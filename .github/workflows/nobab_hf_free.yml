@@ -1,0 +1,43 @@
+name: Nobab HF‑Free Research
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Tor and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tor
+          sudo systemctl start tor
+          pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
+
+      - name: Wait for Tor
+        run: sleep 15
+
+      - name: Run Nobab HF‑Free engine
+        run: |
+          timeout 5h python nobab_hf_free_engine.py loop || echo "Timeout reached, moving to push"
+
+      - name: Commit results
+        run: |
+          git config user.name "nobab-ai[bot]"
+          git config user.email "bot@nobab.ai"
+          git add datasets/ weekly_report.md
+          git diff --staged --quiet || git commit -m "🤖 auto: Nobab HF‑free research data"
+          git push
