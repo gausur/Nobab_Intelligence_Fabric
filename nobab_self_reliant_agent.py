@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 """
-Nobab Self-Reliant Agent - Complete Learning System
-- Automatically generates questions, answers, evaluates, and assesses itself.
-- Built with verified open-source libraries: Questgen.ai, ChromaDB, Sentence-Transformers.
-- Includes weekly testing, scoring, and email reporting capabilities.
-
-Dependencies (install with: pip install -r requirements.txt):
-chromadb sentence-transformers Questgen.ai
+Nobab Self-Reliant Agent - Complete Learning System with ChromaDB Persistence
 """
 
 import os
@@ -15,43 +9,46 @@ import smtplib
 import re
 import time
 import argparse
+from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime
-import chromadb
-from sentence_transformers import SentenceTransformer
-from Questgen import main as qg
 
-# ---------------------------- Configuration ----------------------------
-CHROMA_DB_PATH = "./nobab_knowledge_db"
-COLLECTION_NAME = "knowledge_base"
-REPORT_EMAIL = os.environ.get("NOBAB_REPORT_EMAIL", "admin@example.com")  # Your email
+# --- Necessary Imports for ChromaDB, Embeddings, and Question Generation ---
+# ChromaDB: Persistent client for storing and retrieving vector data.
+import chromadb
+# SentenceTransformer: Creates embeddings for semantic search.
+from sentence_transformers import SentenceTransformer
+# Questgen: Generates questions from text. Handled with try-except for robustness.
+try:
+    from Questgen import main as qg
+except ImportError:
+    print("Questgen not found. Install with: pip install git+https://github.com/ramsrigouthamg/Questgen.ai")
+    qg = None
+
+# ======================= CONFIGURATION =======================
+# Use a persistent client to save data for GitHub push.
+CHROMA_DB_PATH = "./chroma_db"  # Relative path to the directory.
+COLLECTION_NAME = "nobab_knowledge"
+
+# Email settings (use GitHub Secrets for security)
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USERNAME = os.environ.get("SMTP_USERNAME", "")
 SMTP_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
-TOPIC_TREE = {
-    "Cybersecurity": [
-        "Injection attacks (SQLi, XSS, Command Injection)",
-        "Brute-force attacks",
-        "Man-in-the-middle (MITM) attacks",
-        "Social engineering and phishing",
-        "Malware analysis",
-        "Network scanning (Nmap, vulnerability scanning)",
-        "Cryptography basics"
-    ]
-}
+REPORT_EMAIL = os.environ.get("REPORT_EMAIL", "admin@example.com")
 
-# ---------------------------- ChromaDB Setup ----------------------------
+# ======================= ChromaDB Setup =======================
+# Initialize the persistent client. This ensures data is saved to disk.
 client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
-try:
-    collection = client.get_collection(COLLECTION_NAME)
-except:
-    collection = client.create_collection(COLLECTION_NAME)
+# Use `get_or_create_collection` to avoid conflicts on multiple runs.
+collection = client.get_or_create_collection(name=COLLECTION_NAME)
+
+# Load the SentenceTransformer model for creating embeddings.
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
-# ---------------------------- Helper: Email ----------------------------
+# ======================= Helper: Email =======================
 def send_email(subject, body):
+    """Send an email report using SMTP."""
     if not SMTP_USERNAME or not SMTP_PASSWORD:
         print("[!] Email credentials not set. Skipping email.")
         return
@@ -69,24 +66,24 @@ def send_email(subject, body):
     except Exception as e:
         print(f"[!] Email error: {e}")
 
-# ---------------------------- Step 1: Generate Questions ----------------------------
-def generate_questions(topic, max_questions=10):
-    """
-    Generate questions using Questgen.ai from the given topic.
-    Questgen uses transformer models (T5, BERT) to generate MCQs, boolean, and FAQs.
-    """
-    print(f"[Q] Generating questions on: {topic}")
+# ======================= Step 1: Generate Questions =======================
+def generate_questions(text, max_questions=5):
+    """Generate MCQs from a given text using Questgen."""
+    if qg is None:
+        print("Questgen not available. Skipping question generation.")
+        return []
     qe = qg.QGen()
-    payload = {"input_text": topic}
+    payload = {"input_text": text}
     try:
         output = qe.predict_mcq(payload)
         questions = []
+        # If you need to increase complexity, you can adjust 'max_questions'
         for q_item in output.get('questions', [])[:max_questions]:
             questions.append({
                 "question": q_item['question_statement'],
-                "options": q_item['options'],
+                "options": q_item.get('options', []),
                 "answer": q_item['answer'],
-                "topic": topic
+                "context": text[:200]  # Save a snippet of context
             })
         print(f"[√] Generated {len(questions)} questions.")
         return questions
@@ -94,103 +91,101 @@ def generate_questions(topic, max_questions=10):
         print(f"[!] Questgen error: {e}")
         return []
 
-# ---------------------------- Step 2: Answer & Index ----------------------------
-def answer_question(question_data):
-    """
-    Retrieve relevant knowledge from ChromaDB to answer a given question.
-    Uses semantic search to find the most similar stored knowledge.
-    """
-    query_text = question_data['question']
-    query_embedding = embedder.encode([query_text]).tolist()[0]
-    results = collection.query(query_embeddings=[query_embedding], n_results=3)
-    if results['documents'] and results['documents'][0]:
-        best_answer = results['documents'][0][0]  # Use the most relevant stored knowledge
-        return best_answer
-    else:
-        return "No relevant information found in knowledge base."
-    
+# ======================= Step 2: Answer & Index =======================
 def index_knowledge(text, metadata=None):
-    """Store a piece of knowledge (text) in ChromaDB."""
-    doc_id = f"doc_{time.time()}_{hash(text)}"
+    """Store a text chunk and its embedding in ChromaDB."""
+    if not text:
+        return
+    # Create a unique ID for the document.
+    doc_id = f"doc_{int(time.time())}_{hash(text) % 10000}"
+    # ChromaDB can also accept embedding directly, but we let it auto-generate.
     embedding = embedder.encode([text]).tolist()[0]
-    collection.upsert(ids=[doc_id], embeddings=[embedding], documents=[text], metadatas=metadata or [{}])
+    # Upsert (update or insert) the document into the collection.
+    collection.upsert(
+        ids=[doc_id],
+        embeddings=[embedding],
+        documents=[text],
+        metadatas=metadata or [{}]
+    )
+    print(f"📚 Indexed: {text[:50]}...")
 
-# ---------------------------- Step 3: Self Evaluation ----------------------------
-def evaluate_answer(question, answer, expected_answer):
+# ======================= Step 3: Self Evaluation =======================
+def evaluate_learning(question_list, answer_text):
     """
-    Evaluate the quality of an answer compared to the expected answer.
-    Uses simple NLP similarity and keyword matching.
+    A simple evaluation: check if keywords from the question appear in the answer.
+    This simulates self-evaluation; you can enhance it with a local LLM later.
     """
-    # Simple scoring: presence of key terms from expected answer
-    expected_words = set(re.findall(r'\b\w+\b', expected_answer.lower()))
-    answer_words = set(re.findall(r'\b\w+\b', answer.lower()))
-    overlap = len(expected_words & answer_words)
-    score = (overlap / len(expected_words)) * 100 if expected_words else 0
-    return min(score, 100)  # Cap at 100
+    if not answer_text:
+        return 0.0
+    # Extract keywords from the question (simple method)
+    keywords = re.findall(r'\b\w+\b', question_list[0]['question'].lower()) if question_list else []
+    score = 0
+    for kw in keywords:
+        if kw in answer_text.lower():
+            score += 1
+    max_score = len(keywords) if keywords else 1
+    return (score / max_score) * 100
 
-# ---------------------------- Step 4: Weekly Assessment ----------------------------
+# ======================= Step 4: Weekly Assessment =======================
 def weekly_assessment():
-    """
-    Retrieve all stored questions, evaluate answers, compute scores.
-    Also generates a report and optionally sends it via email.
-    """
+    """Assess the knowledge stored over the week and email a report."""
     print("\n[📊] Weekly Assessment Starting...")
-    stored_items = collection.get()
-    if not stored_items['documents']:
+    all_data = collection.get()
+    if not all_data['documents']:
         print("[!] No knowledge stored yet. Cannot assess.")
         return
-    scores = []
-    for i, doc in enumerate(stored_items['documents']):
-        # For evaluation, treat each document as self-generated knowledge.
-        # We'll generate a test question from the document itself.
-        qe = qg.QGen()
-        payload = {"input_text": doc[:500]}  # Use first 500 chars as context
-        try:
-            q_output = qe.predict_mcq(payload)
-            if q_output and q_output.get('questions'):
-                sample_q = q_output['questions'][0]
-                question = sample_q['question_statement']
-                expected_answer = sample_q['answer']
-                # In a real scenario, the agent would have previously stored its own answer.
-                # For now, we simulate that the agent answered using the same document.
-                generated_answer = doc  # The document itself as the agent's answer
-                score = evaluate_answer(question, generated_answer, expected_answer)
-                scores.append(score)
-                print(f"Q: {question}\nScore: {score:.2f}%\n")
-        except Exception as e:
-            print(f"[!] Evaluation error for doc {i}: {e}")
-    avg_score = sum(scores) / len(scores) if scores else 0
-    report = f"Weekly Learning Report\nDate: {datetime.now()}\nTotal Knowledge Items: {len(stored_items['documents'])}\nAverage Score: {avg_score:.2f}%\nIndividual Scores: {scores}"
-    print(report)
-    send_email("Nobab Weekly Assessment", report)
-    return avg_score
+    print(f"Total Knowledge Items: {len(all_data['documents'])}")
+    # Simple evaluation: count stored items and check first few.
+    # Save a report to a file in the datasets directory (for GitHub push)
+    os.makedirs("datasets", exist_ok=True)
+    report = f"Weekly Learning Report\nDate: {datetime.now()}\nTotal Items: {len(all_data['documents'])}"
+    report += "\nFirst 3 stored items:\n"
+    for doc in all_data['documents'][:3]:
+        report += f"- {doc[:100]}...\n"
+    report_path = "datasets/weekly_report.txt"
+    with open(report_path, "w") as f:
+        f.write(report)
+    print(f"Report saved to {report_path}")
+    # Send email only if configured
+    if SMTP_USERNAME and SMTP_PASSWORD:
+        send_email("Nobab Weekly Learning Report", report)
+    return len(all_data['documents'])
 
-# ---------------------------- Main Loop ----------------------------
+# ======================= Main Loop =======================
 def main():
     parser = argparse.ArgumentParser(description="Nobab Self-Reliant Agent")
-    parser.add_argument("--topic", type=str, default="Cybersecurity", help="Topic to explore")
-    parser.add_argument("--max_questions", type=int, default=5, help="Max questions per cycle")
+    parser.add_argument("--topic", type=str, default="Cybersecurity", help="Topic to learn")
     parser.add_argument("--assess", action="store_true", help="Run weekly assessment only")
     args = parser.parse_args()
-    
+
     if args.assess:
         weekly_assessment()
         return
-    
-    print("🤖 Nobab Agent Started. Generating Knowledge Base...")
-    # Step 1: Generate questions and answers
-    for sub_topic in TOPIC_TREE.get(args.topic, [args.topic]):
-        questions = generate_questions(sub_topic, args.max_questions)
+
+    # Step 1: Learn a topic (simulate by using a predefined text chunk)
+    print(f"🤖 Nobab Agent starting. Learning about: {args.topic}")
+    topic_text = f"Cybersecurity protects networks, devices, and data from unauthorized access, damage, or theft. Core areas include {args.topic}."
+    # Step 2: Generate questions from the topic
+    questions = generate_questions(topic_text, max_questions=3)
+    if questions:
+        # Step 3: For evaluation, we use the same topic as an answer (self-generated)
+        answer_body = topic_text
+        # Step 4: Evaluate the learning (simple keyword matching)
+        score = evaluate_learning(questions, answer_body)
+        print(f"Self-Evaluation Score: {score:.2f}%")
+        # Step 5: Index all knowledge (store text + question contexts)
+        index_knowledge(topic_text, metadata={"topic": args.topic, "score": score})
         for q in questions:
-            # Generate answer (simulate from web or internal knowledge)
-            # For now, we treat the original topic text as the answer.
-            # In a real scenario, the agent would fetch from web or its own knowledge.
-            answer_text = f"Answer for {q['question']}: Based on topic '{sub_topic}', we develop robust defenses against {sub_topic.split()[0]} attacks."  
-            # Index the knowledge
-            index_knowledge(answer_text, metadata={"topic": sub_topic, "question": q['question']})
-            print(f"✅ Indexed Q: {q['question']}")
-        time.sleep(2)  # Respect rate limits
-    print("[√] Knowledge Base Built. Ready for Assessment.")
-    
+            q_text = f"Q: {q['question']} A: {q['answer']}"
+            index_knowledge(q_text, metadata={"topic": args.topic, "type": "qa"})
+        print("[√] Knowledge Base Built. Ready for Assessment.")
+    else:
+        print("[!] No questions generated. Check Questgen installation.")
+
+    # Ensure datasets directory exists and add a timestamp file for reassurance.
+    os.makedirs("datasets", exist_ok=True)
+    with open("datasets/last_run.txt", "w") as f:
+        f.write(f"Last run: {datetime.now()}\nTopic: {args.topic}\nScore: {score if questions else 0:.2f}%\n")
+
 if __name__ == "__main__":
     main()
