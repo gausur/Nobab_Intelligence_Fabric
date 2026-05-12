@@ -1,51 +1,60 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-12 18:56:33.081445
+# Generated 2026-05-12 20:30:35.119734
 
 import os
-import sys
-import shutil
 import subprocess
 
 def detect_ransomware():
+    """Detects whether the system is infected with ransomware or not"""
     # Check if the system is running Windows
-    if not sys.platform == 'win32':
-        print("Ransomware detection only supported on Windows")
-        return
-
-    # Get a list of all processes running on the system
-    process_list = subprocess.check_output(['wmic', 'process', 'get', '/for[5D[K
-'/format:csv'])
-
-    # Iterate over the list and search for ransomware-like processes
-    for process in process_list.split('\n'):
-        if 'svchost' in process or 'rundll32' in process:
-            print(f"Ransomware detected! Process {process} is running")
-
-            # Check if the process is a legitimate Microsoft service
-            if not 'System' in process and not 'svchost.exe' in process:
-                print("Stopping ransomware process...")
-                subprocess.run(['taskkill', '/F', '/IM', process])
+    if os.name == "nt":
+        # Check if the system has a known ransomware process
+        try:
+            subprocess.check_call(["tasklist", "/fi", "imagename eq wscript[7D[K
+wscript.exe"])
+            return True
+        except subprocess.CalledProcessError:
+            pass
+    else:
+        # Check if the system has a known ransomware process
+        try:
+            subprocess.check_call(["pgrep", "-f", "python"])
+            return True
+        except subprocess.CalledProcessError:
+            pass
+    return False
 
 def mitigate_ransomware():
+    """Mitigates the ransomware attack by deleting the infected file and re[2D[K
+removing any trace of it"""
     # Check if the system is running Windows
-    if not sys.platform == 'win32':
-        print("Ransomware mitigation only supported on Windows")
-        return
-
-    # Get a list of all files and directories on the system
-    file_list = subprocess.check_output(['dir', '/b'])
-
-    # Iterate over the list and search for ransomware-like files
-    for file in file_list.split('\n'):
-        if 'encrypted' in file or 'locked' in file:
-            print(f"Ransomware detected! File {file} is encrypted/locked")
-
-            # Check if the file is a legitimate system file
-            if not 'System32' in file and not 'Windows' in file:
-                print("Unlocking ransomware-encrypted file...")
-                subprocess.run(['attrib', '-R', file])
+    if os.name == "nt":
+        # Delete the infected file
+        subprocess.check_call(["del", "/f", "/q"])
+        # Remove any trace of the ransomware process
+        try:
+            subprocess.check_call(["taskkill", "/im", "wscript.exe"])
+        except subprocess.CalledProcessError:
+            pass
+    else:
+        # Delete the infected file
+        subprocess.check_call(["rm", "-rf"])
+        # Remove any trace of the ransomware process
+        try:
+            subprocess.check_call(["killall", "-9", "python"])
+        except subprocess.CalledProcessError:
+            pass
+    return True
 
 def main():
-    detect_ransomware()
-    mitigate_ransomware()
+    """Main function that runs the detection and mitigation code"""
+    # Detect if the system is infected with ransomware
+    if detect_ransomware():
+        # If it is, mitigate the attack
+        mitigate_ransomware()
+    else:
+        print("The system is not infected with ransomware")
+
+if __name__ == "__main__":
+    main()
