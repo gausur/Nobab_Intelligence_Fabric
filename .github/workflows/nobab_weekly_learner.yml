@@ -1,0 +1,44 @@
+name: Nobab Weekly Learner
+
+on:
+  schedule:
+    # Runs every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch:   # Allows manual triggering from GitHub UI
+
+jobs:
+  learn-and-assess:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # Needed to push back to the repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          # Installing the necessary libraries. torch is large but required for sentence-transformers.
+          pip install torch sentence-transformers chromadb
+          # Install Questgen from its GitHub repository (the package is not on PyPI)
+          pip install git+https://github.com/ramsrigouthamg/Questgen.ai
+
+      - name: Run Nobab Self-Reliant Agent
+        run: python nobab_self_reliant_agent.py --topic "Cybersecurity"
+
+      - name: Run Weekly Assessment and generate report
+        run: python nobab_self_reliant_agent.py --assess
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Add the persistent ChromaDB folder and the datasets folder
+          git add chroma_db/ datasets/
+          # Commit only if there are changes
+          git diff --staged --quiet || git commit -m "Auto-update learning knowledge base and datasets [skip ci]"
+          git push
