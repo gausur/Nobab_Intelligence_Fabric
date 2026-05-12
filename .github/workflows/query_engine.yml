@@ -23,20 +23,16 @@ jobs:
   query:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
+      - uses: actions/checkout@v4
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install chromadb sentence-transformers requests duckduckgo-search beautifulsoup4 lxml trafilatura
-
-      - name: Run query engine
+          pip install chromadb sentence-transformers requests trafilatura
+      - name: Run query
         run: |
           export PYTHONPATH=$GITHUB_WORKSPACE
           python src/query_engine.py "${{ github.event.inputs.source_type }}" "${{ github.event.inputs.question }}"
