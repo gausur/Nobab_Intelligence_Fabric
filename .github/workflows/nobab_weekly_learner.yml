@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install chromadb==0.4.22 sentence-transformers==2.2.2 transformers==4.36.0 huggingface-hub==0.19.4 torch aiohttp beautifulsoup4 lxml aiolimiter ollama docker
+          pip install numpy<2.0.0 chromadb==0.4.22 sentence-transformers==2.2.2 transformers==4.36.0 huggingface-hub==0.19.4 torch aiohttp beautifulsoup4 lxml aiolimiter ollama docker
           pip install langgraph langchain langchain-community
       - name: Run Nobab weekly cycle
         run: python nobab_multi_agent.py weekly
