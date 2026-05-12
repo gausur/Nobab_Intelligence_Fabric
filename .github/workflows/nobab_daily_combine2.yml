@@ -1,0 +1,30 @@
+name: Nobab LLM Hourly
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          ollama serve &
+          sleep 15
+          ollama pull codellama:7b-instruct-q4_K_M
+      - name: Run LLM engine
+        run: python nobab_llm_engine.py
+      - name: Commit generated tools
+        run: |
+          git config user.name "nobab-ai[bot]"
+          git add generated_tools/
+          git diff --staged --quiet || git commit -m "🤖 auto: hourly AI tools"
+          git push
