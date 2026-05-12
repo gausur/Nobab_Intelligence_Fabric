@@ -2,7 +2,7 @@ name: Nobab Multi-Agent System
 
 on:
   schedule:
-    - cron: '0 0 * * 0'   # Every Sunday at midnight UTC
+    - cron: '0 0 * * 0'
   workflow_dispatch:
 
 permissions:
@@ -20,14 +20,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install chromadb==0.4.22 sentence-transformers==2.2.2 transformers==4.36.0 huggingface-hub==0.19.4 torch aiohttp beautifulsoup4 lxml aiolimiter ollama docker
+          pip install langgraph langchain langchain-community
       - name: Run Nobab weekly cycle
-        env:
-          NOBAB_REPORT_EMAIL: ${{ secrets.NOBAB_REPORT_EMAIL }}
-          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-        run: |
-          python nobab_multi_agent.py weekly
+        run: python nobab_multi_agent.py weekly
       - name: Commit and push results
         run: |
           git config user.name "github-actions[bot]"
