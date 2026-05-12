@@ -1,42 +1,37 @@
-name: Nobab Weekly Learner
+name: Nobab Multi-Agent System
 
 on:
   schedule:
-    # প্রতি রবিবার বাংলাদেশ সময় সকাল ৬টায় রান করবে (UTC 00:00)
-    - cron: '0 0 * * 0'
-      timezone: Asia/Dhaka
-  workflow_dispatch:   # ম্যানুয়ালি রান করানোর অপশন
+    - cron: '0 0 * * 0'   # Every Sunday at midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  learn-and-assess:
+  multi-agent:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # রিপোজিটরিতে ডেটা পুশ করতে পারবে
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          # নির্দিষ্ট ভার্সন ইনস্টল করছে, যা পুরোপুরি সামঞ্জস্যপূর্ণ
-          pip install sentence-transformers==2.2.2 transformers==4.36.0 torch chromadb
-          pip install git+https://github.com/ramsrigouthamg/Questgen.ai
-
-      - name: Run Nobab Self-Reliant Agent
-        run: python nobab_self_reliant_agent.py --topic "Cybersecurity"
-
-      - name: Run Weekly Assessment and generate report
-        run: python nobab_self_reliant_agent.py --assess
-
-      - name: Commit and push changes
+          pip install -r requirements.txt
+      - name: Run Nobab weekly cycle
+        env:
+          NOBAB_REPORT_EMAIL: ${{ secrets.NOBAB_REPORT_EMAIL }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          python nobab_multi_agent.py weekly
+      - name: Commit and push results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add chroma_db/ datasets/
-          git diff --staged --quiet || git commit -m "🤖 Auto-update learning knowledge base and datasets [skip ci]"
+          git add chroma_db/ datasets/ weekly_report.md
+          git diff --staged --quiet || git commit -m "🤖 Auto-update Nobab datasets and report [skip ci]"
           git push
