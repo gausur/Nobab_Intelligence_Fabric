@@ -3,8 +3,12 @@ name: Query Engine (Nobab AI)
 on:
   workflow_dispatch:
     inputs:
+      source_type:
+        description: 'সোর্স টাইপ (normal / darkweb / both / chromadb)'
+        required: true
+        default: 'both'
       question:
-        description: 'তোমার প্রশ্ন (ইংরেজি বা বাংলা)'
+        description: 'তোমার প্রশ্ন (বাংলা/ইংরেজি)'
         required: true
         default: 'What is ransomware?'
 
@@ -27,4 +31,4 @@ jobs:
       - name: Run query engine
         run: |
           export PYTHONPATH=$GITHUB_WORKSPACE
-          python src/query_engine.py "${{ github.event.inputs.question }}"
+          python src/query_engine.py "${{ github.event.inputs.source_type }}" "${{ github.event.inputs.question }}"
