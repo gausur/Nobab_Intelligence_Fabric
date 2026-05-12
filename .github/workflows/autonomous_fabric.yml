@@ -1,9 +1,10 @@
+# .github/workflows/autonomous_fabric.yml
 name: Autonomous Intelligence Fabric
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+    - cron: '0 */6 * * *'   # প্রতি 6 ঘন্টা পর পর রান করবে
+  workflow_dispatch:         # ম্যানুয়াল রান করার অপশন
 
 permissions:
   contents: write
@@ -20,16 +21,18 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Run full pipeline
         run: |
-          export PYTHONPATH=$GITHUB_WORKSPACE
-          python -m src.discover
-          python -m src.crawler
-          python -m src.processor
-          python -m src.embedder
-          python -m src.dataset_builder
+          pip install --upgrade pip
+          pip install beautifulsoup4 chromadb lxml python-dotenv requests sentence-transformers tqdm trafilatura
+
+      - name: Run pipeline
+        run: |
+          export PYTHONPATH=$GITHUB_WORKSPACE   # মূল সমাধান এখানে
+          python src/discover.py
+          python src/crawler.py
+          python src/processor.py
+          python src/embedder.py
+          python src/dataset_builder.py
 
       - name: Commit & push
         run: |
