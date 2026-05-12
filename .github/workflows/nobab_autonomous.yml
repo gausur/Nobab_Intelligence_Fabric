@@ -3,7 +3,7 @@ name: Nobab Autonomous Research
 on:
   schedule:
     # প্রতি 12 ঘণ্টায় একবার রান করবে (ব্যাকআপ)
-    - cron: '0 */12 * * *'
+    - cron: '0 */3 * * *'
   workflow_dispatch:   # ম্যানুয়ালি ট্রিগার
 
 permissions:
