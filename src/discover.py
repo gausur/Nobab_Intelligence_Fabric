@@ -3,10 +3,11 @@ import time
 import random
 from urllib.parse import quote_plus
 
-# ----------------- Surface Web Engines (10) -----------------
+# ------------------------------------------------------------
+# Surface Web Engines (10)
+# ------------------------------------------------------------
 
-def search_web_duckduckgo(keyword, limit=5):
-    """DuckDuckGo HTML (limited reliability in GitHub Actions)"""
+def search_surface_duckduckgo(keyword, limit=5):
     try:
         url = f"https://lite.duckduckgo.com/lite/?q={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
@@ -19,22 +20,18 @@ def search_web_duckduckgo(keyword, limit=5):
     except:
         return []
 
-def search_web_qwant(keyword, limit=5):
-    """Qwant public API (no key required)"""
+def search_surface_qwant(keyword, limit=5):
     try:
         url = f"https://api.qwant.com/v3/search/web?q={quote_plus(keyword)}&count={limit}"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(url, headers=headers, timeout=10)
+        resp = requests.get(url, timeout=10)
         if resp.status_code != 200:
             return []
         data = resp.json()
-        links = [item['url'] for item in data.get('data', {}).get('result', {}).get('items', [])]
-        return links[:limit]
+        return [item['url'] for item in data.get('data', {}).get('result', {}).get('items', [])][:limit]
     except:
         return []
 
-def search_web_brave(keyword, limit=5):
-    """Brave Search API (no key for limited public? using fallback)"""
+def search_surface_brave(keyword, limit=5):
     try:
         url = f"https://search.brave.com/search?q={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -43,12 +40,11 @@ def search_web_brave(keyword, limit=5):
             return []
         import re
         links = re.findall(r'href="(https?://[^"]+)"', resp.text)
-        return [l for l in links if not l.startswith('https://www.brave.com')][:limit]
+        return [l for l in links if 'brave.com' not in l and l.startswith('http')][:limit]
     except:
         return []
 
-def search_web_searxng(keyword, limit=5):
-    """SearXNG public instances (list of working ones)"""
+def search_surface_searxng(keyword, limit=5):
     instances = ["https://searx.be", "https://searx.barxfux.ch", "https://search.whatever.social"]
     random.shuffle(instances)
     for inst in instances:
@@ -57,26 +53,23 @@ def search_web_searxng(keyword, limit=5):
             resp = requests.get(url, timeout=10)
             if resp.status_code == 200:
                 data = resp.json()
-                links = [r['url'] for r in data.get('results', [])]
-                return links[:limit]
+                return [r['url'] for r in data.get('results', [])][:limit]
         except:
             continue
     return []
 
-def search_web_mojeek(keyword, limit=5):
-    """Mojeek public API (limited, no key needed for basic)"""
+def search_surface_mojeek(keyword, limit=5):
     try:
         url = f"https://api.mojeek.com/search?q={quote_plus(keyword)}&fmt=json&limit={limit}"
         resp = requests.get(url, timeout=10)
         if resp.status_code == 200:
             data = resp.json()
-            return [item['url'] for item in data.get('response', {}).get('results', [])]
+            return [item['url'] for item in data.get('response', {}).get('results', [])][:limit]
     except:
         pass
     return []
 
-def search_web_yandex(keyword, limit=5):
-    """Yandex HTML (simple extraction)"""
+def search_surface_yandex(keyword, limit=5):
     try:
         url = f"https://yandex.com/search/?text={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -85,13 +78,11 @@ def search_web_yandex(keyword, limit=5):
             return []
         import re
         links = re.findall(r'href="(https?://[^"]+)"', resp.text)
-        valid = [l for l in links if 'yandex' not in l and l.startswith('http')]
-        return valid[:limit]
+        return [l for l in links if 'yandex' not in l and l.startswith('http')][:limit]
     except:
         return []
 
-def search_web_startpage(keyword, limit=5):
-    """Startpage.com (privacy search)"""
+def search_surface_startpage(keyword, limit=5):
     try:
         url = f"https://www.startpage.com/sp/search?query={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -104,8 +95,7 @@ def search_web_startpage(keyword, limit=5):
     except:
         return []
 
-def search_web_ecosia(keyword, limit=5):
-    """Ecosia (privacy search, HTML scrape)"""
+def search_surface_ecosia(keyword, limit=5):
     try:
         url = f"https://www.ecosia.org/search?q={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -114,13 +104,11 @@ def search_web_ecosia(keyword, limit=5):
             return []
         import re
         links = re.findall(r'href="(https?://[^"]+)"', resp.text)
-        valid = [l for l in links if 'ecosia' not in l and 'google' not in l]
-        return valid[:limit]
+        return [l for l in links if 'ecosia' not in l and 'google' not in l][:limit]
     except:
         return []
 
-def search_web_google(keyword, limit=5):
-    """Google HTML (least reliable, but as fallback)"""
+def search_surface_google(keyword, limit=5):
     try:
         url = f"https://www.google.com/search?q={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -129,13 +117,11 @@ def search_web_google(keyword, limit=5):
             return []
         import re
         links = re.findall(r'href="(https?://[^"]+)"', resp.text)
-        filtered = [l for l in links if l.startswith('http') and 'google.com' not in l]
-        return filtered[:limit]
+        return [l for l in links if l.startswith('http') and 'google.com' not in l][:limit]
     except:
         return []
 
-def search_web_bing(keyword, limit=5):
-    """Bing HTML (fallback)"""
+def search_surface_bing(keyword, limit=5):
     try:
         url = f"https://www.bing.com/search?q={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -144,15 +130,15 @@ def search_web_bing(keyword, limit=5):
             return []
         import re
         links = re.findall(r'href="(https?://[^"]+)"', resp.text)
-        filtered = [l for l in links if 'bing.com' not in l and l.startswith('http')]
-        return filtered[:limit]
+        return [l for l in links if 'bing.com' not in l and l.startswith('http')][:limit]
     except:
         return []
 
-# ----------------- Dark Web Engines (10) -----------------
+# ------------------------------------------------------------
+# Dark Web Engines (10)
+# ------------------------------------------------------------
 
-def dark_web_ahmia(keyword, limit=10):
-    """Ahmia JSON API (most reliable without Tor)"""
+def search_dark_ahmia(keyword, limit=10):
     try:
         url = f"https://ahmia.fi/api/search/?q={quote_plus(keyword)}"
         resp = requests.get(url, timeout=15)
@@ -170,8 +156,7 @@ def dark_web_ahmia(keyword, limit=10):
     except:
         return []
 
-def dark_web_darksearchio(keyword, limit=10):
-    """DarkSearch.io public API"""
+def search_dark_darksearchio(keyword, limit=10):
     try:
         url = f"https://darksearch.io/api/search?q={quote_plus(keyword)}"
         resp = requests.get(url, timeout=15)
@@ -189,20 +174,18 @@ def dark_web_darksearchio(keyword, limit=10):
     except:
         return []
 
-def dark_web_pyahmia(keyword, limit=10):
-    """PyAhmia library (if installed)"""
+def search_dark_pyahmia(keyword, limit=10):
     try:
         from pyahmia import search
         onions = []
         for result in search(keyword, limit=limit):
             if result.get('link'):
                 onions.append(result['link'])
-        return onions
+        return onions[:limit]
     except:
         return []
 
-def dark_web_onionsearch_cli(keyword, limit=10):
-    """OnionSearch via subprocess (requires pip install onionsearch)"""
+def search_dark_onionsearch(keyword, limit=10):
     import subprocess, json, tempfile, os
     try:
         with tempfile.NamedTemporaryFile(mode='w+', suffix='.json', delete=False) as tmp:
@@ -213,46 +196,23 @@ def dark_web_onionsearch_cli(keyword, limit=10):
             with open(tmp_path, 'r') as f:
                 data = json.load(f)
             os.unlink(tmp_path)
-            onions = [item['link'] for item in data if '.onion' in item.get('link', '')]
-            return onions[:limit]
+            return [item['link'] for item in data if '.onion' in item.get('link', '')][:limit]
     except:
         pass
     return []
 
-def dark_web_torch(keyword, limit=10):
-    """Torch (requires Tor? but scrape via fallback)"""
-    # Placeholder - Torch requires Tor, but we'll try direct HTTP
-    try:
-        url = "http://torchdeedp3i2jigzjdmfpn5ttjhthh5wbmda2rr3jvqjg5p77c54dqd.onion/search?q=" + quote_plus(keyword)
-        # cannot directly access .onion without Tor; return empty
-        return []
-    except:
-        return []
-
-def dark_web_phobos(keyword, limit=10):
-    """Phobos (via OnionSearch or direct)"""
-    # Phobos requires Tor; fallback to empty
-    return []
-
-def dark_web_deepwebsearch(keyword, limit=10):
-    """Custom fallback using Ahmia but with different endpoint"""
-    return dark_web_ahmia(keyword, limit)  # duplicate reduced
-
-def dark_web_excavator(keyword, limit=10):
-    """Excavator v1 API (no Tor)"""
+def search_dark_excavator(keyword, limit=10):
     try:
         url = f"https://excavator.app/api/search?q={quote_plus(keyword)}"
         resp = requests.get(url, timeout=10)
         if resp.status_code == 200:
             data = resp.json()
-            links = [item['url'] for item in data.get('results', []) if '.onion' in item.get('url', '')]
-            return links[:limit]
+            return [item['url'] for item in data.get('results', []) if '.onion' in item.get('url', '')][:limit]
     except:
         pass
     return []
 
-def dark_web_theseonion(keyword, limit=10):
-    """theseonion.com (simple HTML scrape)"""
+def search_dark_theseonion(keyword, limit=10):
     try:
         url = f"https://theseonion.com/search?q={quote_plus(keyword)}"
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -265,62 +225,61 @@ def dark_web_theseonion(keyword, limit=10):
     except:
         return []
 
-# ----------------- Master Search Functions -----------------
+# Placeholder for engines that require Tor or rarely work – they will return empty and be skipped
+def search_dark_torch(keyword, limit=10):
+    return []
+
+def search_dark_phobos(keyword, limit=10):
+    return []
+
+def search_dark_deepwebsearch(keyword, limit=10):
+    return []  # duplicate of ahmia, skip
+
+def search_dark_fallback(keyword, limit=10):
+    return []
+
+# ------------------------------------------------------------
+# Master search functions
+# ------------------------------------------------------------
 
 def search_web(keyword, limit=5):
-    """Combine all 10 surface web engines"""
-    engines = [
-        search_web_duckduckgo,
-        search_web_qwant,
-        search_web_brave,
-        search_web_searxng,
-        search_web_mojeek,
-        search_web_yandex,
-        search_web_startpage,
-        search_web_ecosia,
-        search_web_google,
-        search_web_bing
+    all_engines = [
+        search_surface_duckduckgo, search_surface_qwant, search_surface_brave,
+        search_surface_searxng, search_surface_mojeek, search_surface_yandex,
+        search_surface_startpage, search_surface_ecosia, search_surface_google, search_surface_bing
     ]
-    all_links = []
-    for eng in engines:
+    for eng in all_engines:
         try:
-            links = eng(keyword, limit)
-            all_links.extend(links)
+            res = eng(keyword, limit)
+            if res:
+                return res
         except:
             continue
-    return list(set(all_links))[:limit]
+    return []
 
 def dark_web_search(keyword, limit=10):
-    """Combine all 10 dark web engines"""
-    engines = [
-        dark_web_ahmia,
-        dark_web_darksearchio,
-        dark_web_pyahmia,
-        dark_web_onionsearch_cli,
-        dark_web_torch,
-        dark_web_phobos,
-        dark_web_deepwebsearch,
-        dark_web_excavator,
-        dark_web_theseonion
+    all_engines = [
+        search_dark_ahmia, search_dark_darksearchio, search_dark_pyahmia,
+        search_dark_onionsearch, search_dark_excavator, search_dark_theseonion,
+        search_dark_torch, search_dark_phobos, search_dark_deepwebsearch, search_dark_fallback
     ]
-    all_onions = []
-    for eng in engines:
+    for eng in all_engines:
         try:
-            onions = eng(keyword, limit)
-            all_onions.extend(onions)
+            res = eng(keyword, limit)
+            if res:
+                return res
         except:
             continue
-    return list(set(all_onions))[:limit]
+    return []
 
 def search_all(keyword):
-    """Combine surface and dark web results"""
     surface = search_web(keyword, limit=3)
     dark = dark_web_search(keyword, limit=5)
     return surface + dark
 
-# For testing if run directly
+# ------------------------------------------------------------
 if __name__ == "__main__":
-    kw = "cybersecurity"
+    kw = "darknet market"
     print("Surface:", search_web(kw))
     print("Dark:", dark_web_search(kw))
     print("All:", search_all(kw))
