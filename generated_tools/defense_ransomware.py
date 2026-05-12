@@ -1,60 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-12 20:30:35.119734
+# Generated 2026-05-12 22:07:49.769733
 
 import os
+import re
+import time
 import subprocess
 
-def detect_ransomware():
-    """Detects whether the system is infected with ransomware or not"""
-    # Check if the system is running Windows
-    if os.name == "nt":
-        # Check if the system has a known ransomware process
-        try:
-            subprocess.check_call(["tasklist", "/fi", "imagename eq wscript[7D[K
-wscript.exe"])
-            return True
-        except subprocess.CalledProcessError:
-            pass
-    else:
-        # Check if the system has a known ransomware process
-        try:
-            subprocess.check_call(["pgrep", "-f", "python"])
-            return True
-        except subprocess.CalledProcessError:
-            pass
-    return False
+# Define the list of files and directories to watch for changes
+files_to_watch = ['/path/to/file1', '/path/to/file2', '/path/to/directory'][21D[K
+'/path/to/directory']
 
-def mitigate_ransomware():
-    """Mitigates the ransomware attack by deleting the infected file and re[2D[K
-removing any trace of it"""
-    # Check if the system is running Windows
-    if os.name == "nt":
-        # Delete the infected file
-        subprocess.check_call(["del", "/f", "/q"])
-        # Remove any trace of the ransomware process
-        try:
-            subprocess.check_call(["taskkill", "/im", "wscript.exe"])
-        except subprocess.CalledProcessError:
-            pass
-    else:
-        # Delete the infected file
-        subprocess.check_call(["rm", "-rf"])
-        # Remove any trace of the ransomware process
-        try:
-            subprocess.check_call(["killall", "-9", "python"])
-        except subprocess.CalledProcessError:
-            pass
-    return True
+# Define the regex pattern to match ransomware payloads
+ransomware_pattern = r'^.*(encrypted|blocked).*$'
 
-def main():
-    """Main function that runs the detection and mitigation code"""
-    # Detect if the system is infected with ransomware
-    if detect_ransomware():
-        # If it is, mitigate the attack
-        mitigate_ransomware()
-    else:
-        print("The system is not infected with ransomware")
+# Set up the watchdog observer
+observer = Observer()
 
-if __name__ == "__main__":
-    main()
+# Define the event handler function
+def handle_event(event):
+    if event.is_directory:
+        return
+    elif re.match(ransomware_pattern, event.src_path):
+        print('Ransomware detected!')
+        # TODO: Mitigate ransomware attack here
+        # For example, you could delete the malicious file or directory
+        subprocess.run(['rm', '-rf', event.src_path])
+    else:
+        print(f'File {event.src_path} changed')
+
+# Set up the watchdog observer with the list of files and directories to wa[2D[K
+watch
+observer = Observer()
+observer.schedule(handle_event, files_to_watch)
+observer.start()
+
+# Run the script indefinitely
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    observer.stop()
