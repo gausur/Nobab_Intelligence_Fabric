@@ -1,22 +1,19 @@
-name: Query Engine (Nobab AI)
+name: Autonomous Intelligence Fabric
 
 on:
+  schedule:
+    - cron: '0 */6 * * *'
   workflow_dispatch:
-    inputs:
-      source_type:
-        description: 'সোর্স (normal / darkweb / both / chromadb)'
-        required: true
-        default: 'both'
-      question:
-        description: 'তোমার প্রশ্ন'
-        required: true
-        default: 'What is ransomware?'
+
+permissions:
+  contents: write
 
 jobs:
-  query:
+  run-fabric:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -26,9 +23,23 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install chromadb sentence-transformers requests beautifulsoup4 lxml trafilatura duckduckgo-search
+          pip install requests beautifulsoup4 chromadb sentence-transformers lxml trafilatura duckduckgo-search pyahmia onionsearch
 
-      - name: Run query
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+
+      - name: Run full pipeline
         run: |
-          export PYTHONPATH=$GITHUB_WORKSPACE
-          python src/query_engine.py "${{ github.event.inputs.source_type }}" "${{ github.event.inputs.question }}"
+          python src/discover.py
+          python src/crawler.py
+          python src/processor.py
+          python src/embedder.py
+          python src/dataset_builder.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "nobab-ai[bot]"
+          git config user.email "nobab-ai[bot]@users.noreply.github.com"
+          git add datasets/ chroma_db/
+          git diff --staged --quiet || git commit -m "auto: update datasets $(date -u '+%Y-%m-%d %H:%M:%S')"
+          git push
