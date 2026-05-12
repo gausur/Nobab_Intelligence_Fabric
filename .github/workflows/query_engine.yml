@@ -1,19 +1,22 @@
-name: Autonomous Intelligence Fabric
+name: Query Engine (Nobab AI)
 
 on:
-  schedule:
-    - cron: '0 */6 * * *'        # প্রতি ৬ ঘণ্টায় রান করবে (৬ ঘণ্টা কাজ + ১ ঘণ্টা বিরতি নয় – GitHub limit)
-  workflow_dispatch:              # ম্যানুয়াল রান
-
-permissions:
-  contents: write
+  workflow_dispatch:
+    inputs:
+      source_type:
+        description: 'সোর্স (normal / darkweb / both / chromadb)'
+        required: true
+        default: 'both'
+      question:
+        description: 'তোমার প্রশ্ন'
+        required: true
+        default: 'What is ransomware?'
 
 jobs:
-  run-fabric:
+  query:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -23,23 +26,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install requests duckduckgo-search onionsearch beautifulsoup4 chromadb sentence-transformers lxml trafilatura
+          pip install chromadb sentence-transformers requests beautifulsoup4 lxml trafilatura duckduckgo-search
 
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
-
-      - name: Run full pipeline
+      - name: Run query
         run: |
-          python src/discover.py
-          python src/crawler.py
-          python src/processor.py
-          python src/embedder.py
-          python src/dataset_builder.py
-
-      - name: Commit & push changes
-        run: |
-          git config user.name "nobab-ai[bot]"
-          git config user.email "nobab-ai[bot]@users.noreply.github.com"
-          git add datasets/ chroma_db/
-          git diff --staged --quiet || git commit -m "auto: update datasets $(date -u '+%Y-%m-%d %H:%M:%S')"
-          git push
+          export PYTHONPATH=$GITHUB_WORKSPACE
+          python src/query_engine.py "${{ github.event.inputs.source_type }}" "${{ github.event.inputs.question }}"
