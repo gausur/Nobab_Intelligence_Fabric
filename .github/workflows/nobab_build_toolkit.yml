@@ -1,0 +1,32 @@
+name: Nobab Build Security Toolkit
+
+on:
+  workflow_dispatch:            # manual trigger only
+  schedule:
+    - cron: '30 */6 * * *'     # optional: run 30 min after advanced pipeline
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies (datasketch)
+        run: pip install datasketch requests
+      - name: Run Advanced Pipeline (dedup, enrich, API)
+        run: python nobab_advanced_pipeline.py
+      - name: Build Security Toolkit
+        run: python nobab_builder.py
+      - name: Commit generated files
+        run: |
+          git config user.name "nobab-ai[bot]"
+          git config user.email "bot@nobab.ai"
+          git add master_intel_clean.jsonl enriched_master.jsonl threats_api.json semantic_dedup_report.md Nobab_Security_Toolkit.py
+          git diff --staged --quiet || git commit -m "🤖 auto: advanced pipeline & toolkit"
+          git push
