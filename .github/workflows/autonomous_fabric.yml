@@ -2,8 +2,8 @@ name: Autonomous Intelligence Fabric
 
 on:
   schedule:
-    - cron: '0 */6 * * *'   # প্রতি ৬ ঘণ্টায় রান হবে
-  workflow_dispatch:         # ইচ্ছে করলে ম্যানুয়ালিও চালানো যাবে
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,6 +21,9 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE" >> $GITHUB_ENV
 
       - name: Run full pipeline
         run: |
