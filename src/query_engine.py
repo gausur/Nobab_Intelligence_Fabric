@@ -1,24 +1,14 @@
 #!/usr/bin/env python3
-# Nobab AI - Complete Query Engine (Standalone)
-# Fixed headers and retry logic
-
-import sys
-import re
-import requests
-import chromadb
-import time
+import sys, re, requests, chromadb, time
 from urllib.parse import quote_plus
 from sentence_transformers import SentenceTransformer
 
-# ---------------------------- CONFIG ----------------------------
 CHROMA_DIR = "./chroma_db"
 COLLECTION_NAME = "autonomous_intel"
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
 
-# ---------------------------- SURFACE WEB SEARCH (DuckDuckGo Lite) ----------------------------
-def search_surface(keyword, limit=3):
+def search_surface(keyword, limit=2):
+    """Function for Surface Web Search via DuckDuckGo"""
     for attempt in range(2):
         try:
             url = f"https://lite.duckduckgo.com/lite/?q={quote_plus(keyword)}"
@@ -26,52 +16,32 @@ def search_surface(keyword, limit=3):
             if resp.status_code == 200:
                 links = re.findall(r'href="(https?://[^"]+)"', resp.text)
                 valid = [l for l in links if not any(x in l for x in ('duckduckgo', 'google', 'facebook', 'twitter'))]
-                if valid:
-                    return valid[:limit]
+                if valid: return valid[:limit]
             time.sleep(1)
-        except Exception as e:
-            print(f"Surface search attempt {attempt+1} failed: {e}")
+        except: pass
     return []
 
-# ---------------------------- DARK WEB SEARCH (Ahmia API + Fallback) ----------------------------
-def search_dark(keyword, limit=3):
-    # Try JSON API first
-    for attempt in range(2):
+def search_dark(keyword, limit=2):
+    """Function for Dark Web Search via Ahmia with TOR"""
+    proxies = {"http": "socks5h://127.0.0.1:9050", "https": "socks5h://127.0.0.1:9050"}
+    for attempt in range(3):
         try:
-            url = f"https://ahmia.fi/api/search/?q={quote_plus(keyword)}"
-            resp = requests.get(url, headers=HEADERS, timeout=15)
+            url = f"https://ahmia.fi/search/?q={quote_plus(keyword)}"
+            resp = requests.get(url, headers=HEADERS, proxies=proxies, timeout=10)
             if resp.status_code == 200:
-                data = resp.json()
-                onions = []
-                for res in data.get('results', []):
-                    link = res.get('link', '')
-                    if '.onion' in link:
-                        onions.append(link)
-                    if len(onions) >= limit:
-                        break
-                if onions:
-                    return onions
-            time.sleep(1)
+                onions = re.findall(r'https?://([a-z2-7]+\.onion)', resp.text)
+                return [f"http://{o}" for o in list(set(onions))[:limit]]
+            time.sleep(2)
         except Exception as e:
-            print(f"Dark search API attempt {attempt+1} failed: {e}")
-    # Fallback: try HTML scraping (if API fails)
-    try:
-        url = f"https://ahmia.fi/search/?q={quote_plus(keyword)}"
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-        if resp.status_code == 200:
-            onions = re.findall(r'https?://([a-z2-7]+\.onion)', resp.text)
-            onions = list(set(onions))[:limit]
-            return [f"http://{o}" for o in onions]
-    except Exception as e:
-        print(f"Dark fallback error: {e}")
+            print(f"Attempt {attempt+1} for Dark Web failed: {e}")
+            continue
     return []
 
-# ---------------------------- CRAWL & EXTRACT ----------------------------
 def crawl_and_extract(url):
+    """Fetch and extract text from URL using trafilatura"""
     try:
         resp = requests.get(url, headers=HEADERS, timeout=15)
-        if resp.status_code != 200:
-            return ""
+        if resp.status_code != 200: return ""
         import trafilatura
         text = trafilatura.extract(resp.text, fast=True, include_comments=False, include_tables=False)
         if text:
@@ -82,14 +52,14 @@ def crawl_and_extract(url):
         print(f"Crawl error {url}: {e}")
         return ""
 
-# ---------------------------- CHROMADB ----------------------------
-def query_chromadb(query, top_k=3):
+def query_chromadb(query):
+    """Search local ChromaDB and return results"""
     try:
         embedder = SentenceTransformer("all-MiniLM-L6-v2")
         client = chromadb.PersistentClient(path=CHROMA_DIR)
         collection = client.get_collection(COLLECTION_NAME)
         q_emb = embedder.encode([query]).tolist()
-        results = collection.query(query_embeddings=q_emb, n_results=top_k)
+        results = collection.query(query_embeddings=q_emb, n_results=3)
         if not results['documents'][0]:
             return []
         return list(zip(results['documents'][0], results['metadatas'][0]))
@@ -97,11 +67,11 @@ def query_chromadb(query, top_k=3):
         print(f"ChromaDB error: {e}")
         return []
 
-# ---------------------------- MAIN ANSWER ----------------------------
 def answer(query, source_type):
     print(f"\n🤔 প্রশ্ন: {query}")
     print(f"🎯 সোর্স: {source_type}\n")
 
+    # ChromaDB Query
     if source_type == "chromadb":
         results = query_chromadb(query)
         if results:
@@ -115,6 +85,7 @@ def answer(query, source_type):
             print("❌ ChromaDB-তে কিছু পাওয়া যায়নি।")
         return
 
+    # Live Web Search
     urls = []
     if source_type in ["normal", "both"]:
         urls.extend(search_surface(query, limit=2))
@@ -128,13 +99,20 @@ def answer(query, source_type):
     print(f"🔍 পেয়েছি {len(urls)} টি URL। ক্রল করছি...\n")
     all_texts = []
     for url in urls:
-        print(f"   ক্রলিং: {url}")
-        text = crawl_and_extract(url)
-        if text:
-            all_texts.append(text)
-            print(f"      → {len(text)} অক্ষর ডেটা পাওয়া গেছে।")
-        else:
-            print(f"      → কোনো ডেটা পাওয়া যায়নি।")
+        if '.onion' in url and source_type == "darkweb":
+            print(f"   ক্রলিং: {url}")
+            text = crawl_and_extract(url)
+            if text:
+                all_texts.append(text)
+                print(f"      → {len(text)} অক্ষর ডেটা পাওয়া গেছে।")
+        elif source_type in ["normal", "both"]:
+            print(f"   ক্রলিং: {url}")
+            text = crawl_and_extract(url)
+            if text:
+                all_texts.append(text)
+                print(f"      → {len(text)} অক্ষর ডেটা পাওয়া গেছে।")
+            else:
+                print(f"      → কোনো ডেটা পাওয়া যায়নি।")
         time.sleep(1)
 
     if all_texts:
