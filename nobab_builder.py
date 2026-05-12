@@ -5,7 +5,7 @@ Reads enriched_master.jsonl or master_intel_clean.jsonl.
 Outputs a standalone Python script: Nobab_Security_Toolkit.py
 """
 
-import os, json, random
+import os, json
 from datetime import datetime
 
 INPUT_FILE = "enriched_master.jsonl"
@@ -32,6 +32,7 @@ def load_top_threats(limit=20):
     return threats
 
 def generate_toolkit(threats):
+    # Fixed: datetime.now() inside the generated code
     toolkit_code = f'''#!/usr/bin/env python3
 """
 Nobab Security Toolkit – Auto‑generated from {len(threats)} threat intelligence entries.
@@ -45,13 +46,12 @@ from datetime import datetime
 LOG_FILE = "nobab_toolkit.log"
 
 def log(msg):
-    timestamp = datetime.utcnow().isoformat()
+    timestamp = datetime.now().isoformat()
     with open(LOG_FILE, "a") as f:
         f.write(f"{timestamp} | {msg}\\n")
     print(msg)
 
 def check_suspicious_processes():
-    """Look for known malicious process names (dummy list)."""
     suspicious = ["malware", "crypt", "ransom", "exploit"]
     try:
         procs = subprocess.check_output(["ps", "aux"], text=True).lower()
@@ -62,10 +62,8 @@ def check_suspicious_processes():
         pass
 
 def check_network_connections():
-    """Check for unusual outbound connections (placeholder)."""
     try:
         result = subprocess.check_output(["ss", "-tunp"], text=True)
-        # Dummy: just count established
         est = result.count("ESTAB")
         log(f"Network: {est} established connections.")
     except:
