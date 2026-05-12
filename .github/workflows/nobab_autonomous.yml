@@ -2,9 +2,8 @@ name: Nobab Autonomous Research
 
 on:
   schedule:
-    # প্রতি 12 ঘণ্টায় একবার রান করবে (ব্যাকআপ)
-    - cron: '0 */3 * * *'
-  workflow_dispatch:   # ম্যানুয়ালি ট্রিগার
+    - cron: '0 */3 * * *'   # প্রতি 3 ঘণ্টায় (আপনার ইচ্ছা মতো পরিবর্তন করুন)
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,6 +11,7 @@ permissions:
 jobs:
   research:
     runs-on: ubuntu-latest
+    continue-on-error: true   # স্ক্রিপ্ট ব্যর্থ হলেও পরের ধাপ চলবে
     steps:
       - uses: actions/checkout@v4
       - name: Setup Python
@@ -23,18 +23,21 @@ jobs:
           pip install --upgrade pip
           pip install chromadb sentence-transformers beautifulsoup4 requests
       - name: Run Nobab Engine (loop)
+        id: run_script
         run: |
-          python nobab_autonomous_engine.py loop &
-          # The loop will run until GitHub kills it (max 6 hours)
-          # It will automatically respect 5h work + 1h break inside the script.
-          # We'll let it run in background, but better to keep foreground.
-          # Actually the script will stay alive.
-          # We'll monitor with timeout? Not needed.
-      - name: Commit and push results (if any changes)
-        if: always()
+          python nobab_autonomous_engine.py loop || echo "Script exited, but we continue"
+      - name: Generate fallback report if missing
+        run: |
+          if [ ! -f weekly_research_report.md ]; then
+            echo "# Nobab Report (Fallback)" > weekly_research_report.md
+            echo "Date: $(date -u +'%Y-%m-%d %H:%M:%S')" >> weekly_research_report.md
+            echo "Status: Script may have been interrupted." >> weekly_research_report.md
+          fi
+      - name: Commit and push
         run: |
           git config user.name "nobab-ai[bot]"
           git config user.email "bot@nobab.ai"
-          git add chroma_db/ datasets/ weekly_research_report.md
+          git add chroma_db/ datasets/ 2>/dev/null || true
+          if [ -f weekly_research_report.md ]; then git add weekly_research_report.md; fi
           git diff --staged --quiet || git commit -m "🤖 auto: Nobab research update"
           git push
