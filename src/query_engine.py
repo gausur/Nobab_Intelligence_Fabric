@@ -44,9 +44,9 @@ def search_surface(keyword, limit=2):
             print(f"Surface search attempt {attempt+1} failed: {e}")
     return []
 
-# ---------------------------- DARK WEB SEARCH (Ahmia via Tor) ----------------------------
+# ---------------------------- DARK WEB SEARCH (Ahmia via Tor) - FIXED ----------------------------
 def search_dark(keyword, limit=2):
-    """Dark web search using Ahmia (via Tor proxy)"""
+    """Dark web search using Ahmia (via Tor proxy) - filters out Ahmia's own onion"""
     session = get_tor_session()
     for attempt in range(3):
         try:
@@ -55,8 +55,15 @@ def search_dark(keyword, limit=2):
             if resp.status_code == 200:
                 # Extract .onion links from HTML
                 onions = re.findall(r'https?://([a-z2-7]+\.onion)', resp.text)
-                onions = list(set(onions))[:limit]
-                return [f"http://{o}" for o in onions]
+                # Filter out Ahmia's own onion and any containing 'ahmia'
+                filtered = []
+                for o in onions:
+                    if 'ahmia' not in o.lower() and 'juhanur' not in o.lower():
+                        filtered.append(f"http://{o}")
+                # Remove duplicates and limit
+                filtered = list(set(filtered))[:limit]
+                if filtered:
+                    return filtered
             time.sleep(2)
         except Exception as e:
             print(f"Dark search attempt {attempt+1} failed: {e}")
@@ -124,7 +131,8 @@ def answer(query, source_type):
     if source_type in ["normal", "both"]:
         urls.extend(search_surface(query, limit=2))
     if source_type in ["darkweb", "both"]:
-        urls.extend(search_dark(query, limit=2))
+        dark_urls = search_dark(query, limit=2)
+        urls.extend(dark_urls)
 
     if not urls:
         print("❌ কোনো সার্চ ফলাফল পাওয়া যায়নি।")
