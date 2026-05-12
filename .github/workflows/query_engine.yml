@@ -1,4 +1,3 @@
-# .github/workflows/query_engine.yml
 name: Query Engine (Nobab AI)
 
 on:
@@ -35,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install chromadb sentence-transformers requests duckduckgo-search
+          pip install chromadb sentence-transformers requests duckduckgo-search beautifulsoup4 lxml
 
       - name: Run query engine
         run: |
