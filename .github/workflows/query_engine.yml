@@ -1,31 +1,43 @@
+# .github/workflows/query_engine.yml
 name: Query Engine (Nobab AI)
 
 on:
   workflow_dispatch:
     inputs:
       source_type:
-        description: 'সোর্স (normal/darkweb/both/chromadb)'
+        description: 'সোর্স টাইপ (normal / darkweb / both / chromadb)'
         required: true
         default: 'both'
+        type: choice
+        options:
+          - normal
+          - darkweb
+          - both
+          - chromadb
       question:
-        description: 'তোমার প্রশ্ন'
+        description: 'তোমার প্রশ্ন (বাংলা বা ইংরেজি)'
         required: true
-        default: 'darknet market'
+        default: 'What is ransomware?'
+        type: string
 
 jobs:
   query:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install chromadb sentence-transformers requests duckduckgo-search pyahmia onionsearch
-      - name: Run query
+          pip install chromadb sentence-transformers requests duckduckgo-search
+
+      - name: Run query engine
         run: |
           export PYTHONPATH=$GITHUB_WORKSPACE
           python src/query_engine.py "${{ github.event.inputs.source_type }}" "${{ github.event.inputs.question }}"
