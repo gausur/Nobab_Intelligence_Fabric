@@ -32,7 +32,6 @@ def load_top_threats(limit=20):
     return threats
 
 def generate_toolkit(threats):
-    # Fixed: datetime.now() inside the generated code
     toolkit_code = f'''#!/usr/bin/env python3
 """
 Nobab Security Toolkit – Auto‑generated from {len(threats)} threat intelligence entries.
@@ -46,9 +45,9 @@ from datetime import datetime
 LOG_FILE = "nobab_toolkit.log"
 
 def log(msg):
-    timestamp = datetime.now().isoformat()
+    ts = datetime.now().isoformat()
     with open(LOG_FILE, "a") as f:
-        f.write(f"{timestamp} | {msg}\\n")
+        f.write(f"{{ts}} | {{msg}}\\n")
     print(msg)
 
 def check_suspicious_processes():
@@ -57,7 +56,7 @@ def check_suspicious_processes():
         procs = subprocess.check_output(["ps", "aux"], text=True).lower()
         for kw in suspicious:
             if kw in procs:
-                log(f"Suspicious keyword '{kw}' found in running processes.")
+                log(f"Suspicious keyword '{{kw}}' found in running processes.")
     except:
         pass
 
@@ -65,7 +64,7 @@ def check_network_connections():
     try:
         result = subprocess.check_output(["ss", "-tunp"], text=True)
         est = result.count("ESTAB")
-        log(f"Network: {est} established connections.")
+        log(f"Network: {{est}} established connections.")
     except:
         pass
 
@@ -78,7 +77,6 @@ def main():
 if __name__ == "__main__":
     main()
 '''
-    # Append some threat snippets as comments (for reference)
     toolkit_code += "\n\n# Threat intelligence used:\n"
     for i, th in enumerate(threats[:10]):
         toolkit_code += f"# {i+1}. {th}\n"
