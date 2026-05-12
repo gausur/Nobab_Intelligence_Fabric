@@ -1,11 +1,5 @@
-beautifulsoup4>=4.12.0
-chromadb>=0.4.22
-lxml>=4.9.0
-python-dotenv>=1.0.0
-requests>=2.31.0
-sentence-transformers>=2.2.2
-tqdm>=4.66.0
-trafilatura>=1.6.0
-requests
-duckduckgo-search
-onionsearch
+sentence-transformers==2.2.2
+transformers==4.36.0
+torch>=2.0.0
+chromadb
+Questgen @ git+https://github.com/ramsrigouthamg/Questgen.ai
