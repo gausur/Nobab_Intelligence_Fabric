@@ -1,43 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-12 22:07:49.769733
+# Generated 2026-05-12 23:57:41.361858
 
 import os
-import re
 import time
+import shutil
 import subprocess
+from pathlib import Path
 
-# Define the list of files and directories to watch for changes
-files_to_watch = ['/path/to/file1', '/path/to/file2', '/path/to/directory'][21D[K
-'/path/to/directory']
+def main():
+    # Get the current directory
+    curr_dir = os.getcwd()
 
-# Define the regex pattern to match ransomware payloads
-ransomware_pattern = r'^.*(encrypted|blocked).*$'
+    # Check if there are any new files in the directory
+    new_files = [f for f in os.listdir(curr_dir) if os.path.isfile(os.path.[23D[K
+os.path.isfile(os.path.join(curr_dir, f))]
 
-# Set up the watchdog observer
-observer = Observer()
-
-# Define the event handler function
-def handle_event(event):
-    if event.is_directory:
+    # If there are no new files, exit
+    if not new_files:
         return
-    elif re.match(ransomware_pattern, event.src_path):
-        print('Ransomware detected!')
-        # TODO: Mitigate ransomware attack here
-        # For example, you could delete the malicious file or directory
-        subprocess.run(['rm', '-rf', event.src_path])
-    else:
-        print(f'File {event.src_path} changed')
 
-# Set up the watchdog observer with the list of files and directories to wa[2D[K
-watch
-observer = Observer()
-observer.schedule(handle_event, files_to_watch)
-observer.start()
+    # Iterate over the new files and check for known ransomware patterns
+    for file in new_files:
+        with open(os.path.join(curr_dir, file), 'rb') as f:
+            contents = f.read()
+            if b'This file is encrypted' in contents or b'Ransomware detect[6D[K
+detected' in contents:
+                # Ransomware pattern detected
+                print('Ransomware detected in file', file)
 
-# Run the script indefinitely
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    observer.stop()
+                # Remove the infected file
+                os.remove(os.path.join(curr_dir, file))
+
+                # Notify the user of the incident
+                subprocess.run(['notify-send', 'Ransomware Attack Detected'[9D[K
+Detected'])
+
+                # Backup the directory to a safe location
+                shutil.copytree(curr_dir, '/path/to/backup/directory')
+
+                # Exit the program to prevent further damage
+                sys.exit()
+
+if __name__ == '__main__':
+    main()
