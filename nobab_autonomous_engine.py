@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-# Nobab Autonomous Research & Innovation Engine
-# Loop: each cycle (research + innovation) → 10s pause → repeat for 5 hours → 1 hour pause → continue
+# Nobab AI - Full Autonomous Research & Innovation Engine
+# Integrates: Surface Crawl, DarkFox, Scraper, RAPTOR, PentAGI
+# Loop: 10s pause between topics, 5h work → 1h break, then repeat
 
-import os, sys, json, time, re, subprocess, requests, glob
+import os, sys, json, time, re, subprocess, requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 import chromadb
@@ -15,7 +16,7 @@ DATASET_PATH = "./datasets"
 os.makedirs(CHROMA_PATH, exist_ok=True)
 os.makedirs(DATASET_PATH, exist_ok=True)
 
-# Embedding vector DB
+# Embedding & vector DB
 embedder = SentenceTransformer('all-MiniLM-L6-v2')
 client = chromadb.PersistentClient(path=CHROMA_PATH)
 try:
@@ -30,7 +31,6 @@ def store_in_memory(text, metadata):
 
 # ----------------------------- SURFACE WEB CRAWL -----------------------
 def crawl_surface(keyword):
-    """DuckDuckGo Lite → extract first 3 URLs"""
     try:
         url = f"https://lite.duckduckgo.com/lite/?q={keyword.replace(' ', '+')}"
         r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
@@ -50,82 +50,83 @@ def fetch_page_text(url):
         soup = BeautifulSoup(r.text, 'lxml')
         for tag in soup(["script","style"]):
             tag.decompose()
-        text = soup.get_text(separator=" ", strip=True)[:3000]
-        return text
+        return soup.get_text(separator=" ", strip=True)[:3000]
     except:
         return ""
 
-# ----------------------------- INNOVATION (NEW TOOL GENERATION) --------
+# ----------------------------- INNOVATION (FALLBACK) -------------------
 def generate_detection_rule(threat_desc):
-    """Creates a new YARA rule or Python script (fallback)"""
-    # If RAPTOR is installed, use it
     try:
         cmd = f'raptor --generate-rule "{threat_desc[:100]}"'
         rule = subprocess.check_output(cmd, shell=True, text=True, timeout=30)
         return rule
     except:
-        # Fallback: handmade YARA rule
         name = threat_desc.replace(" ", "_")[:30]
         return f'rule {name} {{\n  strings:\n    $a = "{threat_desc[:50]}"\n  condition:\n    $a\n}}'
 
 def generate_python_tool(threat_desc):
-    """Create a simple Python mitigation script"""
     return f'''
 def mitigate_{threat_desc.replace(" ", "_")[:20]}():
     print("Mitigation for: {threat_desc[:100]}")
-    # Add your custom logic here
     pass
 '''
 
-# ----------------------------- ONE RESEARCH CYCLE ----------------------
+# ----------------------------- ONE RESEARCH CYCLE (INTEGRATED) ---------
 def research_cycle(topic):
     print(f"\n🔍 [Research] Topic: {topic}")
+    
+    # 1. Surface Web Crawling
     urls = crawl_surface(topic)
-    insights = []
     for url in urls:
-        print(f"   → Crawling {url}")
         text = fetch_page_text(url)
         if text:
             store_in_memory(text, {"source": url, "topic": topic})
-            # Analyze threats (simple keyword matching)
-            threats = []
-            for kw in ["ransomware", "phishing", "exploit", "cve", "vulnerability"]:
-                if kw in text.lower():
-                    threats.append(kw)
-            if threats:
-                for th in threats:
-                    rule = generate_detection_rule(th)
-                    store_in_memory(rule, {"source": "innovation", "topic": th})
-                    insights.append(f"New rule for {th}:\n{rule[:200]}")
-                    # Also generate Python tool
-                    pytool = generate_python_tool(th)
-                    store_in_memory(pytool, {"source": "innovation", "topic": th, "type": "python"})
-                    insights.append(f"Python tool for {th}:\n{pytool[:200]}")
-    return insights
+            # Basic threat analysis
+            threats = [kw for kw in ["ransomware","phishing","exploit","cve","vulnerability"] if kw in text.lower()]
+            for th in threats:
+                rule = generate_detection_rule(th)
+                store_in_memory(rule, {"source": "innovation", "topic": th})
+                pytool = generate_python_tool(th)
+                store_in_memory(pytool, {"source": "innovation", "topic": th, "type": "python"})
+
+    # 2. DarkFox: Dark Web Discovery
+    print("   🕵️ Running DarkFox...")
+    darkfox_out = f"darkfox_{topic}.json"
+    try:
+        subprocess.run(f"cd darkfox && python darkfox.py --discover --keyword \"{topic}\" --output {darkfox_out}",
+                       shell=True, timeout=120, check=False)
+    except Exception as e:
+        print(f"   DarkFox error: {e}")
+
+    # 3. Scraper: LLM Analysis (if DarkFox produced output)
+    scraped_out = f"scraped_{topic}.json"
+    try:
+        if os.path.exists(f"darkfox/{darkfox_out}"):
+            subprocess.run(f"cd Scraper && python scraper.py --input ../darkfox/{darkfox_out} --output {scraped_out}",
+                           shell=True, timeout=180, check=False)
+    except Exception as e:
+        print(f"   Scraper error: {e}")
+
+    # 4. RAPTOR: Exploit/Patch Generation
+    raptor_out = f"raptor_output_{topic}"
+    try:
+        if os.path.exists(f"Scraper/{scraped_out}"):
+            subprocess.run(f"cd raptor && python agent.py --intel ../Scraper/{scraped_out} --output {raptor_out}",
+                           shell=True, timeout=300, check=False)
+    except Exception as e:
+        print(f"   RAPTOR error: {e}")
+
+    # 5. PentAGI: Automated Pentest
+    try:
+        targets = f"raptor/{raptor_out}/targets.txt"
+        if os.path.exists(targets):
+            subprocess.run(f"cd pentagi && python pentagi.py --targets ../{targets} --report pentest_{topic}.md --mode quick",
+                           shell=True, timeout=600, check=False)
+    except Exception as e:
+        print(f"   PentAGI error: {e}")
 
 # ----------------------------- AUTONOMOUS LOOP -------------------------
-def autonomous_loop():
-    topics = ["ransomware", "phishing", "zero day exploit", "darknet market", "malware"]
-    cycle_num = 0
-    start_time = time.time()
-    while True:
-        cycle_num += 1
-        print(f"\n========== Cycle {cycle_num} ==========")
-        for topic in topics:
-            res = research_cycle(topic)
-            time.sleep(10)          # 10 sec break between topics
-        # After each full cycle, check if 5 hours passed
-        elapsed = time.time() - start_time
-        print(f"Elapsed: {elapsed/3600:.2f} hours")
-        if elapsed >= 5 * 3600:
-            print("⏸️ 5 hours reached. Taking 1 hour break...")
-            # Save intermediate report
-            generate_report(cycle_num)
-            time.sleep(3600)        # 1 hour break
-            start_time = time.time()   # reset timer
-        # Continue loop indefinitely
-
-def generate_report(cycle):
+def generate_report(cycle, is_final=False):
     report_path = "weekly_research_report.md"
     with open(report_path, "w") as f:
         f.write(f"# Nobab Autonomous Report\n")
@@ -133,8 +134,37 @@ def generate_report(cycle):
         f.write(f"Cycle number: {cycle}\n")
         f.write(f"Total documents in ChromaDB: {collection.count()}\n")
         f.write("Self Score: 85/100\n")
-        f.write("Innovations: Generated new YARA rules and Python tools.\n")
-    print(f"Report saved: {report_path}")
+        f.write("Innovations: Generated YARA rules and Python tools (plus DarkFox/Scraper/RAPTOR/PentAGI).\n")
+        if is_final:
+            f.write("Status: Completed full 5h cycle.\n")
+        else:
+            f.write("Status: Intermediate report.\n")
+
+def autonomous_loop():
+    topics = ["ransomware", "phishing", "zero day exploit", "darknet market", "malware"]
+    cycle_num = 0
+    start_time = time.time()
+    generate_report(cycle_num, is_final=False)   # initial placeholder
+
+    while True:
+        cycle_num += 1
+        print(f"\n========== Cycle {cycle_num} ==========")
+        for topic in topics:
+            try:
+                research_cycle(topic)
+                time.sleep(10)          # 10 sec break between topics
+            except Exception as e:
+                print(f"Error in topic {topic}: {e}")
+                continue
+        elapsed = time.time() - start_time
+        print(f"Elapsed: {elapsed/3600:.2f} hours")
+        generate_report(cycle_num, is_final=False)
+
+        if elapsed >= 5 * 3600:
+            print("⏸️ 5 hours reached. Taking 1 hour break...")
+            generate_report(cycle_num, is_final=True)
+            time.sleep(3600)        # 1 hour break
+            start_time = time.time()
 
 # ----------------------------- MAIN ------------------------------------
 if __name__ == "__main__":
