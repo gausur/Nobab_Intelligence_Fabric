@@ -1,50 +1,34 @@
-import requests
-from urllib.parse import quote_plus
-from src.config import SEARCH_ENGINES
+import os
+import json
+import time
+from src.discover import search_web
+from src.crawler import crawl_page
+from src.processor import extract_clean_text, chunk_text
+from src.embedder import add_to_vectorstore
+from src.config import DATA_ROOT
 
-# Dark web search using Ahmia (no Tor needed)
-def dark_web_search(keyword, limit=10):
-    """
-    Ahmia.fi এর API ব্যবহার করে .onion লিংক খোঁজে।
-    GitHub Actions-এ সরাসরি কাজ করে (Tor ছাড়াই)।
-    """
-    try:
-        # Ahmia's public JSON API
-        url = f"https://ahmia.fi/search/?q={quote_plus(keyword)}"
-        headers = {"User-Agent": "Mozilla/5.0"}
-        resp = requests.get(url, headers=headers, timeout=15)
-        if resp.status_code != 200:
-            return []
-        # Simple extraction of .onion links from HTML
-        import re
-        onions = re.findall(r'https?://([a-z2-7]+\.onion)[/"?]', resp.text)
-        unique = list(set(onions))[:limit]
-        return [f"http://{o}" for o in unique]
-    except Exception as e:
-        print(f"Dark web search error: {e}")
-        return []
+def build_dataset(keywords=None):
+    if keywords is None:
+        keywords = ["ransomware", "phishing", "zero day exploit"]
+    os.makedirs(DATA_ROOT, exist_ok=True)
 
-def search_web(keyword):
-    """Surface web search using Google/Bing"""
-    urls = []
-    for engine, base in SEARCH_ENGINES.items():
-        try:
-            resp = requests.get(base + quote_plus(keyword), timeout=10)
-            if resp.status_code == 200:
-                import re
-                links = re.findall(r'href=[\'"]?(https?://[^\'" >]+)', resp.text)
-                urls.extend(links[:5])
-        except:
-            pass
-    return list(set(urls))
-
-# Combined search (surface + dark web)
-def search_all(keyword):
-    surface = search_web(keyword)
-    dark = dark_web_search(keyword)
-    return surface + dark
+    for kw in keywords:
+        print(f"Searching for: {kw}")
+        urls = search_web(kw)
+        for url in urls[:3]:
+            raw = crawl_page(url, depth=1)
+            for item in raw:
+                clean = extract_clean_text(item["text"])
+                if not clean:
+                    continue
+                chunks = chunk_text(clean)
+                for i, chunk in enumerate(chunks[:5]):
+                    doc_id = f"{kw}_{hash(url)}_{i}"
+                    meta = {"keyword": kw, "url": url, "timestamp": item["timestamp"]}
+                    add_to_vectorstore(doc_id, chunk, meta)
+        out_file = os.path.join(DATA_ROOT, f"{kw}.jsonl")
+        with open(out_file, "w") as f:
+            f.write(json.dumps({"keyword": kw, "time": time.time()}) + "\n")
 
 if __name__ == "__main__":
-    test = "cyber threat"
-    print("Surface:", search_web(test))
-    print("Dark web:", dark_web_search(test))
+    build_dataset()
