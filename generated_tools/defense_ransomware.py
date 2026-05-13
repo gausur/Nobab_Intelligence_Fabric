@@ -1,34 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-13 02:28:46.740530
+# Generated 2026-05-13 06:21:45.626095
 
 import os
-import time
-import json
 import subprocess
+import signal
+import psutil
 
-def main():
-    # Check for ransomware infection
-    if is_infected():
-        # Mitigate the ransomware attack
-        mitigate()
+def detect_ransomware():
+    # Check for ransomware processes
+    ransomware_procs = []
+    for proc in psutil.process_iter(attrs=['pid', 'name']):
+        if 'cmd' in proc and 'ransomware' in proc['cmd'].lower():
+            ransomware_procs.append(proc)
+    return len(ransomware_procs) > 0
 
-def is_infected():
-    # Check if the system has been infected with ransomware
-    try:
-        subprocess.run(["ransomware", "--check"], stdout=subprocess.PIPE)
-        return True
-    except subprocess.CalledProcessError:
-        return False
+def mitigate_ransomware():
+    # Kill ransomware processes
+    for proc in psutil.process_iter(attrs=['pid', 'name']):
+        if 'cmd' in proc and 'ransomware' in proc['cmd'].lower():
+            try:
+                os.killpg(proc['pid'], signal.SIGTERM)
+            except OSError:
+                pass
+    # Remove ransomware files
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            if 'ransomware' in file.lower():
+                try:
+                    os.remove(os.path.join(root, file))
+                except OSError:
+                    pass
 
-def mitigate():
-    # Mitigate the ransomware attack by removing the malicious files and re[2D[K
-resetting the system
-    try:
-        subprocess.run(["ransomware", "--remove"], stdout=subprocess.PIPE)
-        os.system("reset")
-    except subprocess.CalledProcessError:
-        print("Failed to mitigate ransomware attack.")
-
-if __name__ == "__main__":
-    main()
+if detect_ransomware():
+    mitigate_ransomware()
