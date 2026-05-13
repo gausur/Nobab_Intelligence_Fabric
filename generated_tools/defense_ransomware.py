@@ -1,54 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-13 21:22:28.448616
+# Generated 2026-05-13 23:01:20.816873
 
 import os
-import json
-import base64
-from typing import Dict, Any
+import socket
+import sys
 
-def detect_ransomware(data: str) -> bool:
-    """Detect if the given data contains ransomware."""
-    # Check if the data is a valid JSON object
+def check_for_ransomware(path):
     try:
-        json.loads(data)
-    except ValueError:
+        with open(path, 'rb') as f:
+            contents = f.read()
+    except FileNotFoundError:
         return False
-    
-    # Check if the JSON object contains the required fields
-    try:
-        payload = json.loads(data)["payload"]
-        nonce = json.loads(data)["nonce"]
-        signature = json.loads(data)["signature"]
-    except KeyError:
-        return False
-    
-    # Check if the signature is valid
-    public_key = "..."  # Replace with your own public key
-    try:
-        base64.b64decode(signature, validate=True)
-        cryptography.hazmat.primitives.asymmetric.rsa.RSAPublicKey.verify(
-            signature,
-            nonce.encode(),
-            padding.PKCS1v15(),
-            public_key
-        )
-    except (ValueError, InvalidSignature):
-        return False
-    
-    # Check if the payload is valid
-    try:
-        base64.b64decode(payload, validate=True)
-    except ValueError:
-        return False
-    
-    return True
 
-def mitigate_ransomware(data: str):
-    """Mitigate a ransomware attack by deleting the data."""
-    if detect_ransomware(data):
-        os.remove("data")
+    if b'RANSOMWARE' in contents:
+        print('[!] Ransomware detected at {}'.format(path))
+        return True
 
-# Example usage
-if __name__ == "__main__":
-    mitigate_ransomware("...")  # Replace with your own data
+def mitigate_ransomware(path):
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print('Usage: python ransomware_detector.py <directory>')
+        sys.exit(1)
+
+    directory = sys.argv[1]
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            path = os.path.join(root, file)
+            if check_for_ransomware(path):
+                mitigate_ransomware(path)

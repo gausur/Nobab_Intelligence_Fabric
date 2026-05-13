@@ -1,38 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-13 21:24:08.828154
+# Generated 2026-05-13 23:02:34.077730
 
 import re
-import smtplib
-from email.message import EmailMessage
+import requests
 
-def check_for_phishing(email):
-    # Check if the email is from a known spammy domain
-    if email.sender.startswith("spammer@example.com"):
+def is_phishing(url):
+    # Check if the URL is valid
+    try:
+        requests.get(url)
+    except requests.exceptions.ConnectionError:
+        return False
+    
+    # Extract the domain name from the URL
+    domain = re.search(r'https?://([^/]+)(/|$)', url).group(1)
+    
+    # Check if the domain is a known phishing site
+    if domain in PHISHING_SITES:
         return True
     
-    # Check if the email contains any phishing URLs or links
-    for part in email.iter_parts():
-        if "http" in part.get_content_type() and re.search(r"phish", part.a[6D[K
-part.as_string()):
+    # Check if the URL contains any suspicious keywords or patterns
+    for keyword in SUSPICIOUS_KEYWORDS:
+        if keyword in url:
             return True
     
-    # No phishing attempts detected
+    # Check if the URL is a shortened link
+    if re.search(r'https?://[a-zA-Z0-9]{32}', url):
+        return True
+    
     return False
 
-def mitigate_phishing(email, spammy_domains=["example1.com", "example2.com"[14D[K
-"example2.com"]):
-    # Check if the email is from a known spammy domain
-    if email.sender.startswith("spammer@example.com"):
-        return EmailMessage("Your email has been flagged as phishing.", "no[3D[K
-"noreply@example.com", email.recipients)
-    
-    # Check if the email contains any phishing URLs or links
-    for part in email.iter_parts():
-        if "http" in part.get_content_type() and re.search(r"phish", part.a[6D[K
-part.as_string()):
-            return EmailMessage("Your email has been flagged as phishing.",[11D[K
-phishing.", "noreply@example.com", email.recipients)
-    
-    # No phishing attempts detected, send the original email
-    return email
+def mitigate_phishing(url):
+    # Redirect to a safe page
+    return 'https://example.com/safe_page.html'
+
+PHISHING_SITES = ['phish.me', 'badsite.com']
+SUSPICIOUS_KEYWORDS = ['free', 'discount', 'coupon']
