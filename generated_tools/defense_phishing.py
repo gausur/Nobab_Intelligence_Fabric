@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-13 11:59:30.090880
+# Generated 2026-05-13 14:25:53.890257
 
 import re
-from email.message import EmailMessage
+import urllib.request
 
-class PhishingDetector:
-    def __init__(self, email_text):
-        self.email = email_text
+def detect_phishing(url):
+    # Check if the URL is a valid HTTP or HTTPS URL
+    if not (url.startswith("http://") or url.startswith("https://")):
+        return False
     
-    def is_phishing(self):
-        if "http://" in self.email or "https://" in self.email:
-            return True
-        else:
+    # Extract the domain name from the URL
+    domain = urllib.request.urlparse(url).netloc
+    
+    # Check if the domain is a valid TLD
+    if not re.match(r"^[a-z0-9.-]+$", domain):
+        return False
+    
+    # Check if the URL contains any suspicious parameters or query strings
+    for param in urllib.parse.urlencode(url).query:
+        if re.search(r"\b(password|login|credentials)\b", urllib.parse.quot[17D[K
+urllib.parse.quote_plus(param)):
             return False
     
-    def get_domain(self):
-        domain = re.search("[a-zA-Z0-9.-]+", self.email)
-        if domain:
-            return domain.group()
-        else:
-            return None
+    # Check if the URL is a known phishing site
+    with open("phishing_sites.txt") as f:
+        for line in f:
+            if re.match(r"\b" + domain + r"\b", line):
+                return True
     
-    def is_in_spam_folder(self, spam_folder):
-        if spam_folder in self.email:
-            return True
-        else:
-            return False
-    
-    def get_sender_name(self):
-        name = re.search("[a-zA-Z ]+", self.email)
-        if name:
-            return name.group()
-        else:
-            return None
+    # If none of the above conditions are met, it's likely a legitimate web[3D[K
+website
+    return False
