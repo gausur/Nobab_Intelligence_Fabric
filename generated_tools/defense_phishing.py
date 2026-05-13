@@ -1,44 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-13 02:28:07.339623
+# Generated 2026-05-13 09:40:53.777341
 
 import re
-from email.message import EmailMessage
+import requests
+from urllib.parse import urlparse
 
-def detect_phishing(email):
-    # Check for common phishing patterns in the email subject
-    if re.search(r'[\w\d]{10}@[\w\d]{10}\.com', email.subject):
-        return True
-    
-    # Check for common phishing patterns in the email body
-    if re.search(r'click here to activate your account', email.body, flags=[6D[K
-flags=re.I):
-        return True
-    
-    # Check for common phishing patterns in the email attachments
-    for attachment in email.attachments:
-        if re.search(r'win32\.exe', attachment.filename):
-            return True
-    
+def is_phishing(url):
+    # Check if the URL is valid
+    try:
+        result = urlparse(url)
+        if not all([result.scheme, result.netloc]):
+            return False
+    except ValueError:
+        return False
+
+    # Check if the URL is from a known phishing domain
+    with open("phishing_domains.txt", "r") as f:
+        domains = [line.strip() for line in f]
+        for domain in domains:
+            if result.netloc.endswith(domain):
+                return True
+
+    # Check if the URL is from a known phishing IP address
+    with open("phishing_ips.txt", "r") as f:
+        ips = [line.strip() for line in f]
+        for ip in ips:
+            if result.ip == ip:
+                return True
+
+    # Check if the URL contains known phishing keywords
+    with open("phishing_keywords.txt", "r") as f:
+        keywords = [line.strip() for line in f]
+        for keyword in keywords:
+            if keyword in url:
+                return True
+
     return False
 
-def mitigate_phishing(email):
-    # Remove any suspicious attachments
-    email.attachments = []
-    
-    # Set the email as read and delete it from the inbox
-    email.read()
-    email.delete()
+def mitigate_phishing(url):
+    # Check if the URL is a valid phishing URL
+    if not is_phishing(url):
+        return url
 
-# Main function to run the script
-def main():
-    # Get the list of emails from the inbox
-    emails = EmailMessage.get_inbox()
-    
-    # Iterate over each email and detect phishing attacks
-    for email in emails:
-        if detect_phishing(email):
-            mitigate_phishing(email)
+    # Replace the URL with a warning message
+    return "Phishing URL detected! Please visit the official website instea[6D[K
+instead."
 
-if __name__ == '__main__':
-    main()
+# Test the script
+urls = ["https://www.example.com/", "http://phishing.domain.com/"]
+for url in urls:
+    print(mitigate_phishing(url))
