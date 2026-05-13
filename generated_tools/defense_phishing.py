@@ -1,53 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-13 09:40:53.777341
+# Generated 2026-05-13 11:59:30.090880
 
 import re
-import requests
-from urllib.parse import urlparse
+from email.message import EmailMessage
 
-def is_phishing(url):
-    # Check if the URL is valid
-    try:
-        result = urlparse(url)
-        if not all([result.scheme, result.netloc]):
+class PhishingDetector:
+    def __init__(self, email_text):
+        self.email = email_text
+    
+    def is_phishing(self):
+        if "http://" in self.email or "https://" in self.email:
+            return True
+        else:
             return False
-    except ValueError:
-        return False
-
-    # Check if the URL is from a known phishing domain
-    with open("phishing_domains.txt", "r") as f:
-        domains = [line.strip() for line in f]
-        for domain in domains:
-            if result.netloc.endswith(domain):
-                return True
-
-    # Check if the URL is from a known phishing IP address
-    with open("phishing_ips.txt", "r") as f:
-        ips = [line.strip() for line in f]
-        for ip in ips:
-            if result.ip == ip:
-                return True
-
-    # Check if the URL contains known phishing keywords
-    with open("phishing_keywords.txt", "r") as f:
-        keywords = [line.strip() for line in f]
-        for keyword in keywords:
-            if keyword in url:
-                return True
-
-    return False
-
-def mitigate_phishing(url):
-    # Check if the URL is a valid phishing URL
-    if not is_phishing(url):
-        return url
-
-    # Replace the URL with a warning message
-    return "Phishing URL detected! Please visit the official website instea[6D[K
-instead."
-
-# Test the script
-urls = ["https://www.example.com/", "http://phishing.domain.com/"]
-for url in urls:
-    print(mitigate_phishing(url))
+    
+    def get_domain(self):
+        domain = re.search("[a-zA-Z0-9.-]+", self.email)
+        if domain:
+            return domain.group()
+        else:
+            return None
+    
+    def is_in_spam_folder(self, spam_folder):
+        if spam_folder in self.email:
+            return True
+        else:
+            return False
+    
+    def get_sender_name(self):
+        name = re.search("[a-zA-Z ]+", self.email)
+        if name:
+            return name.group()
+        else:
+            return None
