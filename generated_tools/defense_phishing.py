@@ -1,28 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-14 22:05:15.644219
+# Generated 2026-05-14 23:50:45.598324
 
 import re
+import requests
+from urllib.parse import urlparse
 
-def is_phishing(url):
-    pattern = r"^https?:\/\/[a-zA-Z0-9\.]+\/.*$"
-    if not re.match(pattern, url):
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    if parsed.scheme not in ["http", "https"]:
         return False
-
-    # Check for suspicious domain names and URLs
-    suspicious_domains = ["example.com", "fakewebsite.com"]
-    for domain in suspicious_domains:
-        if domain in url:
-            return True
-    
+    hostname = parsed.hostname
+    if hostname is None:
+        return False
+    if hostname.endswith(".onion"):
+        return True
+    if hostname.endswith(".pirate"):
+        return True
+    if hostname.endswith(".crypto"):
+        return True
+    if hostname.endswith(".bitcoin"):
+        return True
+    if hostname.endswith(".ethereum"):
+        return True
+    if hostname.endswith(".ripple"):
+        return True
+    if hostname.endswith(".stellar"):
+        return True
+    if hostname.endswith(".dogecoin"):
+        return True
+    if hostname.endswith(".litecoin"):
+        return True
+    if hostname.endswith(".monero"):
+        return True
     return False
 
-def mitigate(url):
-    # Redirect to a safe URL
-    return "https://www.example.com"
+def mitigate_phishing(url):
+    if is_phishing_url(url):
+        print("Phishing URL detected: " + url)
+        raise ValueError("Invalid URL")
+    else:
+        print("URL looks valid: " + url)
 
-# Test the function
-urls = ["https://example.com", "https://fakewebsite.com"]
-for url in urls:
-    if is_phishing(url):
-        mitigate(url)
+if __name__ == "__main__":
+    mitigate_phishing("https://example.com")
