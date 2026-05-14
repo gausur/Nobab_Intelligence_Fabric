@@ -1,28 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-14 13:54:11.631942
+# Generated 2026-05-14 16:08:38.365552
 
 import re
-import socket
+import urllib.parse
+import requests
+from bs4 import BeautifulSoup
 
-def is_phishing_attempt(url):
-    """Check if the given URL is a phishing attempt."""
-    if not url:
-        return False
-    if "://" in url:
-        protocol, host = url.split("://")
-        if protocol == "http" or protocol == "https":
-            if host.endswith(".com") and len(host) > 3:
-                domain = host[:-4]
-                if re.match(r"^[a-zA-Z0-9.-]*$", domain):
-                    return True
+def is_phishing(url):
+    # Check if the URL contains any suspicious keywords or patterns
+    for keyword in ["phish", "scam", "fake"]:
+        if keyword in url:
+            return True
+    
+    # Check if the domain name is registered as a phishing domain
+    try:
+        domain = urllib.parse.urlsplit(url).netloc
+        whois_data = requests.get("https://www.whois.com/whois/" + domain).[8D[K
+domain).text
+        for line in whois_data.split("\n"):
+            if "phishing" in line.lower():
+                return True
+    except:
+        pass
+    
+    # Check the HTML content of the page for suspicious attributes or eleme[5D[K
+elements
+    try:
+        response = requests.get(url)
+        html = BeautifulSoup(response.content, "html.parser")
+        for tag in ["a", "link"]:
+            if html.find_all(tag, href=re.compile("^http://")):
+                return True
+    except:
+        pass
+    
+    # If none of the above checks yielded a positive result, the URL is lik[3D[K
+likely legitimate
     return False
-
-def mitigate_phishing_attempts(url):
-    """Mitigate phishing attempts by redirecting to a known safe URL."""
-    if is_phishing_attempt(url):
-        socket.connect("www.example.com")
-
-if __name__ == "__main__":
-    url = input("Enter the URL: ")
-    mitigate_phishing_attempts(url)
