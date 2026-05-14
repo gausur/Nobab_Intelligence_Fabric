@@ -1,36 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-13 23:01:20.816873
+# Generated 2026-05-14 00:02:07.192366
 
 import os
-import socket
-import sys
+import stat
+import hashlib
+import subprocess
 
-def check_for_ransomware(path):
-    try:
-        with open(path, 'rb') as f:
-            contents = f.read()
-    except FileNotFoundError:
-        return False
-
-    if b'RANSOMWARE' in contents:
-        print('[!] Ransomware detected at {}'.format(path))
+def detect_ransomware(path):
+    file_size = os.stat(path).st_size
+    if file_size > 1000000: # arbitrary threshold
         return True
+    else:
+        return False
 
 def mitigate_ransomware(path):
     try:
-        os.remove(path)
-    except FileNotFoundError:
-        pass
+        subprocess.run(['rm', '-f', path], check=True)
+        os.unlink(path)
+        return True
+    except Exception as e:
+        return False
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('Usage: python ransomware_detector.py <directory>')
-        sys.exit(1)
-
-    directory = sys.argv[1]
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            path = os.path.join(root, file)
-            if check_for_ransomware(path):
-                mitigate_ransomware(path)
+    if detect_ransomware('path/to/file'):
+        mitigate_ransomware('path/to/file')
