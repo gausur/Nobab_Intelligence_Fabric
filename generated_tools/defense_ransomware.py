@@ -1,29 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-14 03:38:53.171116
+# Generated 2026-05-14 06:43:05.543992
 
 import os
-import json
-import subprocess
+import re
+import sys
 
-def detect_ransomware(path):
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-            if b"RANSOMWARE" in data:
-                return True
-    except FileNotFoundError:
-        pass
-    return False
+def detect_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        contents = f.read()
+        if b"RANSOMWARE" in contents:
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(path):
-    try:
-        with open(path, "wb") as f:
-            f.write(b"DECRYPTED BY MITIGATION SCRIPT")
-    except FileNotFoundError:
-        pass
+def mitigate_ransomware(filepath):
+    os.remove(filepath)
 
 if __name__ == "__main__":
-    path = os.getenv("PATH_TO_FILE")
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+    filepath = sys.argv[1]
+    if detect_ransomware(filepath):
+        mitigate_ransomware(filepath)
