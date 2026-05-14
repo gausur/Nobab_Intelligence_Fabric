@@ -1,23 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-14 03:40:25.977996
+# Generated 2026-05-14 09:32:06.872244
 
 import re
+import socket
 
-def is_phishing_url(url):
-    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if re.match(pattern, url):
-        return True
-    else:
+def is_phishing(url):
+    """
+    Detects if the given URL is a phishing website.
+
+    Parameters:
+        url (str): The URL to be checked.
+
+    Returns:
+        bool: True if the URL is a phishing website, False otherwise.
+    """
+    # Check for common phishing patterns in the URL
+    phishing_patterns = [r"://", r"www.", r"/index"]
+    for pattern in phishing_patterns:
+        if re.search(pattern, url):
+            return True
+
+    # Perform a DNS lookup to check if the website is registered
+    try:
+        socket.gethostbyname(url)
+    except socket.gaierror:
         return False
 
-def mitigate_phishing_attack():
-    # implement mitigation strategy
-    pass
+    # Check for common phishing domains in the URL
+    phishing_domains = ["example.com", "fake.net"]
+    for domain in phishing_domains:
+        if url.endswith(domain):
+            return True
 
-while True:
-    url = input("Enter URL: ")
-    if is_phishing_url(url):
-        mitigate_phishing_attack()
-    else:
-        print("URL is not a phishing site.")
+    return False
