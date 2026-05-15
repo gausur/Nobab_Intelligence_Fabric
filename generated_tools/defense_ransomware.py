@@ -1,41 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-15 11:53:14.782304
+# Generated 2026-05-15 13:48:13.059249
 
 import os
-import hashlib
-import json
-from datetime import datetime
+import sys
+import time
 
-def check_for_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        h = hashlib.sha256(data).hexdigest()
-        if h == "1c8977d1d38bab4e03cf5fa53a6a300c":
-            print("Ransomware detected!")
-            return True
+def check_for_ransomware(path):
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+            if b"ransomware" in data:
+                return True
+    except IOError:
+        pass
     return False
 
-def mitigate_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        h = hashlib.sha256(data).hexdigest()
-        if h == "1c8977d1d38bab4e03cf5fa53a6a300c":
-            print("Ransomware detected!")
-            return True
-    with open(file, "wb") as f:
-        data = b""
-        h = hashlib.sha256(data).hexdigest()
-        f.write(data)
-        print("Mitigated ransomware attack.")
-        return False
+def mitigate_ransomware(path):
+    try:
+        with open(path, "wb") as f:
+            f.write(b"I am not ransomware.")
+    except IOError:
+        pass
 
 def main():
-    files = os.listdir()
-    for file in files:
-        if check_for_ransomware(file):
-            mitigate_ransomware(file)
-            break
+    while True:
+        for root, dirs, files in os.walk("."):
+            for file in files:
+                path = os.path.join(root, file)
+                if check_for_ransomware(path):
+                    mitigate_ransomware(path)
+        time.sleep(60)
 
 if __name__ == "__main__":
     main()
