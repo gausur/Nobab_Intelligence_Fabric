@@ -1,52 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-15 21:00:26.464171
+# Generated 2026-05-15 21:58:13.306953
 
 import os
-import re
-import json
 import sys
-from urllib import request
-from pathlib import Path
+import shutil
+import stat
+import subprocess
 
-# Define the list of extensions to consider as malicious files
-malicious_extensions = ['.exe', '.dll', '.scr']
+def detect_ransomware(path):
+    # Check if the file is a regular file
+    if not os.path.isfile(path):
+        return False
 
-# Define the list of directories to scan recursively
-scan_directories = ['/path/to/directory1', '/path/to/directory2']
+    # Check if the file has execute permissions for others
+    if not (stat.S_IXOTH & os.stat(path).st_mode):
+        return False
 
-# Define the list of files to ignore during the scan
-ignore_files = ['some_file.txt', 'another_file.doc']
+    # Check if the file contains ransomware-specific strings or patterns
+    with open(path, 'r') as f:
+        for line in f:
+            if any(s in line for s in ['Ransomware', 'Encrypt', 'Pay']):
+                return True
 
-def is_malicious(filename):
-  extension = Path(filename).suffix
-  if extension in malicious_extensions:
-    return True
-  else:
+    # If the file does not contain ransomware-specific strings or patterns,[9D[K
+patterns, it is likely safe
     return False
 
-def get_file_size(filename):
-  stat = os.stat(filename)
-  return stat.st_size
+def mitigate_ransomware(path):
+    # Remove the inode of the file to prevent access
+    os.remove(path)
 
-def get_last_modified(filename):
-  stat = os.stat(filename)
-  return stat.st_mtime
+    # Remove the file's execute permissions for others
+    subprocess.run(['chmod', '-x', path])
 
-def scan_directory(directory, ignore_files=[]):
-  for root, dirs, files in os.walk(directory):
-    for file in files:
-      if file not in ignore_files:
-        filename = os.path.join(root, file)
-        if is_malicious(filename):
-          print("Malicious file detected: " + filename)
-          size = get_file_size(filename)
-          modified = get_last_modified(filename)
-          print("File size: " + str(size))
-          print("Last modified: " + str(modified))
-
-def scan_directories():
-  for directory in scan_directories:
-    scan_directory(directory, ignore_files)
-
-scan_directories()
+if __name__ == '__main__':
+    if detect_ransomware(sys.argv[1]):
+        mitigate_ransomware(sys.argv[1])
