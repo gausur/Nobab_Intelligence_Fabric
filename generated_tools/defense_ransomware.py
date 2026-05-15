@@ -1,68 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-15 19:22:31.421126
+# Generated 2026-05-15 21:00:26.464171
 
 import os
-import shutil
-import subprocess
+import re
+import json
 import sys
+from urllib import request
+from pathlib import Path
 
-def detect_ransomware(file_path):
-    # Check if the file is a valid executable
-    try:
-        subprocess.check_output(['file', '-b', file_path], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to check file type of {file_path}: {e}")
-        return False
-    
-    # Check if the file is a valid ELF executable
-    try:
-        subprocess.check_output(['readelf', '-aW', file_path], shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to check readelf output of {file_path}: {e}")
-        return False
-    
-    # Check if the file contains a ransomware signature
-    with open(file_path, 'rb') as f:
-        data = f.read()
-        for i in range(len(data) - 20):
-            if data[i:i+4] == b'Crypt':
-                print(f"Ransomware signature found in {file_path}")
-                return True
-    
-    # No ransomware signature found
+# Define the list of extensions to consider as malicious files
+malicious_extensions = ['.exe', '.dll', '.scr']
+
+# Define the list of directories to scan recursively
+scan_directories = ['/path/to/directory1', '/path/to/directory2']
+
+# Define the list of files to ignore during the scan
+ignore_files = ['some_file.txt', 'another_file.doc']
+
+def is_malicious(filename):
+  extension = Path(filename).suffix
+  if extension in malicious_extensions:
+    return True
+  else:
     return False
 
-def mitigate_ransomware(file_path):
-    # Remove the file if it is a ransomware
-    try:
-        os.remove(file_path)
-    except OSError as e:
-        print(f"Failed to remove {file_path}: {e}")
-        return False
-    
-    # Restart the affected service
-    try:
-        subprocess.run(['service', 'restart'], shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Failed to restart service: {e}")
-        return False
-    
-    # Notify the user of the successful mitigation
-    print(f"Mitigated ransomware attack on {file_path}")
-    return True
+def get_file_size(filename):
+  stat = os.stat(filename)
+  return stat.st_size
 
-def main():
-    # Loop through all files in the current directory
-    for file in os.listdir('.'):
-        # Check if the file is a valid executable and contains a ransomware[10D[K
-ransomware signature
-        if detect_ransomware(file):
-            # Mitigate the ransomware attack
-            mitigate_ransomware(file)
-    
-    # Print a success message
-    print("Ransomware detection and mitigation completed successfully")
+def get_last_modified(filename):
+  stat = os.stat(filename)
+  return stat.st_mtime
 
-if __name__ == '__main__':
-    main()
+def scan_directory(directory, ignore_files=[]):
+  for root, dirs, files in os.walk(directory):
+    for file in files:
+      if file not in ignore_files:
+        filename = os.path.join(root, file)
+        if is_malicious(filename):
+          print("Malicious file detected: " + filename)
+          size = get_file_size(filename)
+          modified = get_last_modified(filename)
+          print("File size: " + str(size))
+          print("Last modified: " + str(modified))
+
+def scan_directories():
+  for directory in scan_directories:
+    scan_directory(directory, ignore_files)
+
+scan_directories()
