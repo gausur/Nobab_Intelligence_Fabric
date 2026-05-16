@@ -1,63 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-16 07:55:17.648058
+# Generated 2026-05-16 09:27:13.501019
 
 import re
-import requests
-from bs4 import BeautifulSoup
+import socket
+from email.message import EmailMessage
 
-def is_phishing_url(url):
-    # Check if the URL is valid
-    try:
-        response = requests.get(url)
-        if response.status_code != 200:
-            return False
-    except requests.exceptions.RequestException as e:
-        print("Error: {}".format(e))
+def is_phishing_attack(email):
+    if not email:
+        return False
+    if "@" in email and "." in email:
+        domain = email.split("@")[1]
+        if len(domain) > 3:
+            try:
+                socket.gethostbyname(domain)
+                return True
+            except:
+                return False
+    else:
         return False
 
-    # Parse the HTML content of the URL
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Check if the page contains any suspicious elements
-    for element in soup.find_all():
-        # Skip over non-phishing elements
-        if not isinstance(element, str):
-            continue
-
-        # Check if the element is a known phishing URL
-        if re.search(r"https://login\.facebook\.com/login\.php", element):
-            return True
-
-    # No suspicious elements found
-    return False
-
-def mitigate_phishing_attack(url, username, password):
-    # Check if the URL is a phishing attack
-    if is_phishing_url(url):
-        print("Phishing attempt detected!")
+def mitigate_phishing_attack(email):
+    if is_phishing_attack(email):
+        print("Possible phishing attack detected!")
         return
-
-    # Proceed with logging in normally
-    login_data = {
-        "username": username,
-        "password": password
-    }
-
-    response = requests.post(url + "/login", data=login_data)
-    if response.status_code != 200:
-        print("Login failed!")
+    else:
         return
-
-    # Login successful, proceed with the application
-    print("Login successful!")
-    return
-
-def main():
-    url = input("Enter the URL to login to: ")
-    username = input("Enter your username: ")
-    password = getpass.getpass("Enter your password: ")
-    mitigate_phishing_attack(url, username, password)
 
 if __name__ == "__main__":
-    main()
+    email = input("Enter an email address: ")
+    mitigate_phishing_attack(email)
