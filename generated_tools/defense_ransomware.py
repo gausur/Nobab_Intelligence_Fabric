@@ -1,37 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-16 11:50:08.136191
+# Generated 2026-05-16 13:05:58.275813
 
 import os
-import sys
-import subprocess
+import shutil
+import hashlib
+import tempfile
+import threading
 
-def detect_ransomware():
-    # Check for the presence of ransomware
-    try:
-        output = subprocess.check_output(["ls", "/home/user"])
-        if "ransomware" in output:
-            return True
-        else:
-            return False
-    except subprocess.CalledProcessError as e:
-        print("Error executing command: {}".format(e))
-        return False
+def scan_files(path):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if not file.endswith(".txt"):
+                continue
+            with open(os.path.join(root, file), "r") as f:
+                text = f.read()
+                if "I am a ransomware attacker" in text:
+                    print(f"Ransomware attack detected in {file}")
+                    mitigate_attack(os.path.join(root, file))
 
-def mitigate_ransomware():
-    # Remove ransomware files and folders
-    try:
-        os.system("rm -rf /home/user/ransomware")
-    except OSError as e:
-        print("Error removing ransomware files and folders: {}".format(e))
-        return False
+def mitigate_attack(file):
+    shutil.copyfile(file, tempfile.mktemp())
+    hash = hashlib.sha256()
+    with open(tempfile.mktemp(), "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash.update(chunk)
+    print(f"Mitigation successful, {hash.hexdigest()} has been saved.")
+    os.remove(file)
 
-    # Restart the system to clear any malicious infections
-    try:
-        os.system("sudo reboot")
-    except OSError as e:
-        print("Error restarting the system: {}".format(e))
-        return False
+def main():
+    path = "C:\\path\\to\\scan"
+    threading.Thread(target=scan_files, args=(path,)).start()
 
-if detect_ransomware():
-    mitigate_ransomware()
+if __name__ == "__main__":
+    main()
