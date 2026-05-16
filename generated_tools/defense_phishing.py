@@ -1,35 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-16 15:52:39.562736
+# Generated 2026-05-16 16:52:40.436860
 
 import re
-import socket
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing(url):
-    # Check if the URL contains suspicious characters
-    if re.search(r'[~!@#$%^&*()_+{}\[\]:";<>?,.\/' + url, re.IGNORECASE):
-        return True
+def is_phishing_attack(email):
+    # Check if the email contains a malicious URL
+    url = re.search(r"https?://\S+", email)
+    if url:
+        # Make sure the URL is not from a known good domain
+        if not url.group().startswith("http://www.google.com"):
+            return True
+    return False
 
-    # Check if the URL is a valid IP address or hostname
-    try:
-        socket.gethostbyname(url)
-    except socket.gaierror:
-        return False
+def mitigate_phishing_attack(email, recipient):
+    # Send an email to the recipient warning them of the potential phishing[8D[K
+phishing attack
+    msg = EmailMessage()
+    msg["Subject"] = "Phishing Attack Detected"
+    msg.set_content("We have detected a potential phishing attack in your a[1D[K
+account.\n\nPlease do not click on any links or provide any personal inform[6D[K
+information.")
+    smtplib.sendmail(recipient, email)
 
-    # Check if the URL is on the public internet
-    try:
-        socket.getaddrinfo(url, 80)
-    except socket.gaierror:
-        return False
+def main():
+    # Read the email from stdin
+    email = input().strip()
+    recipient = "recipient@example.com"
 
-    return True
+    if is_phishing_attack(email):
+        mitigate_phishing_attack(email, recipient)
 
-def mitigate_phishing(url):
-    # Redirect the user to a safe website
-    print("Please visit this safe website instead: " + url)
-
-# Test the script
-if __name__ == '__main__':
-    is_phishing("http://www.example.com")  # should be False
-    mitigate_phishing("http://www.example.com")  # should print a message t[1D[K
-to redirect the user to a safe website
+if __name__ == "__main__":
+    main()
