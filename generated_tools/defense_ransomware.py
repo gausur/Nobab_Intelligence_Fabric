@@ -1,50 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-16 20:02:11.499529
+# Generated 2026-05-16 20:53:15.904014
 
 import os
 import hashlib
 import json
-import shutil
-import subprocess
+from datetime import datetime
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-        if b"XOR" in data:
-            return True
-    except Exception:
-        pass
-    return False
+# Define the list of detected file extensions
+file_extensions = ['.doc', '.xls', '.ppt', '.pdf']
 
-def decrypt_file(path):
-    # Decrypt the file using XOR encryption
-    with open(path, "rb") as f:
-        data = f.read()
-    key = os.urandom(16)
-    for i in range(len(data)):
-        data[i] ^= key[i % len(key)]
-    with open(path, "wb") as f:
-        f.write(data)
+# Define the directory to scan
+scan_directory = '/path/to/directory'
 
-def remove_ransomware(path):
-    # Remove the ransomware from the file system
-    shutil.rmtree(path)
+# Create a dictionary to store the results
+results = {}
 
-def mitigate_ransomware(path):
-    # Mitigate the ransomware by decrypting the files and removing them
-    if detect_ransomware(path):
-        decrypt_file(path)
-        remove_ransomware(path)
-
-def main():
-    # Get the list of all files in the file system
-    paths = subprocess.check_output(["find", "/"]).decode().splitlines()
-    # Iterate through the files and mitigate ransomware if present
-    for path in paths:
-        mitigate_ransomware(path)
-
-if __name__ == "__main__":
-    main()
+# Iterate over each file in the directory
+for root, dirs, files in os.walk(scan_directory):
+    for file in files:
+        # Get the full path of the file
+        file_path = os.path.join(root, file)
+        
+        # Check if the file has a detected extension
+        if any(file_path.endswith(ext) for ext in file_extensions):
+            # Open the file and read its contents
+            with open(file_path, 'r') as f:
+                content = f.read()
+                
+            # Calculate the SHA256 hash of the file's contents
+            hash = hashlib.sha256(content.encode('utf-8')).hexdigest()
+            
+            # Check if the hash is in the known ransomware list
+            if hash in RANSOMWARE_HASHES:
+                # Add the file to the results dictionary
+                results[file_path] = {'hash': hash, 'size': os.path.getsize[15D[K
+os.path.getsize(file_path)}
+                
+# Print the results
+print(json.dumps(results, indent=4))
