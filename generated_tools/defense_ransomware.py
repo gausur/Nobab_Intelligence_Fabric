@@ -1,56 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-16 16:54:13.146673
+# Generated 2026-05-16 17:51:01.844403
 
 import os
-import hashlib
-import time
-from datetime import datetime, timedelta
+import subprocess
+from pathlib import Path
 
 def detect_ransomware(path):
-    """Detect if a directory or file has been infected by ransomware"""
-    files = []
-    for root, dirs, _ in os.walk(path):
-        for f in dirs:
-            files.append(os.path.join(root, f))
+    # Check if the file exists
+    if not Path(path).exists():
+        return False
     
-    for file in files:
-        try:
-            with open(file, "rb") as f:
-                contents = f.read()
-                hash_value = hashlib.sha256(contents).hexdigest()
-                if hash_value == "731cea689405e9b0f7c3f6ecd44946a30fe496e3"[42D[K
-"731cea689405e9b0f7c3f6ecd44946a30fe496e3":
-                    # This is a known ransomware signature, so it's likely [K
-that the file has been infected
-                    return True
-            return False
-        except FileNotFoundError:
-            return False
+    # Get the file's hash value using the `md5sum` command
+    hash = subprocess.check_output(['md5sum', path]).decode('utf-8').split([29D[K
+path]).decode('utf-8').split()[0]
+    
+    # Check if the hash is in the known ransomware hashes database
+    with open('ransomware_hashes.txt') as f:
+        for line in f:
+            if hash == line.strip():
+                return True
+    return False
 
 def mitigate_ransomware(path):
-    """Mitigate ransomware by restoring the affected files to a previous st[2D[K
-state"""
-    files = []
-    for root, dirs, _ in os.walk(path):
-        for f in dirs:
-            files.append(os.path.join(root, f))
-    
-    for file in files:
-        try:
-            with open(file, "rb") as f:
-                contents = f.read()
-                hash_value = hashlib.sha256(contents).hexdigest()
-                if hash_value == "731cea689405e9b0f7c3f6ecd44946a30fe496e3"[42D[K
-"731cea689405e9b0f7c3f6ecd44946a30fe496e3":
-                    # This is a known ransomware signature, so it's likely [K
-that the file has been infected
-                    previous_backup = file + ".ransomware"
-                    if os.path.exists(previous_backup):
-                        with open(file, "wb") as f:
-                            with open(previous_backup, "rb") as backup:
-                                f.write(backup.read())
-                        return True
-            return False
-        except FileNotFoundError:
-            return False
+    # Remove the file
+    os.remove(path)
+
+if __name__ == '__main__':
+    # Detect and mitigate ransomware attacks on a given directory
+    for root, dirs, files in os.walk('/path/to/directory'):
+        for file in files:
+            if detect_ransomware(os.path.join(root, file)):
+                mitigate_ransomware(os.path.join(root, file))
