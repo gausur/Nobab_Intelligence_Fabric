@@ -1,32 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-16 09:27:13.501019
+# Generated 2026-05-16 11:00:46.431492
 
 import re
-import socket
-from email.message import EmailMessage
+import urllib.parse
 
-def is_phishing_attack(email):
-    if not email:
-        return False
-    if "@" in email and "." in email:
-        domain = email.split("@")[1]
-        if len(domain) > 3:
-            try:
-                socket.gethostbyname(domain)
-                return True
-            except:
-                return False
+# List of known phishing websites
+phishing_domains = ["example1.com", "example2.com"]
+
+# Function to check if the URL is a phishing website
+def is_phishing(url):
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    return domain in phishing_domains
+
+# Function to mitigate phishing attacks
+def mitigate_phishing(request):
+    # Check if the URL is a phishing website
+    if is_phishing(request.url):
+        # Redirect the user to a safe page
+        return "You have been redirected to a safe page."
     else:
-        return False
+        # Proceed with the original request
+        return "Request processed successfully."
 
-def mitigate_phishing_attack(email):
-    if is_phishing_attack(email):
-        print("Possible phishing attack detected!")
-        return
-    else:
-        return
-
-if __name__ == "__main__":
-    email = input("Enter an email address: ")
-    mitigate_phishing_attack(email)
+# Use the mitigate_phishing function as a middleware in the Flask applicati[9D[K
+application
+from flask import Flask, request
+app = Flask(__name__)
+@app.route("/", methods=["GET"])
+def index():
+    return mitigate_phishing(request)
