@@ -1,50 +1,63 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-17 22:47:16.857918
+# Generated 2026-05-17 23:54:48.972501
 
 import os
-import shutil
-import subprocess
 import sys
-import time
-from datetime import datetime
-
-def get_ransomware_files(path):
-    files = []
-    for root, dirs, names in os.walk(path):
-        for name in names:
-            if "." not in name or name.split(".")[-1] not in ["exe", "bat",[6D[K
-"bat", "cmd"]:
-                continue
-            file_path = os.path.join(root, name)
-            files.append(file_path)
-    return files
-
-def scan_for_ransomware():
-    files = get_ransomware_files("C:\\")
-    for file in files:
-        if "RANSOMWARE" in file or "ENCRYPTION" in file:
-            return True
-    return False
-
-def mitigate_ransomware():
-    files = get_ransomware_files("C:\\")
-    for file in files:
-        if "RANSOMWARE" in file or "ENCRYPTION" in file:
-            try:
-                shutil.copy(file, f"{file}.backup")
-                os.remove(file)
-            except Exception as e:
-                print("Failed to mitigate ransomware!", e)
-    return True
+import json
+from collections import deque
 
 def main():
-    if scan_for_ransomware():
-        print("Ransomware detected! Mitigating...")
-        mitigate_ransomware()
-        print("Mitigation successful!")
-    else:
-        print("No ransomware detected.")
+    # Initialize variables
+    malicious_files = []
+    infected_hosts = set()
+    cleaned_files = 0
 
-if __name__ == "__main__":
-    main()
+    # Parse command line arguments
+    args = sys.argv[1:]
+    if len(args) != 3:
+        print("Usage: python ransomware_detector.py [input_directory] [outp[5D[K
+[output_directory]")
+        return
+    input_dir = args[0]
+    output_dir = args[1]
+
+    # Scan for malicious files and infected hosts
+    for root, dirs, files in os.walk(input_dir):
+        for file in files:
+            if is_malicious_file(file):
+                malicious_files.append(os.path.join(root, file))
+            elif is_infected_host(root):
+                infected_hosts.add(root)
+
+    # Mitigate ransomware attacks by cleaning affected files and hosts
+    for file in malicious_files:
+        try:
+            os.remove(file)
+            cleaned_files += 1
+        except OSError as e:
+            print("Error cleaning file {}: {}".format(file, e))
+
+    # Remove infected hosts from the network
+    for host in infected_hosts:
+        try:
+            os.remove(host)
+        except OSError as e:
+            print("Error removing host {}: {}".format(host, e))
+
+    # Output results
+    print("Cleaned files: {}".format(cleaned_files))
+    print("Infected hosts: {}".format(len(infected_hosts)))
+
+def is_malicious_file(file):
+    """Detects whether a file is malicious by checking its extension."""
+    ext = os.path.splitext(file)[1]
+    return ext == ".exe" or ext == ".dll"
+
+def is_infected_host(root):
+    """Detects whether a host is infected by checking for malicious files i[1D[K
+in its directory."""
+    for file in os.listdir(root):
+        if is_malicious_file(file):
+            return True
+    return False
