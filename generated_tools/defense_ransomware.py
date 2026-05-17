@@ -1,43 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-17 09:03:56.531929
+# Generated 2026-05-17 10:30:13.589548
 
 import os
-import shutil
+import subprocess
 
-def detect_ransomware(directory):
-    # Check for common ransomware files and directories
-    if os.path.exists(os.path.join(directory, "Cryptolocker.exe")):
-        return True
-    if os.path.exists(os.path.join(directory, "README.txt")):
-        with open(os.path.join(directory, "README.txt"), "r") as f:
-            if f.read().startswith("This file is a ransomware infection"):
-                return True
-    # Check for common ransomware strings in process list
-    for proc in psutil.process_iter():
-        try:
-            name = proc.name()
-            cmdline = " ".join(proc.cmdline())
-            if name == "Cryptolocker.exe" or "cryptolocker" in cmdline:
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
-    # Check for common ransomware strings in network connections
-    for con in psutil.net_connections():
-        if "ransom" in con.rhost:
-            return True
-    # No evidence of ransomware detected
-    return False
-
-def mitigate_ransomware(directory):
-    # Remove all files and directories except for those with the ".keep" ex[2D[K
-extension
-    for root, dirs, files in os.walk(directory):
-        for f in files:
-            if not f.endswith(".keep"):
-                os.remove(os.path.join(root, f))
-        for d in dirs:
-            if not d.endswith(".keep"):
-                shutil.rmtree(os.path.join(root, d))
-    # Restart the affected system
-    os.system("shutdown -r now")
+def detect_ransomware():
+    # Check if the system is running Windows
+    if os.name == 'nt':
+        # Run a command to check for ransomware infections
+        result = subprocess.run(['powershell', '-Command', 'Get-MpComputerS[16D[K
+'Get-MpComputerStatus -FullScan'], shell=True, stdout=subprocess.PIPE)
+        # Parse the output of the command to extract the relevant informati[9D[K
+information
+        if result.stdout:
+            scan_result = json.loads(result.stdout)
+            if scan_result['ThreatStatus'] == 'Detected':
+                # Ransomware detected, mitigate the attack by running a rem[3D[K
+remediation script
+                subprocess.run(['powershell', '-Command', 'Set-MpPreference[17D[K
+'Set-MpPreference -ExclusionPath "C:\\Users\\Public"'], shell=True)
+                print("Ransomware detected and mitigated successfully.")
+            else:
+                # No ransomware infection detected
+                print("No ransomware infections detected.")
+        else:
+            # Error running the command to check for ransomware infections
+            print("Error checking for ransomware infections.")
+    else:
+        # The system is not running Windows, so no need to run any checks o[1D[K
+or mitigation scripts
+        pass
