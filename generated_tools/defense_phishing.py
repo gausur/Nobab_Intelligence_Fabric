@@ -1,37 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-17 16:53:48.010650
+# Generated 2026-05-17 17:53:48.699053
 
 import re
+import smtplib
+from email.message import EmailMessage
+from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    pattern = r'^https?://[a-zA-Z0-9.-]+(:[0-9]+)?$'
-    if not re.match(pattern, url):
+    parsed = urlparse(url)
+    if parsed.scheme not in ["http", "https"]:
         return False
-    else:
+    if parsed.netloc == "example.com":
         return True
+    return False
 
-def is_phishing_email(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if not re.match(pattern, email):
-        return False
+def is_phishing_email(msg):
+    if msg.is_multipart():
+        for part in msg.get_payload():
+            if is_phishing_url(part.get("Content-Location")):
+                return True
     else:
-        return True
+        return is_phishing_url(msg["Content-Location"])
 
-def is_phishing_domain(domain):
-    pattern = r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if not re.match(pattern, domain):
-        return False
-    else:
-        return True
+def mitigate_phishing(msg):
+    if is_phishing_email(msg):
+        smtplib.SMTP("mail.example.com").sendmail("from@example.com", "to@e[5D[K
+"to@example.com", msg.as_string())
 
-def mitigate_phishing_attack():
-    # TODO: Add logic to mitigate the phishing attack
-    pass
+def main():
+    with open("email.txt") as f:
+        for line in f:
+            mitigate_phishing(EmailMessage().parse(line))
 
-if __name__ == '__main__':
-    url = input('Enter URL: ')
-    if is_phishing_url(url):
-        mitigate_phishing_attack()
-    else:
-        print('Invalid URL')
+if __name__ == "__main__":
+    main()
