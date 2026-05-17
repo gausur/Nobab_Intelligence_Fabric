@@ -1,45 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-17 21:49:26.567604
+# Generated 2026-05-17 22:47:16.857918
 
 import os
-import sys
+import shutil
 import subprocess
+import sys
+import time
+from datetime import datetime
 
-def detect_ransomware(path):
-    # Check if the file is a valid executable
-    try:
-        subprocess.check_output(['file', path])
-    except subprocess.CalledProcessError as e:
-        return False
+def get_ransomware_files(path):
+    files = []
+    for root, dirs, names in os.walk(path):
+        for name in names:
+            if "." not in name or name.split(".")[-1] not in ["exe", "bat",[6D[K
+"bat", "cmd"]:
+                continue
+            file_path = os.path.join(root, name)
+            files.append(file_path)
+    return files
 
-    # Check if the file contains known ransomware code patterns
-    with open(path, 'rb') as f:
-        data = f.read()
-        for pattern in RANSOMWARE_PATTERNS:
-            if pattern in data:
-                return True
+def scan_for_ransomware():
+    files = get_ransomware_files("C:\\")
+    for file in files:
+        if "RANSOMWARE" in file or "ENCRYPTION" in file:
+            return True
     return False
 
-def mitigate_ransomware(path):
-    # Remove the file and replace it with a blank one
-    os.remove(path)
-    open(path, 'w').close()
+def mitigate_ransomware():
+    files = get_ransomware_files("C:\\")
+    for file in files:
+        if "RANSOMWARE" in file or "ENCRYPTION" in file:
+            try:
+                shutil.copy(file, f"{file}.backup")
+                os.remove(file)
+            except Exception as e:
+                print("Failed to mitigate ransomware!", e)
+    return True
 
-# List of known ransomware code patterns to detect
-RANSOMWARE_PATTERNS = [
-    b'EKQOIHGQOIG',
-    b'FJJGJFQGGYG',
-    b'BTUOUIWIFJF'
-]
-
-# Main function to detect and mitigate ransomware attacks
-def main(path):
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
-        print('Ransomware attack detected and mitigated')
+def main():
+    if scan_for_ransomware():
+        print("Ransomware detected! Mitigating...")
+        mitigate_ransomware()
+        print("Mitigation successful!")
     else:
-        print('No ransomware attack detected')
+        print("No ransomware detected.")
 
-if __name__ == '__main__':
-    main(sys.argv[1])
+if __name__ == "__main__":
+    main()
