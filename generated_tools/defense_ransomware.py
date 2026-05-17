@@ -1,30 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-16 23:46:14.656328
+# Generated 2026-05-17 02:14:09.462531
 
 import os
-import shutil
 import sys
-import time
+import subprocess
+from pathlib import Path
 
-def scan_for_ransomware():
-    # Check for known ransomware file extensions
-    if ".crypt" in os.listdir() or ".lock" in os.listdir():
-        return True
-    else:
+def detect_ransomware(file):
+    try:
+        # Check if the file is encrypted with AES-256
+        output = subprocess.check_output(['openssl', 'aes-256-cbc', '-d', '[1D[K
+'-in', file], stderr=subprocess.STDOUT)
+        if b'error' in output:
+            return True
+        else:
+            return False
+    except subprocess.CalledProcessError as e:
+        print(f"Error while decrypting {file}: {e}")
         return False
 
-def mitigate_ransomware(path):
-    # Remove the infected file and create a new one with a different name
-    shutil.move(path, path + "_backup")
-    open(path, "w").close()
+def mitigate_ransomware(file):
+    try:
+        # Remove the encrypted file
+        os.remove(file)
+        # Recover the original file
+        output = subprocess.check_output(['openssl', 'aes-256-cbc', '-d', '[1D[K
+'-in', file], stderr=subprocess.STDOUT)
+        if b'error' in output:
+            print(f"Error while decrypting {file}: {e}")
+        else:
+            print(f"Recovered original file {file} from ransomware attack")[8D[K
+attack")
+    except subprocess.CalledProcessError as e:
+        print(f"Error while removing encrypted file {file}: {e}")
 
 def main():
-    while True:
-        if scan_for_ransomware():
-            mitigate_ransomware(os.listdir())
-            print("Ransomware detected and mitigated!")
-        time.sleep(60)
+    files = [str(p) for p in Path('.').glob('*')]
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
