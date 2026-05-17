@@ -1,82 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-17 11:57:56.659340
+# Generated 2026-05-17 13:02:25.184843
 
 import os
-import json
-import time
-from pathlib import Path
+import re
+import subprocess
 
-def detect_ransomware(directory):
-    """
-    Detects ransomware attacks by searching for files with the .RAN extensi[7D[K
-extension and checking their contents for known ransomware patterns.
+def is_ransomware(file):
+    # Check if the file is a binary
+    if not file.endswith('.exe') and not file.endswith('.dll'):
+        return False
 
-    Args:
-        directory (str): The directory to search for ransomware files.
+    # Check if the file has a suspicious name
+    if re.search(r'^(.*?)-encrypted$', file):
+        return True
 
-    Returns:
-        list[str]: A list of paths to files that were detected as ransomwar[9D[K
-ransomware.
-    """
-    # Initialize the list of ransomware files
-    ransomware_files = []
+    # Check if the file contains a suspicious pattern
+    result = subprocess.run(['strings', file], stdout=subprocess.PIPE)
+    for line in result.stdout.decode().splitlines():
+        if re.search(r'^EncryptMe$', line):
+            return True
 
-    # Walk through the directory tree and search for files with the .RAN ex[2D[K
-extension
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith('.RAN'):
-                # Open the file and read its contents
-                with open(os.path.join(root, file), 'r') as f:
-                    contents = f.read()
+    # If none of the above checks are successful, assume it is not ransomwa[8D[K
+ransomware
+    return False
 
-                # Check if the contents match any known ransomware patterns[8D[K
-patterns
-                for pattern in ['$RANSOMWARE_PATTERN1', '$RANSOMWAR[11D[K
-'$RANSOMWARE_PATTERN2']:
-                    if pattern in contents:
-                        # Add the file to the list of ransomware files
-                        ransomware_files.append(os.path.join(root, file))
-                        break
+def mitigate_ransomware(file):
+    # Delete the file
+    os.remove(file)
 
-    return ransomware_files
+    # Print a message indicating the file has been deleted
+    print(f'File {file} has been deleted')
 
-def mitigate_ransomware(ransomware_files):
-    """
-    Mitigates ransomware attacks by deleting the infected files and restori[7D[K
-restoring from backups.
+# Get all files in the current directory
+files = os.listdir()
 
-    Args:
-        ransomware_files (list[str]): A list of paths to files that were de[2D[K
-detected as ransomware.
-    """
-    # Delete the infected files
-    for file in ransomware_files:
-        try:
-            os.remove(file)
-        except OSError:
-            pass
-
-    # Restore from backups
-    if 'backup' in directory:
-        shutil.copytree(os.path.join(directory, 'backup'), directory)
-
-def main():
-    """
-    The main function for the script. It detects and mitigates ransomware a[1D[K
-attacks.
-    """
-    # Get the current working directory
-    directory = os.getcwd()
-
-    # Detect ransomware files in the current directory and its subdirectori[12D[K
-subdirectories
-    ransomware_files = detect_ransomware(directory)
-
-    # Mitigate the ransomware attacks by deleting the infected files and re[2D[K
-restoring from backups
-    mitigate_ransomware(ransomware_files)
-
-if __name__ == '__main__':
-    main()
+# Iterate over each file and check if it is ransomware
+for file in files:
+    if is_ransomware(file):
+        mitigate_ransomware(file)
