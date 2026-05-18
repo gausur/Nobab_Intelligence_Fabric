@@ -1,63 +1,71 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-17 23:54:48.972501
+# Generated 2026-05-18 02:38:26.049941
 
 import os
 import sys
-import json
-from collections import deque
+import shutil
+import tempfile
+import subprocess
+
+def detect_ransomware(path):
+    # Check if the file is a valid EXE file
+    if not os.path.isfile(path) or not path.endswith(".exe"):
+        return False
+    
+    # Check if the file has the Windows PE signature
+    with open(path, "rb") as f:
+        data = f.read(4)
+        if b"\x00\x00\x01\x00" not in data:
+            return False
+    
+    # Check if the file has a known ransomware signature
+    with open(path, "rb") as f:
+        data = f.read()
+        for sig in ["ransom", "encrypt", "crypto", "paywall"]:
+            if sig in data:
+                return True
+    
+    return False
+
+def mitigate_ransomware(path):
+    # Create a temporary directory to store the file
+    tempdir = tempfile.mkdtemp()
+    try:
+        # Copy the file to the temporary directory
+        shutil.copy(path, tempdir)
+        
+        # Run the executable in the temporary directory
+        subprocess.run(os.path.join(tempdir, path), shell=True)
+        
+        # Check if the file has been encrypted
+        with open(os.path.join(tempdir, path), "rb") as f:
+            data = f.read()
+            for sig in ["ransom", "encrypt", "crypto", "paywall"]:
+                if sig in data:
+                    return True
+        
+        # If the file has not been encrypted, delete it from the temporary [K
+directory
+        shutil.rmtree(tempdir)
+    except Exception as e:
+        # Delete the temporary directory and reraise the exception
+        shutil.rmtree(tempdir)
+        raise e
+    
+    return False
 
 def main():
-    # Initialize variables
-    malicious_files = []
-    infected_hosts = set()
-    cleaned_files = 0
-
-    # Parse command line arguments
-    args = sys.argv[1:]
-    if len(args) != 3:
-        print("Usage: python ransomware_detector.py [input_directory] [outp[5D[K
-[output_directory]")
-        return
-    input_dir = args[0]
-    output_dir = args[1]
-
-    # Scan for malicious files and infected hosts
-    for root, dirs, files in os.walk(input_dir):
-        for file in files:
-            if is_malicious_file(file):
-                malicious_files.append(os.path.join(root, file))
-            elif is_infected_host(root):
-                infected_hosts.add(root)
-
-    # Mitigate ransomware attacks by cleaning affected files and hosts
-    for file in malicious_files:
-        try:
-            os.remove(file)
-            cleaned_files += 1
-        except OSError as e:
-            print("Error cleaning file {}: {}".format(file, e))
-
-    # Remove infected hosts from the network
-    for host in infected_hosts:
-        try:
-            os.remove(host)
-        except OSError as e:
-            print("Error removing host {}: {}".format(host, e))
-
-    # Output results
-    print("Cleaned files: {}".format(cleaned_files))
-    print("Infected hosts: {}".format(len(infected_hosts)))
-
-def is_malicious_file(file):
-    """Detects whether a file is malicious by checking its extension."""
-    ext = os.path.splitext(file)[1]
-    return ext == ".exe" or ext == ".dll"
-
-def is_infected_host(root):
-    """Detects whether a host is infected by checking for malicious files i[1D[K
-in its directory."""
-    for file in os.listdir(root):
-        if is_malicious_file(file):
-            return True
-    return False
+    # Check if the input path is a valid EXE file
+    if not os.path.isfile("input.exe") or not "input.exe".endswith(".exe"):[29D[K
+"input.exe".endswith(".exe"):
+        print("Invalid file!")
+        sys.exit(1)
+    
+    # Detect and mitigate ransomware attacks using the functions defined ab[2D[K
+above
+    if detect_ransomware("input.exe"):
+        mitigate_ransomware("input.exe")
+        print("File has been encrypted!")
+    else:
+        print("No ransomware detected.")
