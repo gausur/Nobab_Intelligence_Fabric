@@ -1,38 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-19 18:57:17.785754
+# Generated 2026-05-19 20:28:33.032529
 
 import os
-import sys
-import time
-import subprocess
+import hashlib
+import shutil
 
-def detect_ransomware():
-    # Check if the current process is being executed with elevated privileg[8D[K
-privileges
-    if not has_elevated_privileges():
-        return False
+def detect_ransomware(file):
+    file_hash = hashlib.md5(open(file, "rb").read()).hexdigest()
+    if file_hash == "MD5_HASH":
+        print("Ransomware detected")
+        shutil.move(file, "/tmp/ransomware.txt")
 
-    # Get a list of running processes
-    processes = subprocess.check_output(["ps", "aux"]).decode("utf-8")
+def mitigate_ransomware():
+    os.remove("/tmp/ransomware.txt")
+    print("Mitigation successful")
 
-    # Look for process names that indicate ransomware activity
-    ransomware_processes = [p for p in processes.splitlines() if "ransomwar[10D[K
-"ransomware" in p]
-
-    # If any ransomware processes are found, mitigate the attack
-    if len(ransomware_processes) > 0:
-        mitigate_attack()
-
-def has_elevated_privileges():
-    # Check if the current process is being executed with elevated privileg[8D[K
-privileges
-    try:
-        subprocess.check_output(["whoami", "/all"])
-        return True
-    except subprocess.CalledProcessError:
-        return False
-
-def mitigate_attack():
-    # Kill all ransomware processes
-    subprocess.run(["taskkill", "/im", "ransomware"], shell=True)
+if __name__ == "__main__":
+    for file in os.listdir(os.getcwd()):
+        detect_ransomware(file)

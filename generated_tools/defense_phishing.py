@@ -1,29 +1,47 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-19 19:00:02.722953
+# Generated 2026-05-19 20:30:53.265240
 
 import re
 import requests
+from urllib import parse
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
 
-def is_phishing_url(url):
-    parsed = urlparse(url)
-    domain = '.'.join(parsed.netloc.split('.')[-2:])
-    if not re.match(r'^www\.[a-z0-9]+$', domain):
-        return True
-    else:
-        return False
+def is_phishing(url):
+    try:
+        r = requests.get(url)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, 'html.parser')
+            if soup.find('input', {'type': 'password'}) is not None:
+                return True
+    except:
+        pass
+    return False
 
-def is_phishing_email(email):
-    if re.search(r'@example\.com$', email):
-        return True
-    else:
-        return False
-
-def mitigate_phishing(url, email):
-    if is_phishing_url(url) or is_phishing_email(email):
-        requests.get(f'http://{url}/mitigation/phishing')
+def mitigate_phishing(url):
+    try:
+        r = requests.get(url)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, 'html.parser')
+            for link in soup.find_all('a'):
+                if link.get('href').startswith('/'):
+                    link['href'] = parse.urljoin(url, link['href'])
+            for form in soup.find_all('form'):
+                action = form.get('action')
+                if action is not None:
+                    form['action'] = parse.urljoin(url, action)
+            for script in soup.find_all('script'):
+                script.extract()
+            return soup.prettify(formatter=None)
+        else:
+            raise ValueError('Invalid URL')
+    except:
+        pass
+    return None
 
 if __name__ == '__main__':
-    mitigate_phishing('https://www.example.com', 'john@example.com')
+    url = input('Enter URL to check for phishing: ')
+    if is_phishing(url):
+        print('This website may be a phishing site.')
+    else:
+        print('This website does not appear to be a phishing site.')
