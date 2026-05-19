@@ -1,39 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-19 10:58:36.102770
+# Generated 2026-05-19 13:55:28.444869
 
 import os
+import shutil
 import subprocess
-import time
-import sys
 
-def detect_ransomware(file_path):
-    # Check if the file is a ransomware
-    try:
-        with open(file_path, "rb") as f:
-            data = f.read()
-            if b"RANSOMWARE" in data:
-                return True
-    except FileNotFoundError:
-        pass
-    return False
-
-def mitigate_ransomware(file_path):
-    # Remove the ransomware file
-    try:
-        os.remove(file_path)
-    except OSError:
-        pass
-
-# Main function
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python3 ransomware_detector.py [file_path]")
-        sys.exit(1)
-
-    file_path = sys.argv[1]
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-        print("Ransomware detected and removed.")
+def detect_ransomware(filepath):
+    # Check if file is encrypted
+    result = subprocess.run(['magic', '-d', 'file', filepath], capture_outp[12D[K
+capture_output=True, text=True)
+    if 'encrypted' in result.stdout:
+        return True
     else:
-        print("No ransomware detected.")
+        return False
+
+def mitigate_ransomware(filepath):
+    # Restore the original file
+    shutil.copy(f'{filepath}.bak', filepath)
+
+# Run the detection and mitigation functions on all files in the current di[2D[K
+directory
+for file in os.listdir('.'):
+    if detect_ransomware(file):
+        mitigate_ransomware(file)
