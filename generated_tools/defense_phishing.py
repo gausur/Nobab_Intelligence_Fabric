@@ -1,38 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-19 16:48:15.452467
+# Generated 2026-05-19 19:00:02.722953
 
 import re
-import smtplib
-from email import message_from_string
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
-def is_phishing_email(email):
-    # Check if the email is from a known phishing domain
-    if any(domain in email["From"].split("@")[1].lower() for domain in PHIS[4D[K
-PHISHING_DOMAINS):
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    domain = '.'.join(parsed.netloc.split('.')[-2:])
+    if not re.match(r'^www\.[a-z0-9]+$', domain):
         return True
     else:
         return False
 
-def mitigate_phishing_email(email):
-    # Send a notification to the sender and the recipient
-    send_notification(email)
-    # Delete the email from the inbox
-    delete_email(email)
+def is_phishing_email(email):
+    if re.search(r'@example\.com$', email):
+        return True
+    else:
+        return False
 
-# Define the phishing domains to be checked
-PHISHING_DOMAINS = ["phishingsite.com", "fakewebsite.com"]
+def mitigate_phishing(url, email):
+    if is_phishing_url(url) or is_phishing_email(email):
+        requests.get(f'http://{url}/mitigation/phishing')
 
-# Set up the email server and SMTP client
-server = smtplib.SMTP("localhost")
-client = server.login()
-
-# Loop through all emails in the inbox
-for email in client.inbox:
-    # Check if the email is a phishing email
-    if is_phishing_email(email):
-        mitigate_phishing_email(email)
-
-# Close the email server and SMTP client
-server.close()
-client.close()
+if __name__ == '__main__':
+    mitigate_phishing('https://www.example.com', 'john@example.com')
