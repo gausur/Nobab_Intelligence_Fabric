@@ -1,36 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-19 00:00:19.757883
+# Generated 2026-05-19 03:30:56.151095
 
 import os
-import json
+import sys
 import hashlib
-import base64
-from datetime import datetime
 
-def detect_ransomware(file):
-    with open(file, 'rb') as f:
-        file_data = f.read()
-        checksum = hashlib.md5(file_data).hexdigest()
-        if checksum == "1234567890abcdef":
-            return True
-    return False
+def detect_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        filedata = f.read()
+        md5hash = hashlib.md5(filedata).hexdigest()
+        if md5hash == "980459b6a263e7c61d6fdb59ce3b7829":
+            print("This file is likely a ransomware attack")
+        else:
+            print("This file is not a ransomware attack")
 
-def mitigate_ransomware(file):
-    with open(file, 'rb') as f:
-        file_data = f.read()
-        new_checksum = hashlib.md5(file_data).hexdigest()
-        if new_checksum != "1234567890abcdef":
-            return True
-    return False
-
-def main():
-    with open('ransomware_attack.log', 'a') as f:
-        for file in os.listdir():
-            if detect_ransomware(file):
-                mitigate_ransomware(file)
-                f.write("Ransomware attack detected and mitigated on " + da[2D[K
-datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python detect_ransomware.py <filepath>")
+        sys.exit(1)
+    filepath = sys.argv[1]
+    detect_ransomware(filepath)
