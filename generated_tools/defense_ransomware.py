@@ -1,37 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-20 10:23:15.360123
+# Generated 2026-05-20 13:36:28.021417
 
-import os
 import socket
-import subprocess
 import time
 
-def detect_ransomware(path):
-    # Check if the file exists
-    if not os.path.exists(path):
+def detect_ransomware(ip, port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, port))
+        time.sleep(5)
+        data = s.recv(1024)
+        if "RANSOMWARE" in data.decode("utf-8"):
+            print("Ransomware detected!")
+            return True
+        else:
+            print("No ransomware detected.")
+            return False
+    except socket.error as e:
+        print(f"Socket error: {e}")
         return False
+    finally:
+        s.close()
 
-    # Get the file's size and last modification time
-    file_size = os.path.getsize(path)
-    file_mtime = os.path.getmtime(path)
-
-    # Check if the file has been modified recently (within the past hour)
-    if time.time() - file_mtime > 3600:
-        return False
-
-    # Check if the file size has increased by a significant amount (more th[2D[K
-than 10% of its original size)
-    if file_size / os.path.getsize(path, block_size=1024) > 1.1:
-        return True
-
-    return False
-
-def mitigate_ransomware(path):
-    # Check if the file is a known ransomware file
-    if detect_ransomware(path):
-        # Remove the file
-        os.remove(path)
+def mitigate_ransomware():
+    # TODO: implement mitigation techniques here
+    pass
 
 if __name__ == "__main__":
-    mitigate_ransomware("example.txt")
+    ip = input("Enter the IP address of the server to scan: ")
+    port = int(input("Enter the port number to scan: "))
+    if detect_ransomware(ip, port):
+        mitigate_ransomware()
