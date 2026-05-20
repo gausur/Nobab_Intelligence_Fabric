@@ -1,43 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-20 21:48:03.931360
+# Generated 2026-05-20 23:10:02.751730
 
 import re
-import smtplib
-from email.message import EmailMessage
+import requests
 
-def check_phishing(email):
-    # Check for suspicious keywords in the email subject and body
-    if "phishing" in email["subject"] or "scam" in email["body"]:
+def is_phishing(url):
+    # Check if the URL is valid
+    if not url:
+        return False
+    
+    # Extract the domain name from the URL
+    domain = urlparse(url).netloc
+    
+    # Make a request to the domain's DNS server
+    # to see if it has an A record for @
+    try:
+        socket.gethostbyname(domain)
+    except OSError:
+        return False
+    
+    # Check if the domain is blacklisted
+    if domain in blacklist:
         return True
     
-    # Check for suspicious links in the email content
-    for part in email.walk():
-        if part.get_content_maintype() == "multipart":
-            continue
-        if re.search(r"http[s]?://[\w\.]+", part.get_payload()):
-            return True
+    # Check if the URL matches a common phishing pattern
+    if re.match(r'https?://[a-zA-Z0-9.-]+/(?:login|signin|auth)', url):
+        return True
     
-    # Check for suspicious attachments in the email content
-    if email.has_attachments():
-        for attachment in email.attachments:
-            if re.search(r"[\w\.]+\.(exe|bat)", attachment.get_filename()):[27D[K
-attachment.get_filename()):
-                return True
-    
-    # If no suspicious keywords or links are found, the email is likely leg[3D[K
-legitimate
     return False
 
-def mitigate_phishing(email):
-    # Send an error message to the sender
-    smtp = smtplib.SMTP("localhost")
-    smtp.sendmail(email["from"], email["to"], "Error: Phishing attack detec[5D[K
-detected")
-    
-    # Delete the email from the local mailbox
-    for folder in ("Inbox", "Sent"):
-        try:
-            os.remove(os.path.join("~/.mail", folder, email["filename"]))
-        except FileNotFoundError:
-            pass
+def mitigate_phishing(url):
+    # Redirect the user to a safe URL if they are trying to access a phishi[6D[K
+phishing site
+    if is_phishing(url):
+        return 'https://www.example.com'
+    else:
+        return url

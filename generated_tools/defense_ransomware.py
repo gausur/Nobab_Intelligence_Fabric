@@ -1,59 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-20 21:47:04.575572
+# Generated 2026-05-20 23:08:41.913657
 
 import os
+import socket
 import subprocess
+import time
 
-def detect_ransomware(filepath):
-    # Check if the file is readable
-    try:
-        with open(filepath, 'r'):
-            pass
-    except IOError as e:
-        print('File not readable:', filepath)
-        return False
-    
-    # Check if the file has been modified
-    mod_time = os.stat(filepath).st_mtime
-    if time.time() - mod_time > 300:
-        print('File is older than 300 seconds:', filepath)
-        return False
-    
-    # Check if the file has a suspicious name or extension
-    filename = os.path.basename(filepath)
-    if 'ransom' in filename.lower() or '.exe' in filename:
-        print('Suspicious filename detected:', filepath)
-        return False
-    
-    # Check if the file has a suspicious content
-    try:
-        with open(filepath, 'rb') as f:
-            data = f.read()
-        if b'ransomware' in data or b'encrypt' in data:
-            print('Suspicious content detected:', filepath)
-            return False
-    except IOError as e:
-        print('File not readable:', filepath)
-        return False
-    
-    # If all checks passed, the file is likely not ransomware
-    return True
+# Define variables
+ransomware_folder = "C:\\Ransomware"
+payload_file = "C:\\Ransomware\\ransomware.exe"
+cleanup_script = "C:\\Ransomware\\cleanup.bat"
+scan_script = "C:\\Ransomware\\scan.bat"
+mitigation_script = "C:\\Ransomware\\mitigate.bat"
 
-def mitigate_ransomware(filepath):
-    try:
-        subprocess.check_call(['rm', '-rf', filepath])
-    except Exception as e:
-        print('Error deleting file:', filepath)
-    
-    # Also consider adding a firewall rule to block incoming connections fr[2D[K
-from the attacker's IP
+# Define functions
+def detect_ransomware():
+    # Scan for ransomware using the scan script
+    subprocess.run(["cmd", "/c", scan_script], shell=True)
+    # Check if a ransomware payload is present in the folder
+    for file in os.listdir(ransomware_folder):
+        if file.endswith(".exe") and file != "cleanup.bat":
+            return True
+    return False
 
+def mitigate_ransomware():
+    # Run the mitigation script to clean up the folder
+    subprocess.run(["cmd", "/c", mitigation_script], shell=True)
+    # Remove the payload file
+    os.remove(payload_file)
+    # Remove the scan script
+    os.remove(scan_script)
+    # Remove the cleanup script
+    os.remove(cleanup_script)
+
+# Main function
 def main():
-    # Iterate over all files in the current directory
-    for filepath in os.listdir(os.getcwd()):
-        if detect_ransomware(filepath):
-            mitigate_ransomware(filepath)
+    while True:
+        # Check if a ransomware payload is present in the folder
+        if detect_ransomware():
+            mitigate_ransomware()
+            print("Ransomware detected and mitigated.")
+        # Sleep for 10 seconds before checking again
+        time.sleep(10)
 
-if __name__ == '__main__':
+# Run the main function
+if __name__ == "__main__":
     main()
