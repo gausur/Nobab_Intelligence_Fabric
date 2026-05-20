@@ -1,49 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-20 19:20:33.899022
+# Generated 2026-05-20 21:47:04.575572
 
 import os
-import json
 import subprocess
 
-def get_file_list(path):
-    file_list = []
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            file_list.append(os.path.join(root, file))
-    return file_list
-
-def get_file_hashes(file_list):
-    hashes = {}
-    for file in file_list:
-        try:
-            with open(file, 'rb') as f:
-                hashes[file] = subprocess.check_output(['sha256sum', file])[6D[K
-file])
-        except FileNotFoundError:
+def detect_ransomware(filepath):
+    # Check if the file is readable
+    try:
+        with open(filepath, 'r'):
             pass
-    return hashes
-
-def detect_ransomware(hashes):
-    for file in hashes:
-        if '303162653761642d726e6f736f66742d383939' in hashes[file]:
-            return True
-    return False
-
-def mitigate_ransomware(path):
-    file_list = get_file_list(path)
-    hashes = get_file_hashes(file_list)
-    if detect_ransomware(hashes):
-        for file in hashes:
-            if '303162653761642d726e6f736f66742d383939' in hashes[file]:
-                try:
-                    os.remove(file)
-                except FileNotFoundError:
-                    pass
-        return True
-    else:
+    except IOError as e:
+        print('File not readable:', filepath)
         return False
+    
+    # Check if the file has been modified
+    mod_time = os.stat(filepath).st_mtime
+    if time.time() - mod_time > 300:
+        print('File is older than 300 seconds:', filepath)
+        return False
+    
+    # Check if the file has a suspicious name or extension
+    filename = os.path.basename(filepath)
+    if 'ransom' in filename.lower() or '.exe' in filename:
+        print('Suspicious filename detected:', filepath)
+        return False
+    
+    # Check if the file has a suspicious content
+    try:
+        with open(filepath, 'rb') as f:
+            data = f.read()
+        if b'ransomware' in data or b'encrypt' in data:
+            print('Suspicious content detected:', filepath)
+            return False
+    except IOError as e:
+        print('File not readable:', filepath)
+        return False
+    
+    # If all checks passed, the file is likely not ransomware
+    return True
+
+def mitigate_ransomware(filepath):
+    try:
+        subprocess.check_call(['rm', '-rf', filepath])
+    except Exception as e:
+        print('Error deleting file:', filepath)
+    
+    # Also consider adding a firewall rule to block incoming connections fr[2D[K
+from the attacker's IP
+
+def main():
+    # Iterate over all files in the current directory
+    for filepath in os.listdir(os.getcwd()):
+        if detect_ransomware(filepath):
+            mitigate_ransomware(filepath)
 
 if __name__ == '__main__':
-    path = '/path/to/files'
-    mitigate_ransomware(path)
+    main()
