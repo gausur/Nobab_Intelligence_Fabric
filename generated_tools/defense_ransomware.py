@@ -1,55 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-21 14:02:31.248784
+# Generated 2026-05-21 16:42:09.922885
 
 import os
-import time
 import shutil
+import time
+import subprocess
 
 def detect_ransomware(path):
-    # Check if the file or directory is locked by another process
-    try:
-        fd = open(path, "rb")
-        fd.close()
-    except OSError:
-        return True
+    # Check if the path is a directory
+    if not os.path.isdir(path):
+        return False
     
-    # Check if the file size has increased unexpectedly
-    old_size = os.path.getsize(path)
-    time.sleep(1)
-    new_size = os.path.getsize(path)
-    if new_size > old_size:
-        return True
-    
-    # Check if the file has been modified since it was last read
-    mtime = os.path.getmtime(path)
-    atime = os.path.getatime(path)
-    if time.time() - mtime > 10 or time.time() - atime > 10:
-        return True
-    
-    # Check if the file contains a known ransomware signature
-    with open(path, "rb") as fd:
-        data = fd.read()
-        for sig in ("RANSOMWARE", "ENCRYPTED_DATA"):
-            if sig in data:
+    # Check for the presence of ransomware files
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if "ransomware" in file:
                 return True
     
-    # If none of the above conditions are met, assume it is not a ransomwar[9D[K
-ransomware attack
+    # If no ransomware files were found, check for suspicious file modifica[8D[K
+modification times
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            mtime = os.path.getmtime(os.path.join(root, file))
+            if time.time() - mtime > 10 * 60 * 60: # 10 hours
+                return True
+    
+    # If no suspicious modification times were found, check for suspicious [K
+process activity
+    processes = subprocess.check_output(["ps", "aux"])
+    for proc in processes.decode("utf-8").split("\n"):
+        if "ransomware" in proc:
+            return True
+    
+    # If no ransomware was detected, return False
     return False
 
 def mitigate_ransomware(path):
-    # Remove the file or directory
-    shutil.rmtree(path)
+    # Check if the path is a directory
+    if not os.path.isdir(path):
+        return
+    
+    # Move all files to a new location
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            shutil.move(os.path.join(root, file), "ransomware_removed")
 
-# Check for ransomware attacks on all files and directories in the current [K
-working directory
-for root, dirs, files in os.walk("."):
-    for name in files:
-        path = os.path.join(root, name)
-        if detect_ransomware(path):
-            mitigate_ransomware(path)
-    for name in dirs:
-        path = os.path.join(root, name)
-        if detect_ransomware(path):
-            mitigate_ransomware(path)
+# Main function
+def main():
+    path = "/path/to/directory"
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+        print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")
+
+if __name__ == "__main__":
+    main()
