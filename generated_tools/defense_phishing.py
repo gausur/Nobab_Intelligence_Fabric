@@ -1,39 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-20 23:10:02.751730
+# Generated 2026-05-21 02:36:06.402264
 
 import re
 import requests
+from bs4 import BeautifulSoup
 
-def is_phishing(url):
-    # Check if the URL is valid
-    if not url:
-        return False
-    
-    # Extract the domain name from the URL
-    domain = urlparse(url).netloc
-    
-    # Make a request to the domain's DNS server
-    # to see if it has an A record for @
-    try:
-        socket.gethostbyname(domain)
-    except OSError:
-        return False
-    
-    # Check if the domain is blacklisted
-    if domain in blacklist:
-        return True
-    
-    # Check if the URL matches a common phishing pattern
-    if re.match(r'https?://[a-zA-Z0-9.-]+/(?:login|signin|auth)', url):
-        return True
-    
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious keywords or patterns
+    for keyword in ["phish", "scam", "fraud"]:
+        if keyword in url.lower():
+            return True
     return False
 
-def mitigate_phishing(url):
-    # Redirect the user to a safe URL if they are trying to access a phishi[6D[K
-phishing site
-    if is_phishing(url):
-        return 'https://www.example.com'
+def is_phishing_page(soup):
+    # Check if the page contains any suspicious HTML elements or attributes[10D[K
+attributes
+    for element in soup.find_all("a"):
+        if "href" in element.attrs and is_phishing_url(element["href"]):
+            return True
+    for attribute in ["onclick", "onload", "onerror", "onfocus"]:
+        if any(attribute in attr for attr in soup.find_all("*")):
+            return True
+    return False
+
+def mitigate_phishing_attacks(url):
+    # Redirect the user to a safe URL
+    requests.get(url)
+
+def main():
+    # Get the URL from the command line arguments
+    url = sys.argv[1]
+
+    # Check if the URL is a phishing attack
+    if is_phishing_url(url):
+        mitigate_phishing_attacks(url)
     else:
-        return url
+        print("The URL is not a phishing attack.")
+
+if __name__ == "__main__":
+    main()
