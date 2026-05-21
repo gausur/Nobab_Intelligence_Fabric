@@ -1,29 +1,55 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-21 10:35:47.525584
+# Generated 2026-05-21 14:02:31.248784
 
 import os
-import re
-import subprocess
+import time
+import shutil
 
-def detect_ransomware():
-    # Get the list of running processes
-    process_list = subprocess.check_output(['ps', 'aux']).decode('utf-8').s[25D[K
-'aux']).decode('utf-8').split('\n')
-
-    # Filter out any unnecessary processes
-    filtered_processes = [process for process in process_list if 'ransomwar[10D[K
-'ransomware' not in process]
-
-    # Check if the ransomware is running
-    if len(filtered_processes) > 0:
+def detect_ransomware(path):
+    # Check if the file or directory is locked by another process
+    try:
+        fd = open(path, "rb")
+        fd.close()
+    except OSError:
         return True
-    else:
-        return False
+    
+    # Check if the file size has increased unexpectedly
+    old_size = os.path.getsize(path)
+    time.sleep(1)
+    new_size = os.path.getsize(path)
+    if new_size > old_size:
+        return True
+    
+    # Check if the file has been modified since it was last read
+    mtime = os.path.getmtime(path)
+    atime = os.path.getatime(path)
+    if time.time() - mtime > 10 or time.time() - atime > 10:
+        return True
+    
+    # Check if the file contains a known ransomware signature
+    with open(path, "rb") as fd:
+        data = fd.read()
+        for sig in ("RANSOMWARE", "ENCRYPTED_DATA"):
+            if sig in data:
+                return True
+    
+    # If none of the above conditions are met, assume it is not a ransomwar[9D[K
+ransomware attack
+    return False
 
-def mitigate_ransomware():
-    # Kill all running processes related to ransomware
-    subprocess.check_output(['killall', '-9', 'ransomware'])
+def mitigate_ransomware(path):
+    # Remove the file or directory
+    shutil.rmtree(path)
 
-if detect_ransomware():
-    mitigate_ransomware()
+# Check for ransomware attacks on all files and directories in the current [K
+working directory
+for root, dirs, files in os.walk("."):
+    for name in files:
+        path = os.path.join(root, name)
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
+    for name in dirs:
+        path = os.path.join(root, name)
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
