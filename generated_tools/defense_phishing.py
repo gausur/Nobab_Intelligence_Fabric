@@ -1,42 +1,66 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-21 02:36:06.402264
+# Generated 2026-05-21 10:37:09.757309
 
 import re
-import requests
-from bs4 import BeautifulSoup
+from urllib.parse import urlparse
+from email.utils import parseaddr
 
-def is_phishing_url(url):
-    # Check if the URL contains any suspicious keywords or patterns
-    for keyword in ["phish", "scam", "fraud"]:
-        if keyword in url.lower():
-            return True
+# Define a set of common phishing URLs
+phishing_urls = {
+    "http://example.com",
+    "https://example.com",
+    "http://www.example.com",
+    "https://www.example.com",
+    "http://example.net",
+    "https://example.net",
+    "http://www.example.net",
+    "https://www.example.net"
+}
+
+# Define a set of common phishing domains
+phishing_domains = {
+    "example.com",
+    "example.net",
+    "example.org",
+    "example.edu",
+    "example.gov",
+    "example.mil"
+}
+
+def is_phishing(url):
+    # Check if the URL is in the phishing set
+    if url in phishing_urls:
+        return True
+    
+    # Check if the domain is in the phishing set
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if domain in phishing_domains:
+        return True
+    
+    # Check if the URL contains a common phishing tactic
+    if re.search(r"[a-z0-9]{32,}", url):
+        return True
+    
+    # Check if the URL contains a spammy keyword
+    if re.search(r"\bspam\b", url):
+        return True
+    
+    # Check if the URL contains a misleading keyword
+    if re.search(r"\bphishing\b", url):
+        return True
+    
+    # Check if the URL contains a suspicious keyword
+    if re.search(r"\bscam\b", url):
+        return True
+    
     return False
 
-def is_phishing_page(soup):
-    # Check if the page contains any suspicious HTML elements or attributes[10D[K
-attributes
-    for element in soup.find_all("a"):
-        if "href" in element.attrs and is_phishing_url(element["href"]):
-            return True
-    for attribute in ["onclick", "onload", "onerror", "onfocus"]:
-        if any(attribute in attr for attr in soup.find_all("*")):
-            return True
-    return False
-
-def mitigate_phishing_attacks(url):
-    # Redirect the user to a safe URL
-    requests.get(url)
-
-def main():
-    # Get the URL from the command line arguments
-    url = sys.argv[1]
-
-    # Check if the URL is a phishing attack
-    if is_phishing_url(url):
-        mitigate_phishing_attacks(url)
-    else:
-        print("The URL is not a phishing attack.")
-
-if __name__ == "__main__":
-    main()
+def mitigate_phishing(url):
+    # If the URL is phishing, block it
+    if is_phishing(url):
+        raise Exception("Phishing attack detected")
+    
+    # Otherwise, allow the URL to pass through
+    return url
