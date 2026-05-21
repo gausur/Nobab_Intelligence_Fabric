@@ -1,34 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-21 22:15:59.166115
+# Generated 2026-05-21 23:55:47.858648
 
 import os
-import shutil
+import re
 import subprocess
-import sys
+import shlex
 
 def main():
-    # Check if the system is compromised by scanning for known malicious fi[2D[K
-files
-    malicious_files = check_for_malware()
-    if len(malicious_files) > 0:
-        print("Malware detected!")
-        # Mitigate the attack by removing the malicious files and resetting[9D[K
-resetting the system
-        remove_malware(malicious_files)
-        print("System has been reset.")
-    else:
-        print("No malware detected.")
+    # Get list of processes running on the system
+    proc_list = subprocess.check_output(['ps', 'aux'])
+    # Parse output into a dictionary
+    proc_dict = dict()
+    for line in proc_list.splitlines():
+        line = re.sub(r'\s+', ' ', line.decode('utf-8'))
+        proc_id, user, pid, cpu, mem, vsz, rss, tty, stat, time, cmd = line[4D[K
+line.split()
+        if cmd == 'python' and proc_id != os.getpid():
+            # Check for ransomware process
+            proc_dict[proc_id] = cmd
+    # Mitigate ransomware attack
+    for pid in proc_dict:
+        print(f'Killing ransomware process {pid}...')
+        os.kill(int(pid), 9)
 
-def check_for_malware():
-    # Use shutil to scan for known malicious files
-    for root, dirs, files in os.walk('/'):
-        for file in files:
-            if file.endswith(('.exe', '.dll')) and not file.startswith('ran[20D[K
-file.startswith('ransom'):
-                yield os.path.join(root, file)
-
-def remove_malware(malicious_files):
-    # Use subprocess to execute the rm command with -rf options
-    for file in malicious_files:
-        subprocess.run(['rm', '-rf', file])
+if __name__ == '__main__':
+    main()
