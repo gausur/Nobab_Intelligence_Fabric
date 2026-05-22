@@ -1,50 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-22 20:33:07.827729
+# Generated 2026-05-22 22:05:14.392613
 
 import re
-import smtplib
-from email.parser import Parser
+from urllib.parse import urlparse
 
-def is_phishing(email):
-    # Check if the email contains any suspicious keywords or links
-    for keyword in ["phish", "spam", "scam"]:
-        if keyword in email["Subject"] or keyword in email["Body"]:
-            return True
+def is_valid_url(url):
+    parsed = urlparse(url)
+    return bool(parsed.scheme and parsed.netloc)
+
+def is_phishing_site(url):
+    if not is_valid_url(url):
+        return False
+    parsed = urlparse(url)
+    hostname = parsed.hostname.lower()
+    # Check for common phishing domain patterns
+    if re.search(r'[a-z0-9]{3}\.com$', hostname):
+        return True
+    if re.search(r'[a-z0-9]{2,3}\.co\.[a-z]{2}$', hostname):
+        return True
+    if re.search(r'[a-z0-9]+\.ru$', hostname):
+        return True
+    # Check for common phishing domain suffixes
+    if parsed.netloc.endswith('.com') or parsed.netloc.endswith('.co'):
+        return True
     return False
 
-def mitigate_phishing(email):
-    # Send a message to the sender indicating that their email was detected[8D[K
-detected as phishing
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login("your-email@gmail.com", "your-password")
-        message = f"Subject: Phishing attempt detected\n\nDear {email['From[12D[K
-{email['From']},\nYour email was detected as a phishing attempt and has bee[3D[K
-been flagged for further investigation.\n\nSincerely,\nPhishing Detection S[1D[K
-System"
-        server.sendmail("your-email@gmail.com", email["From"], message)
-    # Delete the phishing email from the inbox
-    with Parser() as parser:
-        parser.feed(message)
-        email = parser.close()
-        del email["From"]
-        del email["To"]
-        del email["Subject"]
-        del email["Body"]
-    return email
+def mitigate_phishing(url):
+    if is_phishing_site(url):
+        print("Phishing site detected")
+    else:
+        print("No phishing site detected")
 
-def main():
-    # Read emails from the inbox and detect phishing attempts
-    with smtplib.SMTP("smtp.gmail.com", 587) as server:
-        server.starttls()
-        server.login("your-email@gmail.com", "your-password")
-        messages = server.retrieve(0)
-        for message in messages:
-            email = Parser().parse(message)
-            if is_phishing(email):
-                mitigate_phishing(email)
-    return 0
-
-if __name__ == "__main__":
-    main()
+# Test cases
+mitigate_phishing("https://www.example.com/")  # No phishing site detected
+mitigate_phishing("https://example.com/")  # Phishing site detected
+mitigate_phishing("http://example.com/")  # Phishing site detected
+mitigate_phishing("http://www.example.com/")  # No phishing site detected
