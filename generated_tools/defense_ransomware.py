@@ -1,49 +1,61 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-22 22:03:48.437555
+# Generated 2026-05-22 23:10:00.541343
 
+import socket
 import os
-import time
+import subprocess
+from datetime import datetime
 
-def detect_ransomware():
-    # Check if the file system is being accessed in an unusual way
-    if not os.access(os.getcwd(), os.R_OK):
-        return True
-    
-    # Check if any suspicious files are present in the directory
-    for file in os.listdir():
-        if file.endswith(".ransom"):
+def detect_ransomware(path):
+    # Check if the file is encrypted
+    with open(path, "rb") as f:
+        data = f.read()
+        if b"RANSOMWARE" in data:
+            print("Ransomware detected!")
             return True
-    
-    # Check if any suspicious processes are running
-    for process in psutil.process_iter():
-        try:
-            cmdline = " ".join(process.cmdline())
-            if "ransomware.exe" in cmdline:
-                return True
-        except (psutil.AccessDenied, psutil.NoSuchProcess):
-            pass
-    
-    # Check if any suspicious network activity is present
-    for socket in psutil.net_io_counters(pernic=True).values():
-        if socket.bytes_recv > 1024 or socket.bytes_sent > 1024:
-            return True
-    
-    # Check if any suspicious USB devices are present
-    for device in psutil.disk_partitions(all=True):
-        if device.device == "/dev/sda" and "ransomware" in device.fstype:
-            return True
-    
-    # If no suspicious activity is detected, return False
     return False
 
-def mitigate_ransomware():
-    # Restart the system to clear any malicious processes
-    os.system("shutdown /r /t 0")
+def mitigate_ransomware(path):
+    # Decrypt the file using AES-256-CTR
+    with open(path, "rb") as f:
+        data = f.read()
+        key = os.urandom(32)
+        iv = os.urandom(16)
+        cipher = AES.new(key, AES.MODE_CTR, counter=iv)
+        decrypted_data = cipher.decrypt(data)
+    with open(path, "wb") as f:
+        f.write(decrypted_data)
 
-# Start a timer to detect and mitigate ransomware attacks
-while True:
-    if detect_ransomware():
-        mitigate_ransomware()
-        break
-    time.sleep(60)
+def main():
+    # Set up the socket server
+    HOST = ""
+    PORT = 8080
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((HOST, PORT))
+    s.listen()
+    print("Listening on port", PORT)
+    conn, addr = s.accept()
+    print("Connection from", addr)
+    while True:
+        # Wait for the attacker to send a file
+        data = conn.recv(1024)
+        if not data:
+            break
+        filename = "file" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".en[4D[K
+".enc"
+        with open(filename, "wb") as f:
+            f.write(data)
+        print("Received file", filename)
+        # Check if the file is a ransomware
+        if detect_ransomware(filename):
+            mitigate_ransomware(filename)
+            print("Mitigated ransomware")
+        else:
+            print("Not a ransomware")
+        # Remove the file
+        os.remove(filename)
+    conn.close()
+
+if __name__ == "__main__":
+    main()
