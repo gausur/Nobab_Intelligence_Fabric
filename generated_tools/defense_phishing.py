@@ -1,28 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-22 18:31:05.403565
+# Generated 2026-05-22 20:33:07.827729
 
 import re
-import requests
+import smtplib
+from email.parser import Parser
 
-# Set up the regular expression for detecting phishing URLs
-phishing_regex = r"^https?:\/\/.*\.phishing\.com"
+def is_phishing(email):
+    # Check if the email contains any suspicious keywords or links
+    for keyword in ["phish", "spam", "scam"]:
+        if keyword in email["Subject"] or keyword in email["Body"]:
+            return True
+    return False
 
-# Set up the URL to check against the phishing regex
-url = "http://www.example.com"
+def mitigate_phishing(email):
+    # Send a message to the sender indicating that their email was detected[8D[K
+detected as phishing
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login("your-email@gmail.com", "your-password")
+        message = f"Subject: Phishing attempt detected\n\nDear {email['From[12D[K
+{email['From']},\nYour email was detected as a phishing attempt and has bee[3D[K
+been flagged for further investigation.\n\nSincerely,\nPhishing Detection S[1D[K
+System"
+        server.sendmail("your-email@gmail.com", email["From"], message)
+    # Delete the phishing email from the inbox
+    with Parser() as parser:
+        parser.feed(message)
+        email = parser.close()
+        del email["From"]
+        del email["To"]
+        del email["Subject"]
+        del email["Body"]
+    return email
 
-# Use the requests library to make a GET request to the URL
-response = requests.get(url)
+def main():
+    # Read emails from the inbox and detect phishing attempts
+    with smtplib.SMTP("smtp.gmail.com", 587) as server:
+        server.starttls()
+        server.login("your-email@gmail.com", "your-password")
+        messages = server.retrieve(0)
+        for message in messages:
+            email = Parser().parse(message)
+            if is_phishing(email):
+                mitigate_phishing(email)
+    return 0
 
-# Check if the response status code is 200 (OK)
-if response.status_code == 200:
-    # Extract the text from the HTML response
-    html = response.text
-
-    # Use the regular expression to find phishing URLs in the HTML
-    matches = re.findall(phishing_regex, html)
-
-    # If there are any matches, print an error message and exit
-    if len(matches) > 0:
-        print("Phishing attack detected!")
-        exit(1)
+if __name__ == "__main__":
+    main()
