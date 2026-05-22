@@ -1,36 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-21 18:59:47.180126
+# Generated 2026-05-22 06:43:28.492538
 
 import re
-from email.parser import Parser
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing_attack(message):
-    # Check if the message has a subject line that contains "free" or "disc[5D[K
-"discount"
-    if re.search(r'free|discount', message.get('subject')):
-        return True
-    
-    # Check if the message has a body that contains a link to a suspicious [K
-website
-    if re.search(r'http[s]?://(?!www\.google\.)[^.]+\.[^.]+', message.get('[13D[K
-message.get('body')):
-        return True
-    
-    # Check if the message has a sender email address that is not from a we[2D[K
-well-known and trusted domain
-    if not re.match(r'@example[.]com$', message.get('sender')):
-        return True
-    
-    return False
+def is_phishing_url(url):
+    return bool(re.search(r'^http://|https://', url))
 
-def mitigate_phishing_attack(message):
-    # Delete the message to prevent further phishing attacks
-    del message
-    
-# Read the email message from stdin
-parser = Parser()
-message = parser.parse(sys.stdin)
+def is_valid_domain(email, domain):
+    return True if email.split('@')[-1] == domain else False
 
-if is_phishing_attack(message):
-    mitigate_phishing_attack(message)
+def send_email(sender, recipient, subject, body):
+    msg = EmailMessage()
+    msg['Subject'] = subject
+    msg['From'] = sender
+    msg['To'] = recipient
+    msg.set_content(body)
+    s = smtplib.SMTP('localhost')
+    s.send_message(msg)
+    s.quit()
+
+def phishing_attack_detected(email, url):
+    if is_phishing_url(url) and not is_valid_domain(email, 'example.com'):
+        send_email('phishing@example.com', email, 'Phishing Attempt', f'{ur[5D[K
+f'{url} is a phishing website!')
+
+def main():
+    while True:
+        email = input('Enter your email: ')
+        url = input('Enter the URL you visited: ')
+        phishing_attack_detected(email, url)
+
+if __name__ == '__main__':
+    main()

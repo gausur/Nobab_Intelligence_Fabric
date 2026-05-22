@@ -1,41 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-22 02:38:26.861136
+# Generated 2026-05-22 06:45:09.316981
 
 import os
-import time
 import shutil
+import subprocess
+import sys
 
-# Define the directory to monitor for changes
-directory = '/path/to/monitor'
-
-# Define the list of files to ignore
-ignore_list = ['file1', 'file2']
-
-# Define the threshold for detecting changes (in seconds)
-threshold = 300 # 5 minutes
-
-while True:
-    # Get the current time
-    now = time.time()
+def main():
+    # Check if the system is running Windows
+    if not sys.platform.startswith("win"):
+        print("This script only supports Windows")
+        return
     
-    # Walk through the directory and its subdirectories
-    for root, dirs, files in os.walk(directory):
-        # Iterate over the list of files
-        for file in files:
-            # Skip any ignored files
-            if file in ignore_list:
-                continue
-            
-            # Get the full path to the file
-            file_path = os.path.join(root, file)
-            
-            # Check if the file has been modified since the last check
-            try:
-                stat = os.stat(file_path)
-                if now - stat.st_mtime > threshold:
-                    print('Detected changes in ' + file_path)
-                    shutil.copy(file_path, '/path/to/backup') # Backup the [K
-file to a safe location
-            except OSError:
-                pass # File not found, ignore it
+    # Get a list of all processes running on the system
+    process_list = subprocess.check_output(["tasklist", "/fo", "csv"]).deco[12D[K
+"csv"]).decode().split("\n")
+    
+    # Find the first process with the name "svchost.exe" and kill it
+    for process in process_list:
+        if "svchost.exe" in process:
+            print("Killing svchost.exe...")
+            subprocess.check_call(["taskkill", "/PID", process.split(",")[1[20D[K
+process.split(",")[1]])
+            break
+    
+    # Check if the system is still running and exit with an error code if i[1D[K
+it's not
+    if subprocess.check_output(["wmic", "os", "get", "caption"]).decode().s[22D[K
+"caption"]).decode().startswith("Ransomware detected"):
+        print("The system has been taken over by ransomware")
+        sys.exit(1)
+    
+    # Clean up the temporary files created by the ransomware
+    shutil.rmtree("C:\\Windows\\Temp", ignore_errors=True)
