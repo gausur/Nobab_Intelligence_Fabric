@@ -1,28 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-21 23:55:47.858648
+# Generated 2026-05-22 02:38:26.861136
 
 import os
-import re
-import subprocess
-import shlex
+import time
+import shutil
 
-def main():
-    # Get list of processes running on the system
-    proc_list = subprocess.check_output(['ps', 'aux'])
-    # Parse output into a dictionary
-    proc_dict = dict()
-    for line in proc_list.splitlines():
-        line = re.sub(r'\s+', ' ', line.decode('utf-8'))
-        proc_id, user, pid, cpu, mem, vsz, rss, tty, stat, time, cmd = line[4D[K
-line.split()
-        if cmd == 'python' and proc_id != os.getpid():
-            # Check for ransomware process
-            proc_dict[proc_id] = cmd
-    # Mitigate ransomware attack
-    for pid in proc_dict:
-        print(f'Killing ransomware process {pid}...')
-        os.kill(int(pid), 9)
+# Define the directory to monitor for changes
+directory = '/path/to/monitor'
 
-if __name__ == '__main__':
-    main()
+# Define the list of files to ignore
+ignore_list = ['file1', 'file2']
+
+# Define the threshold for detecting changes (in seconds)
+threshold = 300 # 5 minutes
+
+while True:
+    # Get the current time
+    now = time.time()
+    
+    # Walk through the directory and its subdirectories
+    for root, dirs, files in os.walk(directory):
+        # Iterate over the list of files
+        for file in files:
+            # Skip any ignored files
+            if file in ignore_list:
+                continue
+            
+            # Get the full path to the file
+            file_path = os.path.join(root, file)
+            
+            # Check if the file has been modified since the last check
+            try:
+                stat = os.stat(file_path)
+                if now - stat.st_mtime > threshold:
+                    print('Detected changes in ' + file_path)
+                    shutil.copy(file_path, '/path/to/backup') # Backup the [K
+file to a safe location
+            except OSError:
+                pass # File not found, ignore it
