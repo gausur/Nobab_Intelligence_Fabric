@@ -1,34 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-23 21:50:11.515838
+# Generated 2026-05-23 22:48:02.215615
 
-import os
-import sys
+import socket
+import threading
 import time
 from pathlib import Path
-from typing import List
 
-class RansomwareDetector:
-    def __init__(self, path: str):
-        self.path = Path(path)
-        self.files = []
-        self.ransomware_files = []
-    
-    def detect_ransomware(self):
-        for file in self.files:
-            if "ransom" in file.lower():
-                self.ransomware_files.append(file)
-        return self.ransomware_files
+def main():
+    # Initialize the network listener
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((socket.gethostname(), 1234))
+        s.listen()
 
-    def mitigate_ransomware(self, ransomware_files):
-        for file in ransomware_files:
-            os.remove(file)
+        print("Listening for incoming connections...")
+
+        while True:
+            conn, addr = s.accept()
+            with conn:
+                print(f"Connection received from {addr}")
+
+                # Check if the client is trying to access a restricted file[4D[K
+file
+                if Path("C:\\Windows\\System32\\config\\systemprofile")[52D[K
+Path("C:\\Windows\\System32\\config\\systemprofile").exists():
+                    print("Restricted file accessed!")
+                    with conn.makefile("wb") as f:
+                        f.write(b"Ransomware detected! Payment required to [K
+decrypt data.")
+                else:
+                    print("No restricted file access detected.")
 
 if __name__ == "__main__":
-    detector = RansomwareDetector("C:/")
-    files = detector.files
-    ransomware_files = detector.detect_ransomware()
-    mitigation = input("Do you want to mitigate the detected ransomware? (y[2D[K
-(y/n): ")
-    if mitigation == "y":
-        detector.mitigate_ransomware(ransomware_files)
+    main()
