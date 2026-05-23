@@ -1,61 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-22 23:10:00.541343
+# Generated 2026-05-23 02:16:23.712534
 
-import socket
 import os
+import shutil
 import subprocess
-from datetime import datetime
 
 def detect_ransomware(path):
     # Check if the file is encrypted
-    with open(path, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            print("Ransomware detected!")
-            return True
+    try:
+        with open(path, "rb") as f:
+            magic = f.read(2)
+            if magic == b"\xfe\xed":
+                return True
+    except (OSError, IOError):
+        pass
     return False
 
 def mitigate_ransomware(path):
-    # Decrypt the file using AES-256-CTR
-    with open(path, "rb") as f:
-        data = f.read()
-        key = os.urandom(32)
-        iv = os.urandom(16)
-        cipher = AES.new(key, AES.MODE_CTR, counter=iv)
-        decrypted_data = cipher.decrypt(data)
-    with open(path, "wb") as f:
-        f.write(decrypted_data)
+    # Delete the encrypted file
+    try:
+        os.remove(path)
+    except (OSError, IOError):
+        pass
 
 def main():
-    # Set up the socket server
-    HOST = ""
-    PORT = 8080
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((HOST, PORT))
-    s.listen()
-    print("Listening on port", PORT)
-    conn, addr = s.accept()
-    print("Connection from", addr)
-    while True:
-        # Wait for the attacker to send a file
-        data = conn.recv(1024)
-        if not data:
-            break
-        filename = "file" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".en[4D[K
-".enc"
-        with open(filename, "wb") as f:
-            f.write(data)
-        print("Received file", filename)
-        # Check if the file is a ransomware
-        if detect_ransomware(filename):
-            mitigate_ransomware(filename)
-            print("Mitigated ransomware")
-        else:
-            print("Not a ransomware")
-        # Remove the file
-        os.remove(filename)
-    conn.close()
+    # Check if a ransomware attack is detected
+    if detect_ransomware("/path/to/file"):
+        # Mitigate the ransomware attack
+        mitigate_ransomware("/path/to/file")
+        print("Ransomware attack detected and mitigated.")
+    else:
+        print("No ransomware attack detected.")
 
 if __name__ == "__main__":
     main()
