@@ -1,35 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-23 22:48:02.215615
+# Generated 2026-05-23 23:54:33.831812
 
-import socket
-import threading
+import os
+import hashlib
 import time
-from pathlib import Path
+import re
 
-def main():
-    # Initialize the network listener
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((socket.gethostname(), 1234))
-        s.listen()
+# Define the list of files to check for ransomware infections
+files = ['file1', 'file2']
 
-        print("Listening for incoming connections...")
+# Define the hashes of the known ransomware files
+ransomware_hashes = {
+    'ransomware_file1': 'abcdefg',
+    'ransomware_file2': 'hijklmn'
+}
 
-        while True:
-            conn, addr = s.accept()
-            with conn:
-                print(f"Connection received from {addr}")
+# Iterate through the list of files to check for infections
+for file in files:
+    # Get the hash of the current file
+    file_hash = hashlib.sha256(open(file, 'rb').read()).hexdigest()
 
-                # Check if the client is trying to access a restricted file[4D[K
+    # Check if the file hash matches any of the known ransomware hashes
+    for ransomware_hash in ransomware_hashes:
+        if file_hash == ransomware_hashes[ransomware_hash]:
+            # If a match is found, mitigate the infection by deleting the f[1D[K
 file
-                if Path("C:\\Windows\\System32\\config\\systemprofile")[52D[K
-Path("C:\\Windows\\System32\\config\\systemprofile").exists():
-                    print("Restricted file accessed!")
-                    with conn.makefile("wb") as f:
-                        f.write(b"Ransomware detected! Payment required to [K
-decrypt data.")
-                else:
-                    print("No restricted file access detected.")
+            os.remove(file)
+            print('Ransomware infection detected and mitigated: ' + file)
+            break
 
-if __name__ == "__main__":
-    main()
+# Check for other signs of ransomware activity such as registry keys or net[3D[K
+network connections
+if re.search(r'^ransomware_', open('/registry/key1', 'rb').read()):
+    print('Ransomware detected in the registry key: /registry/key1')
+if re.search(r'^ransomware_', open('/registry/key2', 'rb').read()):
+    print('Ransomware detected in the registry key: /registry/key2')
+if re.search(r'^ransomware_', open('/network/connection1', 'rb').read()):
+    print('Ransomware detected in the network connection: /network/connecti[17D[K
+/network/connection1')
+if re.search(r'^ransomware_', open('/network/connection2', 'rb').read()):
+    print('Ransomware detected in the network connection: /network/connecti[17D[K
+/network/connection2')
