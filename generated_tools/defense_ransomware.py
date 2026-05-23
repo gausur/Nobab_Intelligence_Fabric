@@ -1,40 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-23 20:45:21.704912
+# Generated 2026-05-23 21:50:11.515838
 
 import os
-import shutil
-import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import List
 
-def main():
-    # Initialize the script with a list of all files in the current directo[7D[K
-directory
-    file_list = get_file_list()
+class RansomwareDetector:
+    def __init__(self, path: str):
+        self.path = Path(path)
+        self.files = []
+        self.ransomware_files = []
+    
+    def detect_ransomware(self):
+        for file in self.files:
+            if "ransom" in file.lower():
+                self.ransomware_files.append(file)
+        return self.ransomware_files
 
-    # Iterate over each file and check if it is a ransomware payload
-    for file in file_list:
-        # Check if the file is a ransomware payload by analyzing its conten[6D[K
-contents
-        if is_ransomware_payload(file):
-            # If the file is a ransomware payload, delete it and all of its[3D[K
-its copies
-            delete_ransomware_payload(file)
+    def mitigate_ransomware(self, ransomware_files):
+        for file in ransomware_files:
+            os.remove(file)
 
-def get_file_list() -> List[str]:
-    """Returns a list of all files in the current directory"""
-    return [f for f in os.listdir() if not f.startswith('.')]
-
-def is_ransomware_payload(file: str) -> bool:
-    """Checks if a file is a ransomware payload by analyzing its contents""[10D[K
-contents"""
-    # TODO: Implement the ransomware detection logic here
-    return False
-
-def delete_ransomware_payload(file: str):
-    """Deletes a ransomware payload and all of its copies in the current di[2D[K
-directory"""
-    os.remove(file)
-    shutil.rmtree(os.path.dirname(file))
+if __name__ == "__main__":
+    detector = RansomwareDetector("C:/")
+    files = detector.files
+    ransomware_files = detector.detect_ransomware()
+    mitigation = input("Do you want to mitigate the detected ransomware? (y[2D[K
+(y/n): ")
+    if mitigation == "y":
+        detector.mitigate_ransomware(ransomware_files)
