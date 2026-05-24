@@ -1,28 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-23 23:55:04.527037
+# Generated 2026-05-24 02:34:01.711315
 
 import re
-from urllib.parse import urlparse
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing(url):
-    parsed = urlparse(url)
-    domain = '{}.{}'.format(parsed.netloc, parsed.scheme)
-
-    if not parsed.path:
+def is_phishing(email: str) -> bool:
+    """
+    Check if an email is a phishing attempt.
+    """
+    # Check for common phishing tactics
+    if "www." in email or "<script>" in email or "href=" in email or "javas[6D[K
+"javascript:" in email:
         return True
-
-    if re.match(r'^\/[a-z0-9]{2,15}$', parsed.path):
+    else:
         return False
 
-    if '.' in domain and len(domain) > 64:
-        return True
+def mitigate_phishing(email: str) -> None:
+    """
+    Mitigate phishing attacks by removing suspicious links and formatting t[1D[K
+the email.
+    """
+    # Remove suspicious links
+    email = re.sub("www.", "", email)
+    email = re.sub("<script>", "", email)
+    email = re.sub("href=", "", email)
+    email = re.sub("javascript:", "", email)
 
-    return False
+    # Format the email
+    msg = EmailMessage()
+    msg["From"] = "phishing@example.com"
+    msg["To"] = email
+    msg["Subject"] = "Phishing Attempt Detected"
+    msg.set_content("This is a phishing attempt. Please do not click any li[2D[K
+links.")
+    smtplib.sendmail(msg)
 
-def mitigate_phishing(url):
-    if is_phishing(url):
-        print('Phishing attempt detected!')
-        # TODO: Add your phishing detection logic here
+def main():
+    # Parse the input email
+    email = input("Enter an email address: ")
+
+    # Check if it's a phishing attempt
+    if is_phishing(email):
+        mitigate_phishing(email)
     else:
-        print('No phishing detected.')
+        print("This is not a phishing attempt.")
+
+if __name__ == "__main__":
+    main()
