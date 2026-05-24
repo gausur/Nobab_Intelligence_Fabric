@@ -1,44 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-24 21:50:43.035377
+# Generated 2026-05-24 22:52:06.475729
 
 import os
-import re
-import subprocess
+import sys
 
 def detect_ransomware(directory):
-    # List all files in the directory
-    file_list = os.listdir(directory)
-    
-    # Iterate over the list and check if any files have a modified date tha[3D[K
-that is older than 30 days
-    for file in file_list:
-        file_path = os.path.join(directory, file)
-        mod_time = os.stat(file_path).st_mtime
-        if mod_time < (time.time() - 86400 * 30):
-            return True
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if "RANSOMWARE" in open(os.path.join(root, file), "r").read():
+                print("Detected ransomware!")
+                return True
     return False
 
 def mitigate_ransomware(directory):
-    # List all files in the directory
-    file_list = os.listdir(directory)
-    
-    # Iterate over the list and delete any files that have a modified date [K
-that is older than 30 days
-    for file in file_list:
-        file_path = os.path.join(directory, file)
-        mod_time = os.stat(file_path).st_mtime
-        if mod_time < (time.time() - 86400 * 30):
-            os.remove(file_path)
-    return
-
-def main():
-    # Check if the current directory is infected with ransomware
-    if detect_ransomware("."):
-        # If so, mitigate it by deleting all files that have a modified dat[3D[K
-date older than 30 days
-        mitigate_ransomware(".")
-    return
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if "RANSOMWARE" in open(os.path.join(root, file), "r").read():
+                print("Removing ransomware from file")
+                with open(os.path.join(root, file), "w") as f:
+                    f.write("")
 
 if __name__ == "__main__":
-    main()
+    directory = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
+    detected = detect_ransomware(directory)
+    if detected:
+        mitigate_ransomware(directory)
