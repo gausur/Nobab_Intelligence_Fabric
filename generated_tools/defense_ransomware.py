@@ -1,34 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-24 02:34:41.410035
+# Generated 2026-05-24 06:31:31.853373
 
 import os
-import sys
-import time
+import re
 
-def detect_ransomware():
-    # Check for the existence of the ransomware files
-    if os.path.exists("./ransomware"):
-        print("Ransomware detected!")
-        # Try to remove the ransomware files
-        try:
-            os.remove("./ransomware")
-            print("Ransomware removed successfully!")
-        except OSError as e:
-            print("Error removing ransomware:", e)
-    else:
-        print("No ransomware detected.")
+def detect_ransomware(file_path):
+    with open(file_path, "rb") as f:
+        contents = f.read()
+        if b"RANSOMWARE" in contents:
+            return True
+    return False
+
+def mitigate_ransomware(file_path):
+    os.remove(file_path)
 
 def main():
-    # Start a timer to monitor the system for ransomware activity
-    start_time = time.time()
-
-    while True:
-        detect_ransomware()
-        time.sleep(60)  # Check every minute
-
-        if (time.time() - start_time) > 3600:  # Stop after one hour
-            break
+    for file in os.listdir("."):
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
 if __name__ == "__main__":
     main()
