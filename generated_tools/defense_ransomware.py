@@ -1,37 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-25 20:59:55.385196
+# Generated 2026-05-25 22:10:40.067618
 
 import os
+import stat
 import time
-import socket
-import hashlib
+from shutil import rmtree
 
-def is_ransomware(data):
-    if data.startswith("RANSOMWARE"):
+def detect_ransomware(directory):
+    # Check if the directory is a symbolic link
+    if stat.S_ISLNK(os.stat(directory).st_mode):
         return True
-    else:
-        return False
+    
+    # Check if the directory contains any encrypted files
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if os.path.splitext(file)[1] == ".enc":
+                return True
+    
+    # Check if the directory is older than a certain threshold (e.g., 24 ho[2D[K
+hours)
+    if time.time() - os.stat(directory).st_mtime > 86400:
+        return True
+    
+    return False
 
-def detect_ransomware(ip, port):
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((ip, port))
-        data = s.recv(1024)
-        if is_ransomware(data):
-            print("Ransomware detected!")
-            return True
-        else:
-            return False
-    except socket.error:
-        return False
-
-def mitigate_ransomware():
-    # TODO: implement mitigation strategies here
-    pass
-
-if __name__ == "__main__":
-    ip = input("Enter IP address to scan: ")
-    port = int(input("Enter port number to scan: "))
-    if detect_ransomware(ip, port):
-        mitigate_ransomware()
+def mitigate_ransomware(directory):
+    # Remove the directory and all its contents
+    rmtree(directory)
