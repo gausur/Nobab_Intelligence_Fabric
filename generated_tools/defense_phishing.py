@@ -1,39 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-26 21:46:52.234773
+# Generated 2026-05-26 23:06:51.877918
 
 import re
-import socket
-import urllib.request
-import http.client
 
-def detect_phishing(url):
-    # Check if the URL is a valid HTTP or HTTPS URL
-    if not (re.match(r"^https?://", url)):
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious patterns
+    pattern = r"[\w.-]+@([\w-]+\.)+[\w-]{2,4}"
+    if re.search(pattern, url):
+        return True
+    else:
         return False
-    
-    # Connect to the URL and get the response
-    try:
-        conn = http.client.HTTPConnection(url)
-        conn.request("GET", "/")
-        resp = conn.getresponse()
-        if resp.status != 200:
-            return False
-    
-    # Check if the URL is a subdomain of a known phishing domain
-    except http.client.InvalidURL:
-        return False
-    
-    return True
 
-def mitigate_phishing(url):
-    # Redirect the user to the login page if they are not already logged in[2D[K
-in
-    pass
+def mitigate_phishing_attack(url):
+    # Redirect the user to a safe URL
+    print("Redirecting to a safe URL...")
+    print("The original URL was:", url)
+    print("The safe URL is: https://example.com/safe-page")
+    return "https://example.com/safe-page"
+
+def main():
+    # Get the user's input from the command line
+    url = input("Enter a URL: ")
+    
+    # Check if the URL contains any suspicious patterns
+    if is_phishing_url(url):
+        mitigate_phishing_attack(url)
+    else:
+        print("The URL is safe.")
 
 if __name__ == "__main__":
-    url = input("Enter a URL: ")
-    if detect_phishing(url):
-        mitigate_phishing(url)
-    else:
-        print("Invalid URL")
+    main()
