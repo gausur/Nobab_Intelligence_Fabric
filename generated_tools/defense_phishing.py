@@ -1,49 +1,61 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-26 17:56:06.857449
+# Generated 2026-05-26 20:02:17.010908
 
 import re
-from urllib.parse import urlparse
-from email.utils import parseaddr
+import smtplib
+from email.parser import Parser
 
-def is_phishing(url):
-    """Check if the URL is a phishing site"""
-    parsed = urlparse(url)
-    domain = parsed.netloc
-    if "." not in domain:
-        return False
-    top_level_domain = domain.split(".")[-1]
-    if top_level_domain in ["com", "org", "gov", "edu"]:
+def is_phishing_email(email):
+    # Check if the email is from a known spammer
+    sender = email['From']
+    if sender in SPAMMERS:
         return True
-    else:
-        return False
-
-def is_phishing(email):
-    """Check if the email address is a phishing email"""
-    parsed = parseaddr(email)
-    domain = parsed[1].split("@")[-1]
-    if "." not in domain:
-        return False
-    top_level_domain = domain.split(".")[-1]
-    if top_level_domain in ["com", "org", "gov", "edu"]:
+    
+    # Check if the email contains a known phishing URL
+    url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\([57D[K
+re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+    for part in email.walk():
+        if url_pattern.search(part.get_content()):
+            return True
+    
+    # Check if the email contains a known phishing keyword
+    keyword_pattern = re.compile(r'\b(?:phishing|scam|fraudulent)\b', re.IG[5D[K
+re.IGNORECASE)
+    if keyword_pattern.search(email['Subject']):
         return True
-    else:
-        return False
+    
+    return False
 
-def mitigate(url):
-    """Mitigate the phishing attack by redirecting to a trusted site"""
-    parsed = urlparse(url)
-    domain = parsed.netloc
-    if is_phishing(domain):
-        return "https://www.google.com/search?q={}".format(domain)
-    else:
-        return url
+def mitigate_phishing_attack(email, recipient):
+    # Send a notification email to the recipient and the sender of the orig[4D[K
+original email
+    with smtplib.SMTP('smtp.gmail.com') as server:
+        server.sendmail(recipient, [recipient, email['From']], 'Phishing at[2D[K
+attack detected!')
+    
+    # Remove the email from the recipient's inbox
+    server.sendmail(recipient, 'Trash', 'Remove')
 
-def mitigate(email):
-    """Mitigate the phishing attack by redirecting to a trusted site"""
-    parsed = parseaddr(email)
-    domain = parsed[1].split("@")[-1]
-    if is_phishing(domain):
-        return "https://www.google.com/search?q={}".format(domain)
-    else:
-        return email
+# List of known spammers
+SPAMMERS = ['spammer1@example.com', 'spammer2@example.com']
+
+# Start the email server
+server = smtplib.SMTP('localhost')
+server.starttls()
+server.login('your_email@example.com', 'your_password')
+
+while True:
+    # Receive an email from the inbox
+    msg = server.retrieve(0)
+    
+    # Parse the email content
+    parser = Parser()
+    email = parser.parsestr(msg[1])
+    
+    # Check if it's a phishing attack
+    if is_phishing_email(email):
+        mitigate_phishing_attack(email, msg[0])
+    
+    # Remove the email from the inbox
+    server.sendmail('Trash', msg[0], 'Remove')

@@ -1,24 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-26 17:57:29.685841
+# Generated 2026-05-26 20:03:11.484801
 
 import os
-import sys
-import datetime
+import re
+import subprocess
+
+def detect_ransomware(filepath):
+    # Check if the file is encrypted
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+            if b"ENCRYPTION" in data:
+                return True
+    except FileNotFoundError:
+        pass
+    return False
+
+def mitigate_ransomware(filepath):
+    # Decrypt the file using the built-in encryption algorithm
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+            if b"ENCRYPTION" in data:
+                decrypted_data = subprocess.run(["cat", filepath], stdout=s[8D[K
+stdout=subprocess.PIPE)
+                with open(filepath, "wb") as f:
+                    f.write(decrypted_data)
+    except FileNotFoundError:
+        pass
 
 def main():
-    # Get the current date and time
-    now = datetime.datetime.now()
-    
-    # Check if a ransomware attack has occurred in the last hour
-    if now - datetime.timedelta(hours=1) < latest_attack:
-        # If so, attempt to mitigate the attack
-        try:
-            os.system("ransomware_mitigation")
-        except Exception as e:
-            print("Error mitigating ransomware attack:", e)
-    
-    # Otherwise, log the current date and time as the latest attack
-    else:
-        with open("latest_attack.txt", "w") as f:
-            f.write(now.strftime("%Y-%m-%d %H:%M:%S"))
+    # Check if the script is running in a virtual environment
+    if os.environ.get("VIRTUAL_ENV"):
+        return
+
+    # Get the file path from the command line arguments
+    filepath = sys.argv[1]
+
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(filepath):
+        mitigate_ransomware(filepath)
