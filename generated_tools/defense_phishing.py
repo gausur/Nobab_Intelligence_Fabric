@@ -1,34 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-26 14:51:44.111605
+# Generated 2026-05-26 17:56:06.857449
 
 import re
-import urllib.parse
+from urllib.parse import urlparse
+from email.utils import parseaddr
 
 def is_phishing(url):
-    """Check if the URL is a phishing attack."""
-    parsed = urllib.parse.urlparse(url)
-    hostname = parsed.hostname
-    if not hostname:
+    """Check if the URL is a phishing site"""
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if "." not in domain:
         return False
-    if "http://" in hostname or "https://" in hostname:
+    top_level_domain = domain.split(".")[-1]
+    if top_level_domain in ["com", "org", "gov", "edu"]:
         return True
-    if hostname.endswith("www.example.com"):
-        return True
-    if re.search(r"\.(exe|zip|rar|jar|bin)$", hostname):
-        return True
-    if re.search(r"\.(php|jsp|aspx|py)$", hostname):
-        return True
-    if re.search(r"[^\w.-]", hostname):
-        return True
-    return False
+    else:
+        return False
 
-def mitigate_phishing(url):
-    """Mitigate phishing attacks by opening the URL in a new tab."""
-    import webbrowser
-    webbrowser.open(url, new=2)
+def is_phishing(email):
+    """Check if the email address is a phishing email"""
+    parsed = parseaddr(email)
+    domain = parsed[1].split("@")[-1]
+    if "." not in domain:
+        return False
+    top_level_domain = domain.split(".")[-1]
+    if top_level_domain in ["com", "org", "gov", "edu"]:
+        return True
+    else:
+        return False
 
-if __name__ == "__main__":
-    url = input("Enter the URL: ")
-    if is_phishing(url):
-        mitigate_phishing(url)
+def mitigate(url):
+    """Mitigate the phishing attack by redirecting to a trusted site"""
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if is_phishing(domain):
+        return "https://www.google.com/search?q={}".format(domain)
+    else:
+        return url
+
+def mitigate(email):
+    """Mitigate the phishing attack by redirecting to a trusted site"""
+    parsed = parseaddr(email)
+    domain = parsed[1].split("@")[-1]
+    if is_phishing(domain):
+        return "https://www.google.com/search?q={}".format(domain)
+    else:
+        return email
