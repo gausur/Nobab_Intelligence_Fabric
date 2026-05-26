@@ -1,40 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-26 03:32:28.850507
+# Generated 2026-05-26 07:39:11.823276
 
 import os
-import hashlib
 import re
-from pathlib import Path
+import subprocess
 
-def is_ransomware(file):
-    with open(file, "rb") as f:
-        content = f.read()
-        magic_number = content[:4]
-        if magic_number == b"\x7FELF":
+def detect_ransomware(file):
+    # Check if the file is encrypted with a known ransomware algorithm
+    with open(file, 'rb') as f:
+        data = f.read()
+        pattern = re.compile(b'[A-Z]{3}\s+.*\s+[0-9]+\s+[0-9]{4}')
+        if pattern.search(data):
             return True
+    return False
+
+def mitigate_ransomware(file, key):
+    # Decrypt the file using the provided key
+    with open(file, 'rb') as f:
+        data = f.read()
+        cipher = AES.new(key, AES.MODE_CBC, iv=data[:16])
+        plaintext = cipher.decrypt(data[16:])
+    with open(file, 'wb') as f:
+        f.write(plaintext)
+    return True
+
+def main():
+    # Get the list of files to check
+    files = os.listdir()
+    for file in files:
+        # Check if the file is encrypted with a known ransomware algorithm
+        if detect_ransomware(file):
+            # Ask the user for a decryption key
+            key = input('Enter decryption key: ')
+            # Decrypt the file using the provided key
+            mitigate_ransomware(file, key)
+            print(f'File {file} has been successfully decrypted.')
         else:
-            return False
+            print(f'File {file} is not encrypted with a known ransomware al[2D[K
+algorithm.')
 
-def get_hashes(files):
-    hashes = {}
-    for file in files:
-        with open(file, "rb") as f:
-            content = f.read()
-            hashes[os.path.basename(file)] = hashlib.sha256(content).hexdig[30D[K
-hashlib.sha256(content).hexdigest()
-    return hashes
-
-def mitigate_ransomware(files):
-    for file in files:
-        if is_ransomware(file):
-            with open(file, "rb") as f:
-                content = f.read()
-                content = re.sub(b"(?s)RANSOMWARE_MAGIC", b"", content)
-                with open(file, "wb") as f:
-                    f.write(content)
-
-if __name__ == "__main__":
-    files = [Path("path/to/file1"), Path("path/to/file2"), ...]
-    hashes = get_hashes(files)
-    mitigate_ransomware(files)
+if __name__ == '__main__':
+    main()
