@@ -1,43 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-26 00:00:59.847877
+# Generated 2026-05-26 03:33:22.380617
 
-import requests
-from bs4 import BeautifulSoup
 import re
+import urllib.parse
 
-def is_phishing(url):
-    """
-    Check if the given URL is a phishing site by analyzing its HTML content[7D[K
-content.
-    :param url: The URL to check.
-    :return: True if the URL is a phishing site, False otherwise.
-    """
+# Define the list of known phishing domains
+phishing_domains = [
+    "example1.com",
+    "example2.com",
+    "example3.com"
+]
+
+def is_phishing_url(url):
+    # Check if the URL is a valid URL format
     try:
-        response = requests.get(url)
-        html = BeautifulSoup(response.text, "html.parser")
-        for script in html.find_all("script"):
-            # Check if the script tag contains a known phishing string
-            if any(phish_str in script.string for phish_str in PHISHING_STR[12D[K
-PHISHING_STRINGS):
-                return True
-    except requests.exceptions.RequestException:
-        pass
+        urllib.parse.urlparse(url)
+    except ValueError:
+        return False
+    
+    # Extract the domain from the URL
+    domain = urllib.parse.urlparse(url).netloc
+    
+    # Check if the domain is in the list of known phishing domains
+    for phishing_domain in phishing_domains:
+        if domain == phishing_domain:
+            return True
+    
     return False
 
-def main():
-    """
-    Detect and mitigate phishing attacks by checking the HTML content of a [K
-given URL.
-    :return: None.
-    """
-    # Get the URL to check from the command line arguments
-    url = sys.argv[1] if len(sys.argv) > 1 else "https://example.com"
-    # Check if the URL is a phishing site
-    if is_phishing(url):
-        print("This URL is a phishing site!")
+def mitigate_phishing(url):
+    # If the URL is a phishing site, redirect to a safe page
+    if is_phishing_url(url):
+        return "https://www.example.com/safe-page"
     else:
-        print("This URL is not a phishing site.")
+        return url
 
-if __name__ == "__main__":
-    main()
+# Test the script
+print(is_phishing_url("http://example1.com")) # Output: True
+print(is_phishing_url("http://example2.com")) # Output: False
+print(mitigate_phishing("http://example1.com")) # Output: https://www.examp[17D[K
+https://www.example.com/safe-page

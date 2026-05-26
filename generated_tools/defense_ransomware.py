@@ -1,30 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-26 00:03:12.936373
+# Generated 2026-05-26 03:32:28.850507
 
 import os
-import sys
-import subprocess
+import hashlib
+import re
 from pathlib import Path
 
-def detect_ransomware(file):
+def is_ransomware(file):
     with open(file, "rb") as f:
-        magic = f.read(4)
-        if magic == b"\x01\x02\x03\x04":
+        content = f.read()
+        magic_number = content[:4]
+        if magic_number == b"\x7FELF":
             return True
-    return False
+        else:
+            return False
 
-def mitigate_ransomware(file):
-    with open(file, "wb") as f:
-        f.write(b"\x05\x06\x07\x08")
-
-def main():
-    files = [os.path.join(dp, f) for dp, dn, fn in os.walk("./") for f in f[1D[K
-fn]
+def get_hashes(files):
+    hashes = {}
     for file in files:
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-            print(f"Mitigated ransomware attack in {file}")
+        with open(file, "rb") as f:
+            content = f.read()
+            hashes[os.path.basename(file)] = hashlib.sha256(content).hexdig[30D[K
+hashlib.sha256(content).hexdigest()
+    return hashes
+
+def mitigate_ransomware(files):
+    for file in files:
+        if is_ransomware(file):
+            with open(file, "rb") as f:
+                content = f.read()
+                content = re.sub(b"(?s)RANSOMWARE_MAGIC", b"", content)
+                with open(file, "wb") as f:
+                    f.write(content)
 
 if __name__ == "__main__":
-    main()
+    files = [Path("path/to/file1"), Path("path/to/file2"), ...]
+    hashes = get_hashes(files)
+    mitigate_ransomware(files)
