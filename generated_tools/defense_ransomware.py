@@ -1,63 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-27 17:58:04.076682
+# Generated 2026-05-27 20:08:17.411465
 
 import os
-import json
-from collections import defaultdict
+import sys
+import subprocess
 
-# Define the list of malicious files and their hashes
-malicious_files = ["ransom.exe", "encryptor.dll", "decryptor.exe"]
-hashes = {
-    "ransom.exe": "1234567890abcdef",
-    "encryptor.dll": "abcdef1234567890",
-    "decryptor.exe": "fedcba987654321"
-}
-
-# Define the list of safe files and their hashes
-safe_files = ["file1.txt", "file2.docx"]
-hashes = {
-    "file1.txt": "0000000000000000",
-    "file2.docx": "1111111111111111"
-}
-
-# Define the list of directories to scan
-directories = ["C:\\Users\\John Doe\\Downloads", "C:\\Program Files"]
-
-# Define the list of extensions to consider for files to scan
-extensions = [".exe", ".dll", ".txt", ".docx"]
-
-# Define the function to hash a file and return its hash
-def hash_file(filename):
-    with open(filename, "rb") as f:
-        data = f.read()
-    return hashlib.md5(data).hexdigest()
-
-# Define the function to scan a directory for malware
-def scan_directory(directory):
-    for file in os.listdir(directory):
-        filename = os.path.join(directory, file)
-        if not os.path.isfile(filename):
-            continue
-        extension = os.path.splitext(filename)[1]
-        if extension not in extensions:
-            continue
-        hash = hash_file(filename)
-        if hash in hashes:
-            return True, filename
-    return False, None
-
-# Define the function to scan for malware in all directories
-def scan_directories():
-    for directory in directories:
-        result, filename = scan_directory(directory)
-        if result:
-            print("Malware detected in file:", filename)
-
-# Define the main function
 def main():
-    # Scan for malware in all directories
-    scan_directories()
+    # Check if the system is running a supported operating system
+    if os.name != 'nt' and os.name != 'posix':
+        print("Unsupported operating system:", os.name)
+        return 1
 
-if __name__ == "__main__":
-    main()
+    # Check if the system has the necessary tools installed
+    try:
+        subprocess.check_output(['which', 'powershell'])
+    except subprocess.CalledProcessError:
+        print("Powershell is not installed")
+        return 1
+
+    # Check for the presence of ransomware files or indicators in the syste[5D[K
+system
+    try:
+        with open('/etc/hosts') as f:
+            hosts_file = f.read()
+        if 'ransomware' in hosts_file:
+            print("Ransomware detected!")
+            return 1
+    except FileNotFoundError:
+        pass
+
+    # Check for the presence of ransomware processes or network connections[11D[K
+connections
+    try:
+        subprocess.check_output(['netstat', '-anp'])
+        if 'ransomware' in output:
+            print("Ransomware detected!")
+            return 1
+    except subprocess.CalledProcessError:
+        pass
+
+    # Check for the presence of ransomware registry keys or values
+    try:
+        with open('/etc/registry') as f:
+            registry_file = f.read()
+        if 'ransomware' in registry_file:
+            print("Ransomware detected!")
+            return 1
+    except FileNotFoundError:
+        pass
+
+    # If the system is not running ransomware, proceed with normal operatio[8D[K
+operation
+    print("System is clean. Proceeding with normal operation.")
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
