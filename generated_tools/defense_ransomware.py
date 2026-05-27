@@ -1,51 +1,63 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-27 14:25:28.269670
+# Generated 2026-05-27 17:58:04.076682
 
 import os
-import re
+import json
+from collections import defaultdict
 
-# Define the list of ransomware strings to detect
-ransomware_strings = [
-    "Ransomware detected",
-    "Encrypted files found",
-    "Payment required for decryption key"
-]
+# Define the list of malicious files and their hashes
+malicious_files = ["ransom.exe", "encryptor.dll", "decryptor.exe"]
+hashes = {
+    "ransom.exe": "1234567890abcdef",
+    "encryptor.dll": "abcdef1234567890",
+    "decryptor.exe": "fedcba987654321"
+}
 
-# Define the directory to scan for ransomware
-scan_directory = "/path/to/your/files"
+# Define the list of safe files and their hashes
+safe_files = ["file1.txt", "file2.docx"]
+hashes = {
+    "file1.txt": "0000000000000000",
+    "file2.docx": "1111111111111111"
+}
 
-# Function to check if a file is encrypted
-def is_encrypted(file):
-    with open(file, "rb") as f:
+# Define the list of directories to scan
+directories = ["C:\\Users\\John Doe\\Downloads", "C:\\Program Files"]
+
+# Define the list of extensions to consider for files to scan
+extensions = [".exe", ".dll", ".txt", ".docx"]
+
+# Define the function to hash a file and return its hash
+def hash_file(filename):
+    with open(filename, "rb") as f:
         data = f.read()
-    return any(s in data for s in ransomware_strings)
+    return hashlib.md5(data).hexdigest()
 
-# Function to decrypt an encrypted file
-def decrypt_file(file):
-    # Use a password-based encryption algorithm (e.g. AES) to decrypt the f[1D[K
-file
-    passphrase = "your_passphrase"
-    with open(file, "rb") as f:
-        data = f.read()
-    ciphertext = data[16:] # Remove the ransomware string from the beginnin[8D[K
-beginning of the file
-    plaintext = ciphertext.decode("base64").encode("utf-8")
-    return plaintext.decode("utf-8")
+# Define the function to scan a directory for malware
+def scan_directory(directory):
+    for file in os.listdir(directory):
+        filename = os.path.join(directory, file)
+        if not os.path.isfile(filename):
+            continue
+        extension = os.path.splitext(filename)[1]
+        if extension not in extensions:
+            continue
+        hash = hash_file(filename)
+        if hash in hashes:
+            return True, filename
+    return False, None
 
-# Function to scan a directory for ransomware and decrypt files if necessar[8D[K
-necessary
-def scan_directory(path):
-    # Iterate over the files in the directory and its subdirectories
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            # Check if the file is encrypted
-            if is_encrypted(os.path.join(root, file)):
-                # Decrypt the file
-                decrypted = decrypt_file(os.path.join(root, file))
-                # Replace the encrypted file with the decrypted version
-                with open(os.path.join(root, file), "wb") as f:
-                    f.write(decrypted)
+# Define the function to scan for malware in all directories
+def scan_directories():
+    for directory in directories:
+        result, filename = scan_directory(directory)
+        if result:
+            print("Malware detected in file:", filename)
 
-# Call the scan_directory function to start the scanning process
-scan_directory(scan_directory)
+# Define the main function
+def main():
+    # Scan for malware in all directories
+    scan_directories()
+
+if __name__ == "__main__":
+    main()

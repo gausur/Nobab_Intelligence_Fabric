@@ -1,51 +1,58 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-27 14:27:50.810183
+# Generated 2026-05-27 17:56:29.771662
 
 import re
-import requests
+import smtplib
+from email.message import EmailMessage
 
-def detect_phishing(url):
-    """
-    Detects if the URL is a phishing attack using a list of known phishing [K
-websites.
-    :param url: The URL to check for phishing attacks.
-    :return: True if the URL is a phishing attack, False otherwise.
-    """
-    # Load the list of known phishing websites from a file
-    with open("phishing_websites.txt", "r") as f:
-        phishing_websites = f.read().splitlines()
+def is_phishing_attempt(email):
+    # Check if the email is from a known spammer domain
+    if email["From"].split("@")[1].lower() in SPAMMERS:
+        return True
 
-    # Check if the URL is in the list of known phishing websites
-    for website in phishing_websites:
-        if url.startswith(website):
+    # Check if the email contains a malicious link
+    for part in email.walk():
+        if part.get_content_maintype() == "multipart":
+            continue
+        if re.search(r"https?://[^\s]+\.(?:com|net)", part.get_payload(), r[1D[K
+re.I):
             return True
-    return False
 
-def mitigate_phishing(url, session=None):
-    """
-    Mitigates a phishing attack by checking the URL for suspicious patterns[8D[K
-patterns and blocking the request.
-    :param url: The URL to check for phishing attacks.
-    :param session: An optional HTTP session object to use when making requ[4D[K
-requests.
-    :return: True if the request is blocked, False otherwise.
-    """
-    # Check if the URL is a phishing attack
-    if detect_phishing(url):
-        # Block the request
-        print("Blocking request to phishing website.")
+    # Check if the email contains a malicious attachment
+    for part in email.walk():
+        if part.get_content_maintype() == "application" and part["Content-D[15D[K
+part["Content-Disposition"] == "attachment":
+            return True
+
+    # Check if the email is spam based on its content
+    if re.search(r"viagra|cialis|vardenafil", email.get("Subject"), re.I):
         return True
 
-    # Make the request
-    if session is None:
-        response = requests.get(url)
-    else:
-        response = session.get(url)
+def mitigate_phishing_attempt(email, recipient):
+    # Send an email to the recipient with a phishing warning
+    msg = EmailMessage()
+    msg["From"] = "Phishing Warning <phishing@example.com>"
+    msg["To"] = recipient
+    msg["Subject"] = "Phishing Attempt Detected"
+    msg.set_content("A phishing attempt has been detected for your account.[8D[K
+account. Please check your email carefully and do not click on any suspicio[8D[K
+suspicious links or download any attachments.")
+    smtplib.sendmail(msg)
 
-    # Check the status code of the response
-    if response.status_code != 200:
-        print("Blocking request to non-phishing website.")
-        return True
+# List of known spammer domains
+SPAMMERS = [
+    "example1.com",
+    "example2.com",
+    "example3.com"
+]
 
-    return False
+while True:
+    # Read an email from the server and check if it is a phishing attempt
+    with smtplib.SMTP("localhost") as server:
+        server.login("username", "password")
+        for message in server.iter_data():
+            email = EmailMessage()
+            email.set_content(message)
+            if is_phishing_attempt(email):
+                mitigate_phishing_attempt(email, email["To"])
