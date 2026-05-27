@@ -1,37 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-27 10:56:13.493452
+# Generated 2026-05-27 14:27:50.810183
 
 import re
+import requests
 
-def is_phishing_url(url):
+def detect_phishing(url):
     """
-    Detects if the given URL is a phishing site.
+    Detects if the URL is a phishing attack using a list of known phishing [K
+websites.
+    :param url: The URL to check for phishing attacks.
+    :return: True if the URL is a phishing attack, False otherwise.
     """
-    # Check if the URL contains any suspicious characters
-    for char in ['http://', 'https://']:
-        if char not in url:
-            return False
-    # Check if the URL is from a known phishing domain
-    for domain in ['phishingsite.com', 'maliciousdomain.net']:
-        if domain in url:
+    # Load the list of known phishing websites from a file
+    with open("phishing_websites.txt", "r") as f:
+        phishing_websites = f.read().splitlines()
+
+    # Check if the URL is in the list of known phishing websites
+    for website in phishing_websites:
+        if url.startswith(website):
             return True
-    # If none of the above conditions are met, it's not a phishing site
     return False
 
-def mitigate_phishing(url):
+def mitigate_phishing(url, session=None):
     """
-    Mitigates the given URL by redirecting to the safe browsing page.
+    Mitigates a phishing attack by checking the URL for suspicious patterns[8D[K
+patterns and blocking the request.
+    :param url: The URL to check for phishing attacks.
+    :param session: An optional HTTP session object to use when making requ[4D[K
+requests.
+    :return: True if the request is blocked, False otherwise.
     """
-    import webbrowser
-    webbrowser.open('https://safe-browsing.org/')
+    # Check if the URL is a phishing attack
+    if detect_phishing(url):
+        # Block the request
+        print("Blocking request to phishing website.")
+        return True
 
-def main():
-    url = input("Enter a URL: ")
-    if is_phishing_url(url):
-        mitigate_phishing(url)
+    # Make the request
+    if session is None:
+        response = requests.get(url)
     else:
-        print("The URL seems safe.")
+        response = session.get(url)
 
-if __name__ == '__main__':
-    main()
+    # Check the status code of the response
+    if response.status_code != 200:
+        print("Blocking request to non-phishing website.")
+        return True
+
+    return False
