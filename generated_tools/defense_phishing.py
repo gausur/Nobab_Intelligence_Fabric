@@ -1,58 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-28 14:37:46.556060
+# Generated 2026-05-28 22:31:45.040618
 
 import re
-import socket
 from urllib.parse import urlparse
 
-def is_phishing_attempt(url):
-    # Check if the URL is a valid HTTP/HTTPS URL
-    try:
-        result = urlparse(url)
-        if not (result.scheme == "http" or result.scheme == "https"):
-            return False
-    except ValueError:
-        return False
-
-    # Check if the domain is registered and has an IP address
-    try:
-        host = urlparse(url).hostname
-        socket.gethostbyname(host)
-    except (socket.gaierror, socket.herror):
-        return False
-
-    # Check if the URL contains suspicious characters or keywords
-    if re.search(r"[^\w\.]", url) or any(x in url for x in ["phishing", "sc[3D[K
-"scam", "malware"]):
+def is_phishing(url):
+    parsed_url = urlparse(url)
+    domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_url)
+    if not re.match(r'^https?://', domain):
         return True
-
-    # Check if the domain is a known phishing domain
-    with open("known_phishing_domains.txt") as f:
-        for line in f:
-            if host == line.strip():
-                return True
-
-    # If none of the above conditions are met, assume it's not a phishing a[1D[K
-attempt
-    return False
+    elif not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', [K
+url):
+        return True
+    else:
+        return False
 
 def mitigate_phishing(url):
-    # Redirect to the homepage
-    print("Redirecting to", url)
-    print("Mitigating phishing attack...")
-    print("This action may take a few seconds...")
-    import webbrowser
-    webbrowser.open(url)
-
-def main():
-    # Read input from the user
-    url = input("Enter URL to detect and mitigate phishing attacks: ")
-
-    if is_phishing_attempt(url):
-        mitigate_phishing(url)
+    if is_phishing(url):
+        print("Warning! This link appears to be a phishing site. Do not cli[3D[K
+click on it.")
     else:
-        print("This does not appear to be a phishing attempt.")
+        print("This link does not appear to be a phishing site.")
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    mitigate_phishing('https://www.example.com')
