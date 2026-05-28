@@ -1,47 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-28 06:48:22.567753
+# Generated 2026-05-28 10:52:54.654008
 
 import re
-import urllib.request
-from http import client
+import smtplib
+from email.utils import parseaddr
+from email.message import EmailMessage
 
-def detect_phishing(url):
-    """
-    Detects phishing attacks by checking the URL for suspicious patterns.
-
-    :param url: The URL to check.
-    :return: A boolean indicating whether the URL is a phishing attack or n[1D[K
-not.
-    """
-    # Check if the URL is valid and starts with "http"
-    if not re.match(r"^https?://", url):
+def is_phishing(email):
+    # Check if the email has a valid sender and recipient
+    if not parseaddr(email['From']) or not parseaddr(email['To']):
         return False
-
-    # Send an HTTP request to the URL and check for suspicious response hea[3D[K
-headers
-    try:
-        response = client.urlopen(url)
-        for header in ["Set-Cookie", "Location", "Refresh"]:
-            if header in response.headers:
-                return True
-    except Exception as e:
-        print("Error sending request to URL:", url, file=sys.stderr)
+    
+    # Check if the email has a valid subject
+    if not re.match(r'^[A-Za-z0-9\s]+$', email['Subject']):
         return False
+    
+    # Check if the email has a valid message body
+    if not re.match(r'[\w\W]{1,256}', email['Body']):
+        return False
+    
+    # Check if the email has a valid attachment
+    if 'Attachment' in email:
+        return False
+    
+    return True
 
-    # Check if the URL contains suspicious patterns such as "javascript" or[2D[K
-or "vbscript"
-    if re.search(r"[j|J]avascript:(.*)", url):
-        return True
+def mitigate_phishing(email):
+    # If the email is phishing, send an alert to the recipient
+    if is_phishing(email):
+        print("Phishing attempt detected! Sending alert...")
+        smtplib.sendmail(email['From'], email['To'], "Phishing Attempt Dete[4D[K
+Detected!")
 
-    # Check if the URL is for a known phishing site
-    known_phishers = ["google.com", "facebook.com", "amazon.com"]
-    if any(x in url for x in known_phishers):
-        return True
+# Main function to run the script
+def main():
+    # Read the email from standard input
+    email = EmailMessage()
+    email.parse(input())
+    
+    # Run the phishing detection and mitigation functions
+    is_phishing(email)
+    mitigate_phishing(email)
 
-    return False
-
-if __name__ == "__main__":
-    url = input("Enter URL: ")
-    is_phishing = detect_phishing(url)
-    print("Is phishing:", is_phishing)
+# Run the main function
+if __name__ == '__main__':
+    main()
