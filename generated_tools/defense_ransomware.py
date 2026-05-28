@@ -1,31 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-28 18:01:45.828584
+# Generated 2026-05-28 20:23:13.832155
 
-import os
-import re
-import hashlib
+import socket
 import time
 
-def detect_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        data = f.read()
-    # check for known ransomware strings
-    if re.search(b"RANSOMWARE", data):
-        return True
-    # check for known ransomware file patterns
-    if re.match(r".*[a-z0-9]{20,30}.txt", filepath) and not re.match(r".*/l[15D[K
-re.match(r".*/logs/.*", filepath):
-        return True
-    return False
+# Set up a socket connection
+sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock.bind(('', 80))
+sock.listen(1)
 
-def mitigate_ransomware(filepath):
-    with open(filepath, "w") as f:
-        f.write("This file has been infected by ransomware and cannot be op[2D[K
-opened.")
+# Wait for incoming connections
+print("Waiting for incoming connections...")
+while True:
+    connection, address = sock.accept()
+    print("Connected to", address)
 
-if __name__ == "__main__":
-    # get all files in the current directory
-    for filepath in os.listdir():
-        if detect_ransomware(filepath):
-            mitigate_ransomware(filepath)
+    # Read data from the client
+    data = connection.recv(1024)
+    if not data:
+        break
+
+    # Check for ransomware malware in the data
+    if "ransomware" in data.decode("utf-8"):
+        print("Ransomware detected!")
+        connection.sendall(b"You have been infected with ransomware!\n")
+        connection.close()
+        break
+
+    # Check for other malicious activities
+    if "malware" in data.decode("utf-8"):
+        print("Malware detected!")
+        connection.sendall(b"You have been infected with malware!\n")
+        connection.close()
+        break
+
+# Close the socket
+sock.close()
