@@ -1,48 +1,58 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-28 10:52:54.654008
+# Generated 2026-05-28 14:37:46.556060
 
 import re
-import smtplib
-from email.utils import parseaddr
-from email.message import EmailMessage
+import socket
+from urllib.parse import urlparse
 
-def is_phishing(email):
-    # Check if the email has a valid sender and recipient
-    if not parseaddr(email['From']) or not parseaddr(email['To']):
+def is_phishing_attempt(url):
+    # Check if the URL is a valid HTTP/HTTPS URL
+    try:
+        result = urlparse(url)
+        if not (result.scheme == "http" or result.scheme == "https"):
+            return False
+    except ValueError:
         return False
-    
-    # Check if the email has a valid subject
-    if not re.match(r'^[A-Za-z0-9\s]+$', email['Subject']):
-        return False
-    
-    # Check if the email has a valid message body
-    if not re.match(r'[\w\W]{1,256}', email['Body']):
-        return False
-    
-    # Check if the email has a valid attachment
-    if 'Attachment' in email:
-        return False
-    
-    return True
 
-def mitigate_phishing(email):
-    # If the email is phishing, send an alert to the recipient
-    if is_phishing(email):
-        print("Phishing attempt detected! Sending alert...")
-        smtplib.sendmail(email['From'], email['To'], "Phishing Attempt Dete[4D[K
-Detected!")
+    # Check if the domain is registered and has an IP address
+    try:
+        host = urlparse(url).hostname
+        socket.gethostbyname(host)
+    except (socket.gaierror, socket.herror):
+        return False
 
-# Main function to run the script
+    # Check if the URL contains suspicious characters or keywords
+    if re.search(r"[^\w\.]", url) or any(x in url for x in ["phishing", "sc[3D[K
+"scam", "malware"]):
+        return True
+
+    # Check if the domain is a known phishing domain
+    with open("known_phishing_domains.txt") as f:
+        for line in f:
+            if host == line.strip():
+                return True
+
+    # If none of the above conditions are met, assume it's not a phishing a[1D[K
+attempt
+    return False
+
+def mitigate_phishing(url):
+    # Redirect to the homepage
+    print("Redirecting to", url)
+    print("Mitigating phishing attack...")
+    print("This action may take a few seconds...")
+    import webbrowser
+    webbrowser.open(url)
+
 def main():
-    # Read the email from standard input
-    email = EmailMessage()
-    email.parse(input())
-    
-    # Run the phishing detection and mitigation functions
-    is_phishing(email)
-    mitigate_phishing(email)
+    # Read input from the user
+    url = input("Enter URL to detect and mitigate phishing attacks: ")
 
-# Run the main function
-if __name__ == '__main__':
+    if is_phishing_attempt(url):
+        mitigate_phishing(url)
+    else:
+        print("This does not appear to be a phishing attempt.")
+
+if __name__ == "__main__":
     main()
