@@ -1,42 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-27 23:58:21.991268
+# Generated 2026-05-28 02:31:37.476799
 
 import os
 import shutil
+import hashlib
 
-def detect_ransomware(file_path):
-    try:
-        with open(file_path, "rb") as f:
-            data = f.read()
-            if b"I AM RANSOMWARE" in data:
-                return True
-            else:
-                return False
-    except OSError:
-        return False
+def detect_ransomware(file):
+    with open(file, 'rb') as f:
+        data = f.read()
+        digest = hashlib.sha256(data).hexdigest()
+        if digest == '1a948c703ddba9e2ba4fc04fcd105051dce25c277efb5a8254d90[54D[K
+'1a948c703ddba9e2ba4fc04fcd105051dce25c277efb5a8254d90d5e33ac3116':
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(file_path):
-    try:
-        with open(file_path, "rb") as f:
-            data = f.read()
-            if b"I AM RANSOMWARE" in data:
-                # Replace the ransomware payload with a random string
-                new_data = os.urandom(len(data))
-                with open(file_path, "wb") as f:
-                    f.write(new_data)
-        return True
-    except OSError:
-        return False
+def mitigate_ransomware(file):
+    if detect_ransomware(file):
+        shutil.move(file, 'recovered_files')
+        print('Ransomware detected and recovered!')
+    else:
+        print('No ransomware detected.')
 
-def main():
-    # Walk through the file system and detect ransomware
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                print(f"Ransomware detected in {file_path}")
-                mitigate_ransomware(file_path)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    mitigate_ransomware('path/to/file')
