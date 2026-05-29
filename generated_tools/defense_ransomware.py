@@ -1,46 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-29 05:09:46.930020
+# Generated 2026-05-29 09:42:21.524849
 
 import os
-import socket
+import hashlib
 import subprocess
 
-def detect_ransomware():
-    # Check if the device is connected to the internet
-    try:
-        socket.create_connection(("8.8.8.8", 53))
-    except OSError:
-        return False
+def detect_ransomware(path):
+    # Calculate the SHA256 hash of the file
+    with open(path, 'rb') as f:
+        hash = hashlib.sha256(f.read()).hexdigest()
+    
+    # Check if the file has been modified since it was created
+    mod_time = os.stat(path).st_mtime
+    create_time = os.stat(path).st_ctime
+    if mod_time > create_time:
+        return True, hash
+    else:
+        return False, None
+    
+def mitigate_ransomware(path):
+    # Remove the file from the system
+    os.remove(path)
+    
+def main():
+    # Get a list of all files in the current directory
+    filenames = [f for f in os.listdir('.') if os.path.isfile(f)]
+    
+    # Iterate through each file and check if it is a ransomware
+    for filename in filenames:
+        result, hash = detect_ransomware(filename)
+        if result:
+            mitigate_ransomware(filename)
 
-    # Check for common ransomware files and registry keys
-    if os.path.exists("/root/.ransomware"):
-        return True
-    elif os.path.exists("C:\\Program Files\\Ransomware\\"):
-        return True
-    elif subprocess.check_output(["reg", "query", "/ransomware"]) != 0:
-        return True
-
-    # Check for ransomware processes
-    try:
-        subprocess.check_output(["tasklist", "/ransomware"])
-    except subprocess.CalledProcessError:
-        pass
-
-    return False
-
-def mitigate_ransomware():
-    # Remove all ransomware files and registry keys
-    for file in os.listdir("."):
-        if file.endswith(".ransomware"):
-            os.remove(file)
-    subprocess.check_output(["reg", "delete", "/ransomware"])
-
-    # Kill all ransomware processes
-    try:
-        subprocess.check_output(["taskkill", "/im", "ransomware.exe"])
-    except subprocess.CalledProcessError:
-        pass
-
-if detect_ransomware():
-    mitigate_ransomware()
+if __name__ == "__main__":
+    main()
