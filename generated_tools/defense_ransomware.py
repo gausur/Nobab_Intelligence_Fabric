@@ -1,46 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-29 16:40:30.011735
+# Generated 2026-05-29 19:32:21.687178
 
 import os
-import re
 import subprocess
-from datetime import datetime
+import shutil
 
-def detect_ransomware(filepath):
-    try:
-        with open(filepath, 'rb') as f:
-            data = f.read()
-            if b'RANSOMWARE' in data:
-                return True
+def detect_ransomware():
+    # Check if the file system is mounted read-only
+    if os.access(os.sep, os.W_OK):
+        return False
+    
+    # Check if any of the files or directories in the directory have been m[1D[K
+modified
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            if os.path.getmtime(os.path.join(root, file)) > 0:
+                return False
+    
+    # Check if any of the processes are running with elevated privileges
+    for process in psutil.process_iter():
+        try:
+            if process.euid() != 0:
+                continue
             else:
                 return False
-    except (IOError, OSError) as e:
-        print("Error opening file:", e)
-        return None
+        except psutil.AccessDenied:
+            pass
+    
+    # Check if any of the network interfaces are connected to a network
+    for interface in psutil.net_if_addrs():
+        ifinterface.is_up() and interface.ipv4_addresses:
+            return False
+    
+    return True
 
-def mitigate_ransomware(filepath):
-    try:
-        with open(filepath, 'rb') as f:
-            data = f.read()
-            if b'RANSOMWARE' in data:
-                # Remove the ransomware file
-                os.remove(filepath)
-                print("Removed ransomware file:", filepath)
-    except (IOError, OSError) as e:
-        print("Error opening file:", e)
-        return None
+def mitigate_ransomware():
+    # Restart the system
+    subprocess.call(["sudo", "reboot"])
 
-def scan_directory(directory):
-    for root, dirs, files in os.walk(directory):
-        for filename in files:
-            filepath = os.path.join(root, filename)
-            if detect_ransomware(filepath):
-                mitigate_ransomware(filepath)
-
-def main():
-    directory = '/path/to/directory'
-    scan_directory(directory)
-
-if __name__ == '__main__':
-    main()
+if detect_ransomware():
+    print("Ransomware detected")
+    mitigate_ransomware()
+else:
+    print("No ransomware detected")
