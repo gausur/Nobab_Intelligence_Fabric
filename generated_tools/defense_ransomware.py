@@ -1,46 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-29 19:32:21.687178
+# Generated 2026-05-29 21:49:38.400224
 
 import os
-import subprocess
 import shutil
+import subprocess
 
-def detect_ransomware():
-    # Check if the file system is mounted read-only
-    if os.access(os.sep, os.W_OK):
+def detect_ransomware(path):
+    # Check if the path is a directory
+    if not os.path.isdir(path):
         return False
     
-    # Check if any of the files or directories in the directory have been m[1D[K
-modified
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            if os.path.getmtime(os.path.join(root, file)) > 0:
-                return False
+    # Check if the directory contains any files or directories
+    if len(os.listdir(path)) == 0:
+        return False
     
-    # Check if any of the processes are running with elevated privileges
-    for process in psutil.process_iter():
-        try:
-            if process.euid() != 0:
-                continue
-            else:
-                return False
-        except psutil.AccessDenied:
-            pass
+    # Check if the directory contains any executable files
+    for file in os.listdir(path):
+        if os.access(os.path.join(path, file), os.X_OK):
+            return True
     
-    # Check if any of the network interfaces are connected to a network
-    for interface in psutil.net_if_addrs():
-        ifinterface.is_up() and interface.ipv4_addresses:
-            return False
-    
-    return True
+    return False
 
-def mitigate_ransomware():
-    # Restart the system
-    subprocess.call(["sudo", "reboot"])
+def mitigate_ransomware(path):
+    # Remove the ransomware files and directories
+    shutil.rmtree(path)
 
-if detect_ransomware():
-    print("Ransomware detected")
-    mitigate_ransomware()
-else:
-    print("No ransomware detected")
+# Test the script
+if __name__ == "__main__":
+    detect_ransomware("/tmp/test")
+    mitigate_ransomware("/tmp/test")
