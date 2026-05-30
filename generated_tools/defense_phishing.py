@@ -1,41 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-30 20:49:15.600520
+# Generated 2026-05-30 21:55:29.474926
 
 import re
-import email
-from urllib.parse import urlparse
+import requests
+from bs4 import BeautifulSoup
 
-def is_phishing_attack(email):
-    # Check if the email contains any suspicious links
-    for part in email.iter_parts():
-        if part.get_content_type() == 'text/html':
-            soup = BeautifulSoup(part.get_payload(), 'html.parser')
-            for link in soup.find_all('a'):
-                href = urlparse(link['href'])
-                if href.netloc != email.mail_from and href.netloc not in ['[2D[K
-['www.example.com', 'example.com']:
-                    return True
-
-    # Check if the email contains any suspicious attachment names
-    for part in email.iter_parts():
-        if part.get_content_type() == 'application/pdf' and re.search(r'[a-[15D[K
-re.search(r'[a-z]+\.exe', part.get('name')):
-            return True
-
-    # Check if the email contains any suspicious content
-    for part in email.iter_parts():
-        if part.get_content_type() == 'text/plain':
-            text = str(part.get_payload())
-            if re.search(r'[a-z]+\.exe', text):
-                return True
-
-    # Check if the email contains any suspicious headers
-    for header in email.items():
-        if header.name == 'From':
-            from_addr = header.value
-            if from_addr != email.mail_from:
-                return True
-
-    # No suspicious patterns found, return False
-    return False
+def is_phishing(url):
+    # Check if the URL is valid
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        print("URL is not valid:", err)
+        return False
+    
+    # Extract the HTML content from the URL
+    soup = BeautifulSoup(response.content, "html.parser")
+    
+    # Check if the website is using HTTPS
+    if "https" not in url:
+        print("Warning: Website is not using HTTPS")
+        return False
+    
+    # Check for common phishing patterns
+    if soup.find(id="login_form"):
+        print("Possible phishing attempt detected!")
+        return True
+    elif soup.find(class_="login_form"):
+        print("Possible phishing attempt detected!")
+        return True
+    elif soup.find(action="/login"):
+        print("Possible phishing attempt detected!")
+        return True
+    else:
+        print("No phishing attempts detected.")
+        return False
