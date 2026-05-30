@@ -1,38 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-30 21:55:29.474926
+# Generated 2026-05-30 22:54:41.390986
 
 import re
 import requests
-from bs4 import BeautifulSoup
 
-def is_phishing(url):
-    # Check if the URL is valid
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-    except requests.exceptions.HTTPError as err:
-        print("URL is not valid:", err)
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious characters
+    if not re.search(r'^https?://', url):
         return False
-    
-    # Extract the HTML content from the URL
-    soup = BeautifulSoup(response.content, "html.parser")
-    
-    # Check if the website is using HTTPS
-    if "https" not in url:
-        print("Warning: Website is not using HTTPS")
+    if re.search(r'\s|[()]', url):
         return False
-    
-    # Check for common phishing patterns
-    if soup.find(id="login_form"):
-        print("Possible phishing attempt detected!")
+    if re.search(r'^https?://(\w+.)*gmail\.com$', url):
         return True
-    elif soup.find(class_="login_form"):
-        print("Possible phishing attempt detected!")
-        return True
-    elif soup.find(action="/login"):
-        print("Possible phishing attempt detected!")
-        return True
+    return False
+
+def mitigate_phishing_attack(url):
+    # Redirect the user to a safe URL
+    response = requests.get('http://example.com')
+    print(response.text)
+
+if __name__ == '__main__':
+    url = input('Enter the URL: ')
+    if is_phishing_url(url):
+        mitigate_phishing_attack(url)
     else:
-        print("No phishing attempts detected.")
-        return False
+        print('The URL does not appear to be a phishing site.')
