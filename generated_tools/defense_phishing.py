@@ -1,46 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-30 16:11:12.115003
+# Generated 2026-05-30 18:01:50.997859
 
 import re
-import requests
-from bs4 import BeautifulSoup
+import urllib.request
+from email.utils import parseaddr
 
-def is_phishing(url):
-    """Check if the URL is a phishing site"""
+def is_valid_email(email):
+    if not email:
+        return False
     try:
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        # Check for suspicious keywords in the page source
-        keywords = ["phish", "scam", "fraud", "paypal"]
-        for keyword in keywords:
-            if keyword in soup.text:
-                return True
-        # Check for suspicious domain names
-        if "." in url and url.split(".")[-2] != "com":
-            return True
-    except requests.exceptions.RequestException:
-        pass
+        parseaddr(email)
+        return True
+    except Exception:
+        return False
+
+def get_domain(url):
+    if not url:
+        return None
+    parsed = urllib.parse.urlsplit(url)
+    if not parsed.netloc:
+        return None
+    return parsed.netloc
+
+def is_phishing_site(url, email):
+    domain = get_domain(url)
+    if not domain:
+        return False
+    email_domain = get_domain(email)
+    if not email_domain:
+        return False
+    return domain == email_domain
+
+def mitigate_phishing(url, email):
+    if is_phishing_site(url, email):
+        print("Possible phishing site detected!")
+        print("Domain:", get_domain(url))
+        print("Email:", email)
+        return True
     return False
-
-def mitigate_phishing(url):
-    """Mitigate phishing attacks by redirecting to a safe page"""
-    if is_phishing(url):
-        # Redirect to a safe page
-        print("Redirecting to a safe page...")
-        return "https://www.example.com/safe-page"
-    else:
-        # Return the original URL
-        return url
-
-def main():
-    """Main function"""
-    # Get the input URL from the user
-    url = input("Enter the URL: ")
-    # Check if the URL is a phishing site and mitigate it if necessary
-    mitigated_url = mitigate_phishing(url)
-    print(f"The original URL is {url}. The mitigated URL is {mitigated_url}[15D[K
-{mitigated_url}")
-
-if __name__ == "__main__":
-    main()

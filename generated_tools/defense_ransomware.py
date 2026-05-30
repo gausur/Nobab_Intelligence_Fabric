@@ -1,37 +1,25 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-30 16:09:35.806841
+# Generated 2026-05-30 18:01:07.153543
 
 import os
 import subprocess
-import json
 
-def detect_ransomware(filepath):
-    # Use the file command to check if the file is a known ransomware execu[5D[K
-executable
-    output = subprocess.check_output(['file', filepath])
-    if "ELF 64-bit LSB shared object" in output:
+def check_for_ransomware():
+    # Check for the existence of the ransomware file
+    try:
+        open("ransomware.exe", "r")
         return True
-    else:
+    except FileNotFoundError:
         return False
 
-def mitigate_ransomware(filepath):
-    # Use the file command to check if the file is a known ransomware execu[5D[K
-executable
-    output = subprocess.check_output(['file', filepath])
-    if "ELF 64-bit LSB shared object" in output:
-        # Remove the file if it's a known ransomware executable
-        os.remove(filepath)
-        return True
-    else:
-        return False
+def mitigate_ransomware():
+    # Kill the ransomware process and delete any files it created
+    subprocess.run(["taskkill", "/IM", "ransomware.exe"])
+    os.remove("ransomware.exe")
+    for file in os.listdir("."):
+        if file.endswith(".enc"):
+            os.remove(file)
 
-def main():
-    # Loop through all files in the current directory and check for ransomw[7D[K
-ransomware executables
-    for file in os.listdir('.'):
-        if detect_ransomware(os.path.join('.', file)):
-            mitigate_ransomware(os.path.join('.', file))
-
-if __name__ == '__main__':
-    main()
+if check_for_ransomware():
+    mitigate_ransomware()
