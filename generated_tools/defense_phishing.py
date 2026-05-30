@@ -1,43 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-30 15:02:50.723286
+# Generated 2026-05-30 16:11:12.115003
 
+import re
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
 
 def is_phishing(url):
-    # Check if the URL is a valid HTTP or HTTPS URL
-    parsed_url = urlparse(url)
-    if not parsed_url.scheme in ["http", "https"]:
-        return False
-    
-    # Send a HEAD request to the URL to get only the headers
-    response = requests.head(url, allow_redirects=True)
-    
-    # Check if the server responded with a 302 redirect to another domain
-    if response.status_code == 302 and "Location" in response.headers:
-        redirect_url = urlparse(response.headers["Location"])
-        return redirect_url.netloc != parsed_url.netloc
-    
-    # Check if the server responded with a 404 Not Found error
-    if response.status_code == 404:
-        return False
-    
-    # Get the HTML content of the page
-    html = requests.get(url).content
-    
-    # Parse the HTML using BeautifulSoup
-    soup = BeautifulSoup(html, "html.parser")
-    
-    # Check if the HTML contains any suspicious tags or attributes
-    for tag in ["script", "iframe"]:
-        if tag in soup.find_all(tag):
+    """Check if the URL is a phishing site"""
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        # Check for suspicious keywords in the page source
+        keywords = ["phish", "scam", "fraud", "paypal"]
+        for keyword in keywords:
+            if keyword in soup.text:
+                return True
+        # Check for suspicious domain names
+        if "." in url and url.split(".")[-2] != "com":
             return True
-    for attr in ["onclick", "onsubmit", "javascript"]:
-        if attr in soup.attrs:
-            return True
-    
-    # If none of the above conditions are met, it is likely that the URL is[2D[K
-is legitimate
+    except requests.exceptions.RequestException:
+        pass
     return False
+
+def mitigate_phishing(url):
+    """Mitigate phishing attacks by redirecting to a safe page"""
+    if is_phishing(url):
+        # Redirect to a safe page
+        print("Redirecting to a safe page...")
+        return "https://www.example.com/safe-page"
+    else:
+        # Return the original URL
+        return url
+
+def main():
+    """Main function"""
+    # Get the input URL from the user
+    url = input("Enter the URL: ")
+    # Check if the URL is a phishing site and mitigate it if necessary
+    mitigated_url = mitigate_phishing(url)
+    print(f"The original URL is {url}. The mitigated URL is {mitigated_url}[15D[K
+{mitigated_url}")
+
+if __name__ == "__main__":
+    main()

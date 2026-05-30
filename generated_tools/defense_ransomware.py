@@ -1,28 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-05-30 15:03:16.361673
+# Generated 2026-05-30 16:09:35.806841
 
 import os
-import hashlib
 import subprocess
+import json
 
-def is_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    return b"RANSOMWARE" in data
+def detect_ransomware(filepath):
+    # Use the file command to check if the file is a known ransomware execu[5D[K
+executable
+    output = subprocess.check_output(['file', filepath])
+    if "ELF 64-bit LSB shared object" in output:
+        return True
+    else:
+        return False
 
-def mitigate(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    if is_ransomware(data):
-        print("Detected ransomware!")
-        # Mitigation logic here
-        pass
+def mitigate_ransomware(filepath):
+    # Use the file command to check if the file is a known ransomware execu[5D[K
+executable
+    output = subprocess.check_output(['file', filepath])
+    if "ELF 64-bit LSB shared object" in output:
+        # Remove the file if it's a known ransomware executable
+        os.remove(filepath)
+        return True
+    else:
+        return False
 
 def main():
-    files = [f for f in os.listdir(".") if f.endswith(".exe")]
-    for file in files:
-        mitigate(file)
+    # Loop through all files in the current directory and check for ransomw[7D[K
+ransomware executables
+    for file in os.listdir('.'):
+        if detect_ransomware(os.path.join('.', file)):
+            mitigate_ransomware(os.path.join('.', file))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
