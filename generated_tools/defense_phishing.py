@@ -1,44 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-30 23:56:25.693581
+# Generated 2026-05-31 02:44:26.119888
 
 import re
+import smtplib
 
-def is_phishing_url(url):
-    # Check if the URL is a valid HTTP or HTTPS URL
-    if not re.match(r'^https?://', url):
+def is_phishing(email):
+    # Check if the email is valid
+    if not email or not re.match(r"[^@]+@[^.]+\..+", email):
         return False
-    
-    # Check if the domain name is in the common phishing domain list
-    domain = re.sub(r'^https?://(.*)\..*', '\\1', url)
-    if domain in ['example.com', 'example2.com', 'example3.com']:
+
+    # Check if the email has a spoofed sender
+    try:
+        smtplib.SMTP().sendmail("sender@example.com", "recipient@example.co[21D[K
+"recipient@example.com", "")
         return True
-    
-    # Check if the URL contains any suspicious parameters or queries
-    params = re.findall(r'(\?|&).*', url)
-    for param in params:
-        if re.search(r'password|credential|token', param):
+    except smtplib.SMTPSenderRefused:
+        pass
+
+    # Check if the email contains malicious content
+    if re.search(r"http://|https://|www\.facebook\.com/", email):
+        return True
+
+    # Check if the email contains a known phishing domain
+    for domain in ["phishng.com", "yahoo.com"]:
+        if re.search(f".*{domain}.*", email):
             return True
-    
+
+    # No phishing detected
     return False
 
-def mitigate_phishing_attack(url):
-    # Display a warning message to the user
-    print('Warning: This URL may be a phishing site!')
-    
-    # Ask the user if they want to proceed with the request
-    choice = input('Proceed with request? (y/n) ')
-    
-    # If the user chooses not to proceed, cancel the request
-    if choice.lower() != 'y':
-        return None
-    
-    # Proceed with the request
-    print('Making request...')
-    return url
+def mitigate_phishing(email):
+    # If the email is not valid, do nothing
+    if not is_phishing(email):
+        return
 
-url = input('Enter URL: ')
-if is_phishing_url(url):
-    mitigate_phishing_attack(url)
-else:
-    print('No phishing detected. Proceeding with request.')
+    # If the email has a spoofed sender, block the email
+    try:
+        smtplib.SMTP().sendmail("sender@example.com", "recipient@example.co[21D[K
+"recipient@example.com", "")
+    except smtplib.SMTPSenderRefused:
+        return
+
+    # If the email contains malicious content or a known phishing domain, b[1D[K
+block the email
+    if re.search(r"http://|https://|www\.facebook\.com/", email) or any(dom[7D[K
+any(domain in ["phishng.com", "yahoo.com"] for domain in email):
+        return
+
+    # If the email is not a phishing attack, send it to the recipient's mai[3D[K
+mailbox
+    try:
+        smtplib.SMTP().sendmail("sender@example.com", "recipient@example.co[21D[K
+"recipient@example.com", email)
+    except smtplib.SMTPSenderRefused:
+        return
