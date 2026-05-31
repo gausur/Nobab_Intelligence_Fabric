@@ -1,66 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-31 17:00:47.969959
+# Generated 2026-05-31 18:04:43.905379
 
 import re
-import urllib.request
-from email.utils import parseaddr
+from email.parser import Parser
 
-def validate_email(email):
-    """
-    Validates an email address by checking if it is a valid format and if i[1D[K
-it exists in the email server's DNS records.
-    Args:
-        email (str): The email address to be validated.
-    Returns:
-        bool: True if the email address is valid, False otherwise.
-    """
-    regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if re.match(regex, email):
-        try:
-            parseaddr(email)
+def is_phishing(email):
+    # Check if the email contains spam keywords
+    spam_keywords = ['phish', 'phishing', 'scam', 'hack']
+    for keyword in spam_keywords:
+        if keyword in email.lower():
             return True
-        except:
-            return False
-    else:
-        return False
-
-def detect_phishing(url):
-    """
-    Detects phishing attacks by analyzing the URL and its domain.
-    Args:
-        url (str): The URL to be analyzed.
-    Returns:
-        bool: True if the URL is a phishing attack, False otherwise.
-    """
-    regex = r"^https?://.*(phish|scam).*"
-    domain = urllib.request.urlopen(url).geturl().split("://")[1]
-    if re.match(regex, url):
+    # Check if the email is from a suspicious domain
+    domain = Parser().parsestr(email).get('From')
+    suspicious_domains = ['phish-me.com', 'scam-domain.com']
+    if domain in suspicious_domains:
         return True
-    elif re.match(regex, domain):
-        return True
-    else:
-        return False
+    # Check if the email contains a malicious link
+    link_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[6D[K
+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    for url in re.findall(link_pattern, email):
+        if 'phish' in url or 'scam' in url:
+            return True
+    return False
 
 def mitigate_phishing(email):
-    """
-    Mitigates phishing attacks by reporting the email to the spam filter an[2D[K
-and blocking the sender's IP address.
-    Args:
-        email (str): The email address to be mitigated.
-    Returns:
-        None
-    """
-    # Report the email to the spam filter
-    # Block the sender's IP address
-    return None
-
-def main():
-    url = "http://www.example.com/phishing-page"
-    if detect_phishing(url):
-        mitigate_phishing(url)
-    else:
-        print("This URL is not a phishing attack.")
-
-if __name__ == "__main__":
-    main()
+    # Remove spam keywords from the email
+    spam_keywords = ['phish', 'phishing', 'scam', 'hack']
+    for keyword in spam_keywords:
+        email = email.replace(keyword, '')
+    # Remove suspicious domains from the email
+    domain = Parser().parsestr(email).get('From')
+    suspicious_domains = ['phish-me.com', 'scam-domain.com']
+    if domain in suspicious_domains:
+        email = email.replace(domain, '')
+    # Remove malicious links from the email
+    link_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\), ]|(?:%[6D[K
+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    for url in re.findall(link_pattern, email):
+        if 'phish' in url or 'scam' in url:
+            email = email.replace(url, '')
+    return email
