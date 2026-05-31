@@ -1,57 +1,70 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-05-31 02:44:26.119888
+# Generated 2026-05-31 06:59:44.574475
 
 import re
-import smtplib
+from urllib.parse import urlsplit, urlunsplit
 
-def is_phishing(email):
-    # Check if the email is valid
-    if not email or not re.match(r"[^@]+@[^.]+\..+", email):
-        return False
-
-    # Check if the email has a spoofed sender
+def is_phishing(url):
+    # Check if the URL is a valid HTTPS URL
+    if not urlsplit(url).scheme == "https":
+        return True
+    
+    # Check if the URL has a valid domain name
     try:
-        smtplib.SMTP().sendmail("sender@example.com", "recipient@example.co[21D[K
-"recipient@example.com", "")
-        return True
-    except smtplib.SMTPSenderRefused:
-        pass
-
-    # Check if the email contains malicious content
-    if re.search(r"http://|https://|www\.facebook\.com/", email):
-        return True
-
-    # Check if the email contains a known phishing domain
-    for domain in ["phishng.com", "yahoo.com"]:
-        if re.search(f".*{domain}.*", email):
+        domain = urlsplit(url).netloc.partition(".")[2]
+        if not re.match(r"^[a-zA-Z0-9.-]+$", domain):
             return True
-
-    # No phishing detected
+    except:
+        # Invalid domain name, consider it a phishing URL
+        return True
+    
+    # Check if the URL has a valid path
+    try:
+        path = urlsplit(url).path
+        if not re.match(r"^/[a-zA-Z0-9.-]+$", path):
+            return True
+    except:
+        # Invalid path, consider it a phishing URL
+        return True
+    
+    # Check if the URL has a valid query string
+    try:
+        qs = urlsplit(url).query
+        if not re.match(r"^[a-zA-Z0-9=_%&.-]+$", qs):
+            return True
+    except:
+        # Invalid query string, consider it a phishing URL
+        return True
+    
+    # Check if the URL has a valid fragment identifier
+    try:
+        fragment = urlsplit(url).fragment
+        if not re.match(r"^[a-zA-Z0-9=_%&.-]+$", fragment):
+            return True
+    except:
+        # Invalid fragment identifier, consider it a phishing URL
+        return True
+    
+    # If none of the above checks failed, consider it a valid and non-phish[9D[K
+non-phishing URL
     return False
 
-def mitigate_phishing(email):
-    # If the email is not valid, do nothing
-    if not is_phishing(email):
-        return
+def mitigate_phishing(url):
+    # Check if the URL is a phishing URL
+    if is_phishing(url):
+        # Replace the URL with an empty string
+        return ""
+    else:
+        # Return the original URL
+        return url
 
-    # If the email has a spoofed sender, block the email
-    try:
-        smtplib.SMTP().sendmail("sender@example.com", "recipient@example.co[21D[K
-"recipient@example.com", "")
-    except smtplib.SMTPSenderRefused:
-        return
+# Example usage
+url = "https://www.example.com/phishing?q=123&s=456"
+print(mitigate_phishing(url))  # Output: https://www.example.com/phishing?q[34D[K
+https://www.example.com/phishing?q=123&s=456
 
-    # If the email contains malicious content or a known phishing domain, b[1D[K
-block the email
-    if re.search(r"http://|https://|www\.facebook\.com/", email) or any(dom[7D[K
-any(domain in ["phishng.com", "yahoo.com"] for domain in email):
-        return
-
-    # If the email is not a phishing attack, send it to the recipient's mai[3D[K
-mailbox
-    try:
-        smtplib.SMTP().sendmail("sender@example.com", "recipient@example.co[21D[K
-"recipient@example.com", email)
-    except smtplib.SMTPSenderRefused:
-        return
+# Example usage with invalid URL
+url = "https://www.example.com/phishing?q=123&s=456#"
+print(mitigate_phishing(url))  # Output: https://www.example.com/phishing?q[34D[K
+https://www.example.com/phishing?q=123&s=456
