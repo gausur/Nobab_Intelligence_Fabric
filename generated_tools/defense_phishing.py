@@ -1,28 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-01 16:34:48.556649
+# Generated 2026-06-01 20:53:26.437428
 
 import re
-import urllib.parse
-from urllib.request import urlopen
+import sys
+from urllib.parse import urlparse
 
-def is_phishing_url(url):
-    parsed = urllib.parse.urlparse(url)
-    domain = parsed.netloc
-    if not domain:
+def is_phishing(url):
+    # Check if the URL contains common phishing patterns
+    if "http" in url and not url.startswith("https"):
+        return True
+    elif any(pattern in url for pattern in ("www.", "facebook", "twitter", [K
+"linkedin")):
+        return True
+    else:
         return False
-    try:
-        with urlopen(f"https://{domain}/.well-known/security.txt") as f:
-            text = f.read().decode()
-        for line in text.splitlines():
-            if "phishing" in line.lower():
-                return True
-    except Exception:
-        pass
-    return False
 
 def mitigate_phishing(url):
-    if is_phishing_url(url):
-        print("Phishing detected!")
+    # Redirect to HTTPS version of the URL if possible
+    parsed_url = urlparse(url)
+    if parsed_url.scheme == "http":
+        return f"https://{parsed_url.netloc}{parsed_url.path}"
     else:
-        print("No phishing detected.")
+        return url
+
+if __name__ == "__main__":
+    # Get the URL from the command line arguments
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+    else:
+        print("Usage: python phishing_detector.py <url>")
+        exit()
+
+    # Check if the URL is a phishing attack
+    if is_phishing(url):
+        mitigated_url = mitigate_phishing(url)
+        print(f"Phishing attack detected: {url}")
+        print(f"Mitigated URL: {mitigated_url}")
+    else:
+        print("No phishing attacks detected")
