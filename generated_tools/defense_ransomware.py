@@ -1,38 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-02 10:09:49.995198
+# Generated 2026-06-02 14:47:01.896994
 
 import os
-import subprocess
-import json
+import re
 
-def detect_ransomware(directory):
-    try:
-        output = subprocess.check_output(["clamscan", directory])
-        if "Detected" in str(output):
+def detect_ransomware(filepath):
+    with open(filepath, "r") as f:
+        content = f.read()
+        if re.search(r"^RANSOMWARE", content, re.IGNORECASE):
+            print("Detected ransomware!")
             return True
         else:
             return False
-    except subprocess.CalledProcessError as e:
-        print("ClamAV scan failed with error code {}".format(e.returncode))[25D[K
-{}".format(e.returncode))
-        return False
 
-def mitigate_ransomware(directory):
-    try:
-        output = subprocess.check_output(["ransomeware-remover", directory][10D[K
-directory])
-        print("Removed ransomware from directory {}".format(directory))
-    except subprocess.CalledProcessError as e:
-        print("Ransomware remover failed with error code {}".format(e.retur[18D[K
-{}".format(e.returncode))
-        return False
-
-def main():
-    directories = ["/path/to/directory1", "/path/to/directory2"]
-    for directory in directories:
-        if detect_ransomware(directory):
-            mitigate_ransomware(directory)
+def mitigate_ransomware(filepath):
+    if detect_ransomware(filepath):
+        with open(filepath, "w") as f:
+            f.write("")
+        print("Mitigated ransomware!")
 
 if __name__ == "__main__":
-    main()
+    mitigate_ransomware("/path/to/file")
