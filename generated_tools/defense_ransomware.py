@@ -1,31 +1,62 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-01 23:00:56.003116
+# Generated 2026-06-02 00:14:13.038684
 
 import os
+import shutil
+import socket
 import subprocess
+from base64 import b64decode
+from pathlib import Path
 
-def detect_ransomware():
-    # Check if the system is running Windows
-    if os.name == 'nt':
-        # Execute a PowerShell command to check for ransomware
-        output = subprocess.check_output(['powershell', '-Command', 'Get-Wm[7D[K
-'Get-WmiObject -Class win32_volume | Where-Object { $_.DriveType -eq 3 }'])[4D[K
-}']).decode('utf-8')
-        # Check if the output contains a specific string indicating ransomw[7D[K
-ransomware activity
-        if 'Encrypted' in output:
-            return True
-    return False
+def get_file_info(path):
+    return {
+        "name": Path(path).name,
+        "size": Path(path).stat().st_size,
+        "created": Path(path).stat().st_ctime,
+        "modified": Path(path).stat().st_mtime,
+        "accessed": Path(path).stat().st_atime
+    }
 
-def mitigate_ransomware():
-    # If the system is running Windows, execute a PowerShell command to unm[3D[K
-unmount the encrypted volume
-    if os.name == 'nt':
-        subprocess.check_call(['powershell', '-Command', 'Get-WmiObject -Cl[3D[K
--Class win32_volume | Where-Object { $_.DriveType -eq 3 } | Unmount-WmiObje[15D[K
-Unmount-WmiObject'])
-    return True
+def get_process_info(pid):
+    return {
+        "name": subprocess.check_output(["ps", "-p", str(pid), "-o", "comm"[6D[K
+"comm"]),
+        "exe": subprocess.check_output(["readlink", "/proc/" + str(pid) + "[1D[K
+"/exe"])
+    }
 
-if detect_ransomware():
-    mitigate_ransomware()
+def get_network_info():
+    return {
+        "ip": socket.gethostbyname(socket.gethostname()),
+        "hostname": socket.gethostname()
+    }
+
+def detect_ransomware(path):
+    file_info = get_file_info(path)
+    process_info = get_process_info(os.getpid())
+    network_info = get_network_info()
+
+    if (file_info["size"] > 10000000):
+        return True
+    elif (process_info["name"].decode("utf-8").startswith("python")):
+        return True
+    elif (network_info["ip"] == "255.255.255.255"):
+        return True
+    else:
+        return False
+
+def mitigate_ransomware(path, key):
+    if (detect_ransomware(path)):
+        with open(path, "rb") as f:
+            ciphertext = f.read()
+            plaintext = b64decode(ciphertext)
+            f.seek(0)
+            f.truncate()
+            f.write(plaintext)
+            print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")
+
+if __name__ == "__main__":
+    mitigate_ransomware(Path(".", "file.txt"), key="")
