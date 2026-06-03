@@ -1,37 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-03 13:11:24.207069
+# Generated 2026-06-03 18:21:34.555655
 
 import os
-import stat
-import subprocess
-import sys
+import re
 
-def detect_ransomware():
-    # Check if the current process is being executed by a user with root pr[2D[K
-privileges
-    if os.getuid() != 0:
-        print("This script must be run as root to detect and mitigate ranso[5D[K
-ransomware attacks.")
-        sys.exit(1)
+def detect_ransomware(file_path):
+    # Check if the file is readable
+    if not os.access(file_path, os.R_OK):
+        print("Error: File is not readable")
+        return
 
-    # Get the list of running processes
-    process_list = subprocess.check_output(['ps', 'ax']).splitlines()
+    # Read the first 1024 bytes of the file
+    with open(file_path, "rb") as f:
+        data = f.read(1024)
 
-    # Iterate over the list of processes, checking for suspicious behavior
-    for proc in process_list:
-        if b'ransomware' in proc:
-            print(f"Ransomware detected: {proc}")
-            mitigate_ransomware(proc)
+    # Look for known ransomware patterns in the first 1024 bytes
+    if re.search(r"^[A-Za-z0-9]{5,}!", data):
+        print("Ransomware detected")
+        return
 
-def mitigate_ransomware(process):
-    # Get the PID of the ransomware process
-    pid = int(process.split()[0])
-
-    # Kill the ransomware process and all of its descendants
-    subprocess.call(['kill', '-9', str(pid)])
-
-# Start the detection and mitigation loop
-while True:
-    detect_ransomware()
-    time.sleep(300) # Check for ransomware every 5 minutes
+# Iterate through all files and directories in the current directory
+for root, dirs, files in os.walk("."):
+    for file in files:
+        # Skip hidden files and directories
+        if not file.startswith("."):
+            detect_ransomware(os.path.join(root, file))
