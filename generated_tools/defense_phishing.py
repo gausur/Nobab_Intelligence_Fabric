@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-03 02:57:26.600583
+# Generated 2026-06-03 08:11:59.115597
 
 import re
-import smtplib
+import requests
+from urllib.parse import urlparse
 
-def is_phishing(email):
-    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", em[2D[K
-email):
+def is_phishing(url):
+    parsed = urlparse(url)
+    hostname = parsed.hostname
+    if hostname and not hostname.endswith('.com'):
         return False
-    try:
-        smtplib.SMTP("smtp.gmail.com", 587).connect()
-        smtplib.SMTP("smtp.yahoo.com", 587).connect()
-        smtplib.SMTP("smtp.outlook.com", 587).connect()
-    except smtplib.SMTPException:
+    domain = '.'.join(hostname.split('.')[-2:])
+    response = requests.get(f'https://phishing-detector.org/api/v1/{domain}[60D[K
+requests.get(f'https://phishing-detector.org/api/v1/{domain}')
+    data = response.json()
+    if data['status'] == 'ok':
         return True
-    return False
+    else:
+        return False
