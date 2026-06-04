@@ -1,47 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-04 10:59:18.827702
+# Generated 2026-06-04 13:56:44.399124
 
 import re
-import smtplib
-from email.parser import Parser
-from email.message import EmailMessage
+import urllib.request
+from bs4 import BeautifulSoup
 
-def check_for_phishing(email):
-    # Parse the email message using the Python SMTP library
-    msg = Parser().parsestr(email)
-
-    # Check if the email is a spam or phishing email
-    if msg['Subject'].startswith('[PHISHING]'):
-        return True
-    elif msg['Subject'].startswith('[SPAM]'):
-        return True
-    else:
+def is_phishing(url):
+    # Check if the URL is a valid HTTP or HTTPS URL
+    if not (re.match(r'^https?://', url)):
         return False
-
-def mitigate_phishing(email):
-    # Parse the email message using the Python SMTP library
-    msg = Parser().parsestr(email)
-
-    # Check if the email is a spam or phishing email
-    if check_for_phishing(msg):
-        print('Phishing attack detected!')
+    
+    # Fetch the HTML content of the website
+    try:
+        html = urllib.request.urlopen(url).read()
+    except:
         return False
-    else:
-        return True
-
-# Test the function by passing in an email message
-email = 'From: John Doe <johndoe@example.com>\n' \
-        'To: Jane Doe <janedoe@example.com>\n' \
-        'Subject: [PHISHING] Click here to update your password\n' \
-        '\n' \
-        'Hello Jane, click the link below to update your password.\n' \
-        'https://www.example.com/update_password?token=abc123\n' \
-        '\n' \
-        'Best regards,\n' \
-        'John Doe'
-
-if mitigate_phishing(email):
-    print('Email is not a phishing attack!')
-else:
-    print('Phishing attack detected!')
+    
+    # Parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(html, 'html.parser')
+    
+    # Check if the website has a login form and a submit button
+    if not (soup.find('form', attrs={'method': 'post'})):
+        return False
+    
+    # Check if the website has a hidden input field with name "_csrf" or "c[2D[K
+"csrf_token"
+    if not (soup.find('input', attrs={'name': re.compile(r'_csrf|csrf_token[29D[K
+re.compile(r'_csrf|csrf_token')})):
+        return False
+    
+    # Check if the website has a hidden input field with name "authenticity[13D[K
+"authenticity_token"
+    if not (soup.find('input', attrs={'name': 'authenticity_token'})):
+        return False
+    
+    return True
