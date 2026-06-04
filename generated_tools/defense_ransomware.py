@@ -1,36 +1,61 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-04 16:50:52.124027
+# Generated 2026-06-04 19:19:20.404821
 
 import os
 import subprocess
 
 def detect_ransomware():
-    # Check if the system is running with reduced functionality due to rans[4D[K
-ransomware attack
-    if not os.getenv("WINDOWS_RANSOMWARE"):
-        return False
-    
-    # Check if the system has been locked down by a ransomware attack
-    try:
-        subprocess.check_output(["reg", "query", "HKLM\\SOFTWARE\\Microsoft[26D[K
-"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"], shell=True)
-    except subprocess.CalledProcessError:
+    # Check for known ransomware files
+    if os.path.exists("ransomware_files"):
         return True
     
+    # Check for suspicious system processes
+    process_list = subprocess.check_output(["ps", "aux"]).decode().split("\[25D[K
+"aux"]).decode().split("\n")
+    for process in process_list:
+        if "ransomware" in process:
+            return True
+    
+    # Check for suspicious network traffic
+    netstat_out = subprocess.check_output(["netstat", "-anp"]).decode()
+    for line in netstat_out.split("\n"):
+        if "ransomware" in line:
+            return True
+    
+    # Check for suspicious registry entries
+    regedit_out = subprocess.check_output(["regedit", "/export"]).decode()
+    for line in regedit_out.split("\n"):
+        if "ransomware" in line:
+            return True
+    
+    # Check for suspicious file attributes
+    file_list = subprocess.check_output(["dir", "/b"]).decode().split("\n")[27D[K
+"/b"]).decode().split("\n")
+    for file in file_list:
+        if "ransomware" in file:
+            return True
+    
+    # If no ransomware detected, return False
     return False
 
 def mitigate_ransomware():
-    # Unlock the system and restore access to important files and folders
-    try:
-        subprocess.check_output(["reg", "query", "HKLM\\SOFTWARE\\Microsoft[26D[K
-"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"], shell=True)
-    except subprocess.CalledProcessError:
-        return True
+    # Stop the ransomware process
+    subprocess.run(["taskkill", "/im", "ransomware.exe"])
     
-    # Restart the system to clear any remaining ransomware locks
-    subprocess.check_output(["shutdown", "/r", "/f"], shell=True)
+    # Remove the ransomware files
+    for file in os.listdir("ransomware_files"):
+        os.remove("ransomware_files/" + file)
+    
+    # Restore system processes
+    subprocess.run(["taskmgr", "/restart"])
 
+# Main function to run the ransomware detection and mitigation script
 def main():
     if detect_ransomware():
         mitigate_ransomware()
+    else:
+        print("No ransomware detected")
+    
+if __name__ == "__main__":
+    main()
