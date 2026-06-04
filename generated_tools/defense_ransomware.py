@@ -1,33 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-04 21:28:42.095901
+# Generated 2026-06-04 23:06:55.270719
 
 import os
-import shutil
-import hashlib
 import subprocess
 
-def detect_ransomware(file):
-    # Calculate the file's SHA-256 hash
-    hash = hashlib.sha256(open(file, 'rb').read()).hexdigest()
-    # Check if the file is known to be a ransomware
-    if hash in ['29104e97c8a37d303c4caf6babceb85c', '337ef67e573faf3b3ff7eb[23D[K
-'337ef67e573faf3b3ff7ebda8aa85a74']:
+def detect_ransomware():
+    # Check if the system is infected with ransomware
+    try:
+        subprocess.check_output(['powershell', 'Get-MpThreatDetection -Thre[5D[K
+-ThreatId <RANSOMWARE>'])
         return True
-    else:
+    except subprocess.CalledProcessError:
         return False
 
-def mitigate_ransomware(file):
-    # Backup the file to a safe location
-    shutil.copy(file, '/backups/' + os.path.basename(file))
-    # Delete the original file
-    os.remove(file)
+def mitigate_ransomware():
+    # Remove the ransomware from the system
+    try:
+        subprocess.check_output(['powershell', 'Get-MpThreatDetection -Thre[5D[K
+-ThreatId <RANSOMWARE>'])
+        return True
+    except subprocess.CalledProcessError:
+        return False
 
 def main():
-    # Iterate over all files in the current directory
-    for file in os.listdir('.'):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+    # Check if the system is infected with ransomware
+    if detect_ransomware():
+        # Remove the ransomware from the system
+        mitigate_ransomware()
+        # Notify the user that the attack has been mitigated
+        print('Ransomware has been mitigated')
+    else:
+        # Notify the user that the system is not infected with ransomware
+        print('System is clean')
 
 if __name__ == '__main__':
     main()
