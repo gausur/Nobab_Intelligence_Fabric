@@ -1,45 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-05 16:28:52.999518
+# Generated 2026-06-05 18:58:56.346545
 
 import re
-import smtplib
-from email.mime.text import MIMEText
-from urllib.parse import urlparse
+import requests
 
-def is_phishing_url(url):
-    parsed = urlparse(url)
-    domain = parsed.netloc
-    if domain in [
-        "example.com",  # replace with actual phishing domains
-        "example2.com",
-        "example3.com",
-    ]:
+# Define the list of valid domains
+valid_domains = ["example.com", "example.org"]
+
+# Define the list of invalid patterns
+invalid_patterns = ["[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"]
+
+# Define the regular expression for matching email addresses
+email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$"
+
+def is_valid_domain(url):
+    # Split the URL into its components
+    url_components = urlparse.urlsplit(url)
+    
+    # Extract the domain from the URL
+    domain = url_components.hostname
+    
+    # Check if the domain is in the list of valid domains
+    return domain in valid_domains
+
+def is_valid_pattern(url):
+    # Use the regular expression to match the email address
+    match = re.search(email_regex, url)
+    
+    # If the email address matches a valid pattern, return True
+    if match:
         return True
-    else:
-        return False
+    
+    # Otherwise, return False
+    return False
 
-def send_email(recipient, subject, message):
-    sender = "no-reply@example.com"  # replace with actual email address
-    msg = MIMEText(message)
-    msg["Subject"] = subject
-    msg["From"] = sender
-    msg["To"] = recipient
-    s = smtplib.SMTP("smtp.example.com")  # replace with actual SMTP server[6D[K
-server
-    s.send_message(msg)
-    s.quit()
-
-def detect_phishing_url(message):
-    urls = re.findall(r"https?://\S+", message)
-    for url in urls:
-        if is_phishing_url(url):
-            send_email("admin@example.com", "Possible Phishing Attack", f"P[3D[K
-f"Phishing URL detected: {url}")
+def mitigate_phishing(url):
+    # Check if the URL is a valid domain
+    if not is_valid_domain(url):
+        raise ValueError("The URL is not a valid domain.")
+    
+    # Check if the URL matches a valid pattern
+    if not is_valid_pattern(url):
+        raise ValueError("The URL does not match a valid pattern.")
+    
+    # If the URL is both a valid domain and matches a valid pattern, return[6D[K
+return True
+    return True
 
 def main():
-    message = input("Enter a message to be analyzed: ")
-    detect_phishing_url(message)
-
-if __name__ == "__main__":
-    main()
+    # Parse the command line arguments
+    args = parse_args()
+    
+    # Check if the URL is a phishing attack
+    if not mitigate_phishing(args.url):
+        raise ValueError("The URL is a phishing attack.")
