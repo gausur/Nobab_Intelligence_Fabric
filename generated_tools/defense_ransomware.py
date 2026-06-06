@@ -1,35 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-05 22:13:56.036710
+# Generated 2026-06-06 00:03:45.940732
 
 import os
-import stat
-import shutil
+import sys
 import time
-import subprocess
+from subprocess import Popen, PIPE
 
-def detect_ransomware(path):
-    try:
-        with open(path, 'rb') as f:
-            data = f.read()
-            if b'RANSOMWARE' in data:
-                return True
-    except IOError:
-        pass
+def check_ransomware():
+    # Check if the system is running Windows
+    if not sys.platform == "win32":
+        return False
+    
+    # Get the list of running processes
+    process_list = os.popen("tasklist").read().splitlines()
+    
+    # Look for ransomware-like processes
+    for proc in process_list:
+        if "ransomware" in proc.lower():
+            return True
+    
+    # No ransomware detected
     return False
 
-def mitigate_ransomware(path):
-    try:
-        os.remove(path)
-        os.unlink(path)
-    except OSError:
-        pass
+def mitigate_ransomware():
+    # Kill the ransomware process
+    Popen("taskkill /im ransomware.exe", shell=True)
+    time.sleep(5)
+    
+    # Restart the system
+    os.system("shutdown -r -t 0")
 
-if __name__ == '__main__':
-    while True:
-        for root, dirs, files in os.walk('.'):
-            for file in files:
-                path = os.path.join(root, file)
-                if detect_ransomware(path):
-                    mitigate_ransomware(path)
-        time.sleep(60)
+while True:
+    if check_ransomware():
+        mitigate_ransomware()
