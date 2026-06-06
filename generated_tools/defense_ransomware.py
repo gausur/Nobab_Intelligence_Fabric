@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-06 21:59:35.561440
+# Generated 2026-06-06 23:05:31.007351
 
-import sys
 import os
+import socket
 
-def detect_ransomware(file_path):
-    with open(file_path, 'rb') as f:
-        data = f.read()
-        if b'RANSOMWARE' in data:
+def is_ransomware(ip):
+    try:
+        s = socket.create_connection((ip, 80), timeout=5)
+        s.sendall(b"GET / HTTP/1.0\n\n")
+        data = s.recv(4096)
+        if b"<html>" in data:
             return True
-        else:
-            return False
+    except socket.error:
+        pass
+    return False
 
-def mitigate_ransomware(file_path):
-    with open(file_path, 'rb') as f:
-        data = f.read()
-        if b'RANSOMWARE' in data:
-            os.remove(file_path)
+def mitigate_ransomware(ip):
+    if is_ransomware(ip):
+        os.system("iptables -A INPUT -s {} -j DROP".format(ip))
 
-if __name__ == '__main__':
-    file_path = sys.argv[1]
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
+mitigate_ransomware("192.0.2.1")
