@@ -1,31 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-06 11:20:08.989259
+# Generated 2026-06-06 13:14:19.184730
 
 import re
-import urllib.parse
-from email.message import EmailMessage
+import requests
+from urllib.parse import urlparse
+from http.cookies import SimpleCookie
 
-def is_phishing_attempt(email):
-    # Check if the email contains a suspicious link
-    if "://" in email.body:
-        # Extract the URL from the email body
-        url = re.search("https?://[^\s]+", email.body).group()
-        
-        # Parse the URL to extract its components
-        parsed_url = urllib.parse.urlsplit(url)
-        
-        # Check if the URL's hostname is in the email's sender domain
-        if parsed_url.hostname and parsed_url.hostname.endswith(email.sende[40D[K
-parsed_url.hostname.endswith(email.sender):
+def is_phishing(url):
+    """Check if a URL is a phishing site."""
+    try:
+        response = requests.get(url)
+        html = response.text
+        # Check for common phishing patterns in HTML
+        if re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}', h[1D[K
+html):
             return True
-    
+    except requests.exceptions.RequestException:
+        pass
     return False
 
-def mitigate_phishing_attempt(email):
-    # Replace the suspicious link with a placeholder text
-    email.body = re.sub("https?://[^\s]+", "Click here to proceed.", email.[6D[K
-email.body)
-    
-    # Send the modified email to the recipient
-    return email
+def get_cookies(url):
+    """Get cookies from a URL."""
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            html = response.text
+            # Extract cookies from HTML using a regular expression
+            cookie_pattern = r'Set-Cookie:\s*([^;]+);'
+            cookies = re.findall(cookie_pattern, html)
+            return SimpleCookie(cookies)
+    except requests.exceptions.RequestException:
+        pass
+    return None
+
+def mitigate_phishing(url):
+    """Mitigate phishing attacks by blocking URLs and clearing cookies."""
+    if is_phishing(url):
+        # Block the URL from being visited
+        response = requests.get('http://0.0.0.0/')
+        return response.status_code == 200
+
+        # Clear cookies from the browser
+        cookies = get_cookies(url)
+        if cookies:
+            for cookie in cookies:
+                requests.post(f'http://{cookie.domain}:{cookie.port}/', dat[3D[K
+data={'action': 'clear'})
+    return False
