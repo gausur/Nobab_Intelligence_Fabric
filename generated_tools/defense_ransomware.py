@@ -1,43 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-06 13:15:08.076278
+# Generated 2026-06-06 15:09:00.826332
 
 import os
-import json
 import subprocess
+from pathlib import Path
+from shutil import rmtree
 
-def detect_ransomware(file):
+def detect_ransomware(path):
     try:
-        with open(file, 'rb') as f:
-            data = f.read()
-            if b'RANSOMWARE' in data:
-                return True
-            else:
-                return False
-    except IOError:
-        print("Error reading file")
-        return None
-
-def mitigate_ransomware(file):
-    try:
-        with open(file, 'rb') as f:
-            data = f.read()
-            if b'RANSOMWARE' in data:
-                # Remove ransomware code from file
-                new_data = data.replace(b'RANSOMWARE', b'')
-                with open(file, 'wb') as f:
-                    f.write(new_data)
+        files = list(Path(path).rglob('*'))
+        for file in files:
+            if not file.is_file():
+                continue
+            with open(file, 'rb') as f:
+                contents = f.read()
+                if b'ransomware' in contents:
+                    print(f'Ransomware detected in {file}!')
         return True
-    except IOError:
-        print("Error writing to file")
+    except Exception as e:
+        print('Error:', e)
+        return False
+
+def mitigate_ransomware(path):
+    try:
+        files = list(Path(path).rglob('*'))
+        for file in files:
+            if not file.is_file():
+                continue
+            with open(file, 'rb') as f:
+                contents = f.read()
+                if b'ransomware' in contents:
+                    print(f'Mitigating ransomware attack in {file}...')
+                    rmtree(file)
+        return True
+    except Exception as e:
+        print('Error:', e)
         return False
 
 def main():
-    # Get list of files to check
-    files = subprocess.check_output(['ls', '-l'])
-    for file in files.splitlines():
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+    path = '/path/to/directory'
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+    else:
+        print('No ransomware detected.')
 
 if __name__ == '__main__':
     main()
