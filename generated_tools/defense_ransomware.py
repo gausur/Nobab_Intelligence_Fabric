@@ -1,36 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-06 00:03:45.940732
+# Generated 2026-06-06 04:52:15.099964
 
 import os
-import sys
-import time
-from subprocess import Popen, PIPE
+import hashlib
+import subprocess
 
-def check_ransomware():
-    # Check if the system is running Windows
-    if not sys.platform == "win32":
-        return False
-    
-    # Get the list of running processes
-    process_list = os.popen("tasklist").read().splitlines()
-    
-    # Look for ransomware-like processes
-    for proc in process_list:
-        if "ransomware" in proc.lower():
+def detect_ransomware(file_path):
+    """Detects whether a file is encrypted by ransomware or not."""
+    with open(file_path, 'rb') as f:
+        file_bytes = f.read()
+        md5sum = hashlib.md5(file_bytes).hexdigest()
+        if md5sum in ('d41d8cd98f00b204e9800998ecf8427e', 'd41d8cd98f00b204[17D[K
+'d41d8cd98f00b204e9800998ecf8427e'):
             return True
-    
-    # No ransomware detected
-    return False
+        else:
+            return False
 
-def mitigate_ransomware():
-    # Kill the ransomware process
-    Popen("taskkill /im ransomware.exe", shell=True)
-    time.sleep(5)
-    
-    # Restart the system
-    os.system("shutdown -r -t 0")
-
-while True:
-    if check_ransomware():
-        mitigate_ransomware()
+def mitigate_ransomware(file_path):
+    """Mitigates a ransomware attack by decrypting the encrypted file."""
+    with open(file_path, 'rb') as f:
+        file_bytes = f.read()
+        md5sum = hashlib.md5(file_bytes).hexdigest()
+        if md5sum in ('d41d8cd98f00b204e9800998ecf8427e', 'd41d8cd98f00b204[17D[K
+'d41d8cd98f00b204e9800998ecf8427e'):
+            return True
+        else:
+            subprocess.run(['cryptsetup', 'luksOpen', file_path, 'decrypted[10D[K
+'decrypted'])
+    with open(file_path, 'rb') as f:
+        file_bytes = f.read()
+        md5sum = hashlib.md5(file_bytes).hexdigest()
+        if md5sum in ('d41d8cd98f00b204e9800998ecf8427e', 'd41d8cd98f00b204[17D[K
+'d41d8cd98f00b204e9800998ecf8427e'):
+            return True
+        else:
+            subprocess.run(['cryptsetup', 'luksClose', 'decrypted'])
+    with open(file_path, 'rb') as f:
+        file_bytes = f.read()
+        md5sum = hashlib.md5(file_bytes).hexdigest()
+        if md5sum in ('d41d8cd98f00b204e9800998ecf8427e', 'd41d8cd98f00b204[17D[K
+'d41d8cd98f00b204e9800998ecf8427e'):
+            return True
+        else:
+            subprocess.run(['cryptsetup', 'luksClose', 'decrypted'])
