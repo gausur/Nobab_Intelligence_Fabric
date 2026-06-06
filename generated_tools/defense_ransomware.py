@@ -1,49 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-06 15:09:00.826332
+# Generated 2026-06-06 17:04:38.487153
 
 import os
+import sys
 import subprocess
-from pathlib import Path
-from shutil import rmtree
-
-def detect_ransomware(path):
-    try:
-        files = list(Path(path).rglob('*'))
-        for file in files:
-            if not file.is_file():
-                continue
-            with open(file, 'rb') as f:
-                contents = f.read()
-                if b'ransomware' in contents:
-                    print(f'Ransomware detected in {file}!')
-        return True
-    except Exception as e:
-        print('Error:', e)
-        return False
-
-def mitigate_ransomware(path):
-    try:
-        files = list(Path(path).rglob('*'))
-        for file in files:
-            if not file.is_file():
-                continue
-            with open(file, 'rb') as f:
-                contents = f.read()
-                if b'ransomware' in contents:
-                    print(f'Mitigating ransomware attack in {file}...')
-                    rmtree(file)
-        return True
-    except Exception as e:
-        print('Error:', e)
-        return False
+import json
 
 def main():
-    path = '/path/to/directory'
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
-    else:
-        print('No ransomware detected.')
+    # Get the current system information
+    system_info = subprocess.check_output(['uname', '-a'])
+    system_info = system_info.decode('utf-8').strip()
+
+    # Check if the system is running Windows
+    if 'Windows' not in system_info:
+        print("This script only works on Windows systems.")
+        return
+
+    # Get the list of currently running processes
+    process_list = subprocess.check_output(['tasklist', '/fo', 'csv'])
+    process_list = process_list.decode('utf-8').strip()
+    process_list = process_list.split('\r\n')
+
+    # Filter the list to find processes with the "ransomware" string in the[3D[K
+their name
+    ransomware_processes = [p for p in process_list if 'ransomware' in p]
+
+    # Check if any ransomware processes are running
+    if not ransomware_processes:
+        print("No ransomware processes found.")
+        return
+
+    # Get the PID of the first ransomware process
+    pid = int(ransomware_processes[0].split(',')[1])
+
+    # Use the Taskkill command to terminate the ransomware process
+    subprocess.check_call(['taskkill', '/F', '/PID', str(pid)])
+
+    print("Ransomware process terminated.")
 
 if __name__ == '__main__':
     main()
