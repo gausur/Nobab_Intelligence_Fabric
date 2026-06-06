@@ -1,52 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-06 07:43:43.179486
+# Generated 2026-06-06 10:00:52.875990
 
 import os
-import sys
-import time
-from datetime import datetime
-from threading import Thread
-from typing import List
+import json
+from subprocess import run, PIPE
+from pathlib import Path
 
-class RansomwareDetector:
-    def __init__(self, path):
-        self.path = path
-        self.files = []
-        self.ransomed_files = []
-        self.threads = []
-    
-    def detect(self):
-        # Iterate through all files in the given path and subpaths
-        for root, dirs, files in os.walk(self.path):
-            for file in files:
-                # Check if file is a ransomware
-                if self.is_ransomware(os.path.join(root, file)):
-                    # Add file to list of ransomed files
-                    self.ransomed_files.append(os.path.join(root, file))
-        
-        # Start threads for mitigation
-        for file in self.ransomed_files:
-            thread = Thread(target=self.mitigate, args=(file,))
-            thread.start()
-            self.threads.append(thread)
-    
-    def is_ransomware(self, file):
-        # Check if file name matches ransomware pattern
-        return file.endswith(".ransomware")
-    
-    def mitigate(self, file):
-        # Delete file and notify user
-        os.remove(file)
-        print(f"File {file} has been deleted due to ransomware attack.")
-    
+def detect_ransomware(filepath):
+    # Check if the file is a valid executable
+    if not filepath.is_file() or not filepath.stat().st_mode & (stat.S_IXUS[12D[K
+(stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH):
+        return False
+
+    # Run the file to see if it prints "I am a ransomware"
+    output = run([filepath], stdout=PIPE, check=True)
+    return b"I am a ransomware" in output.stdout
+
+def mitigate_ransomware(filepath):
+    # Remove the file if it is a ransomware
+    try:
+        os.remove(filepath)
+    except OSError as e:
+        print("Failed to remove file:", e)
+
+def main():
+    # Get the list of files in the current directory
+    filenames = [filename for filename in Path().iterdir() if filename.is_f[13D[K
+filename.is_file()]
+
+    # Iterate through the files and check if they are ransomware
+    for filepath in filenames:
+        if detect_ransomware(filepath):
+            mitigate_ransomware(filepath)
+            print("Removed ransomware:", filepath)
+
 if __name__ == "__main__":
-    # Parse arguments
-    path = sys.argv[1] if len(sys.argv) > 1 else None
-    if not path:
-        print("Usage: python detect_ransomware.py <path>")
-        exit()
-    
-    # Create detector object and start detection
-    detector = RansomwareDetector(path)
-    detector.detect()
+    main()
