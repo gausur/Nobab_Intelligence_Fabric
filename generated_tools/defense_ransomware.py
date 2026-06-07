@@ -1,45 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-07 21:06:22.483463
+# Generated 2026-06-07 22:58:49.316630
 
 import os
-import shutil
+import re
 import subprocess
-import tempfile
 
-def detect_ransomware(path):
-    files = os.listdir(path)
-    for file in files:
-        if "encrypted" in file:
+def is_ransomware(file):
+    """Detects if the file is a ransomware or not."""
+    with open(file, "rb") as f:
+        content = f.read()
+        if b"RSA KEY" in content:
             return True
-    return False
+        else:
+            return False
 
-def mitigate_ransomware(path):
-    # Use subprocess to run a command that unlocks the ransomware-encrypted[20D[K
-ransomware-encrypted files
-    command = f"{unlock_command} {path}"
-    output = subprocess.check_output(command, shell=True)
-    print(f"Unlocked ransomware-encrypted files in {path}")
-    # Use shutil to move the unlocked files to a temporary directory
-    temp_dir = tempfile.mkdtemp()
-    for file in files:
-        if "encrypted" not in file:
-            shutil.move(os.path.join(path, file), os.path.join(temp_dir, fi[2D[K
-file))
-    print(f"Moved unlocked files to temporary directory {temp_dir}")
-    # Remove the ransomware-encrypted files from the original directory
-    for file in files:
-        if "encrypted" in file:
-            os.remove(os.path.join(path, file))
-    print(f"Removed ransomware-encrypted files from {path}")
+def decrypt_ransomware(file):
+    """Decrypts the ransomware file."""
+    with open(file, "rb") as f:
+        content = f.read()
+        # Decrypt using AES-256 with SHA-384
+        decrypted_content = subprocess.check_output(["openssl", "aes-256-cb[11D[K
+"aes-256-cbc", "-d", "-pass", "pass:" + passphrase, "-in", file])
+        return decrypted_content
 
 def main():
-    # Get the path to the directory containing the ransomware-encrypted fil[3D[K
-files
-    path = input("Enter the path to the directory containing the ransomware[10D[K
-ransomware-encrypted files: ")
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
-    else:
-        print("No ransomware-encrypted files detected in the given director[8D[K
-directory")
+    """Main function."""
+    # Get the list of files in the current directory
+    files = os.listdir()
+    for file in files:
+        if is_ransomware(file):
+            print("Detected ransomware:", file)
+            decrypted_content = decrypt_ransomware(file)
+            # Save the decrypted content to a new file
+            with open(file + ".decrypted", "wb") as f:
+                f.write(decrypted_content)
+
+if __name__ == "__main__":
+    main()
