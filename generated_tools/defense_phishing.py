@@ -1,27 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-07 07:05:29.555646
+# Generated 2026-06-07 10:11:34.759624
 
-import requests
-from urllib.parse import urlparse
+import re
+import smtplib
 
-def is_phishing_site(url):
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc
-    try:
-        # Check if the domain is in the public suffix list
-        tld = requests.get("https://publicsuffix.org/list/effective_tld_nam[61D[K
-requests.get("https://publicsuffix.org/list/effective_tld_names.dat").text
-        if domain in tld:
-            return True
-    except Exception as e:
-        print(f"Error while checking phishing site: {e}")
-    return False
-
-def mitigate_phishing_attack(url):
-    # Redirect the user to a known safe URL
-    return "https://www.example.com/"
-
-# Example usage
-if is_phishing_site("http://evilsite.com"):
-    mitigate_phishing_attack("http://evilsite.com")
+def is_phishing(url):
+    # Check if the URL is a valid email address
+    if not re.match(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", url):
+        return False
+    
+    # Connect to the SMTP server and send a HELO command
+    smtp = smtplib.SMTP("smtp.example.com")
+    smtp.send_command("HELO")
+    
+    # Check if the response is 250, indicating that the server is ready for[3D[K
+for a TLS connection
+    if smtp.recv_response()[0] != 250:
+        return False
+    
+    # Start a TLS session and send an EHLO command
+    smtp.starttls()
+    smtp.send_command("EHLO")
+    
+    # Check if the response is 250, indicating that the server supports TLS[3D[K
+TLS
+    if smtp.recv_response()[0] != 250:
+        return False
+    
+    # Send a MAIL FROM command with a sender address and a blank RCPT TO co[2D[K
+command
+    smtp.send_command("MAIL FROM", "sender@example.com")
+    smtp.send_command("RCPT TO", "")
+    
+    # Check if the response is 250, indicating that the server accepts the [K
+sender address and blank RCPT TO command
+    if smtp.recv_response()[0] != 250:
+        return False
+    
+    # Send a DATA command with a blank message body
+    smtp.send_command("DATA", "")
+    
+    # Check if the response is 354, indicating that the server accepts the [K
+DATA command
+    if smtp.recv_response()[0] != 354:
+        return False
+    
+    # Send a quit command and close the connection
+    smtp.send_command("QUIT")
+    smtp.close()
+    
+    # If all checks passed, the URL is likely to be a phishing website
+    return True
