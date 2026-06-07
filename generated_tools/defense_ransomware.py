@@ -1,46 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-07 10:09:42.078125
+# Generated 2026-06-07 12:18:25.347704
 
 import os
-import sys
-import socket
-import json
-import hashlib
+import shutil
 import subprocess
-
-def check_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    if b"RANSOMWARE" in data:
-        print("Ransomware detected!")
-        return True
-    else:
-        print("No ransomware detected.")
-        return False
-
-def mitigate_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    if b"RANSOMWARE" in data:
-        print("Removing ransomware...")
-        data = data.replace(b"RANSOMWARE", b"")
-        with open(file, "wb") as f:
-            f.write(data)
-        return True
-    else:
-        print("No ransomware detected.")
-        return False
+from pathlib import Path
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python ransomware_detector.py [file]")
-        sys.exit()
-    file = sys.argv[1]
-    if check_ransomware(file):
-        mitigate_ransomware(file)
-    else:
-        print("No ransomware detected.")
+    # Initialize variables
+    current_directory = os.getcwd()
+    ransomware_path = None
 
-if __name__ == "__main__":
+    # Check for ransomware in the current directory
+    if not os.path.isfile(current_directory + '/ransomware'):
+        print("No ransomware detected")
+        return
+
+    # Get the path of the ransomware file
+    ransomware_path = os.path.join(current_directory, 'ransomware')
+
+    # Check if the ransomware is a malicious file
+    if not shutil.which('ransomware'):
+        print("Ransomware is not a malicious file")
+        return
+
+    # Launch the anti-ransomware tool
+    subprocess.run(['anti-ransomware', ransomware_path])
+
+    # Remove the ransomware file
+    os.remove(ransomware_path)
+
+if __name__ == '__main__':
     main()
