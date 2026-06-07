@@ -1,42 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-07 02:46:39.319183
+# Generated 2026-06-07 07:05:29.555646
 
-import re
-import smtplib
-from email.message import EmailMessage
+import requests
+from urllib.parse import urlparse
 
-def is_phishing_email(email):
-    """Check if the given email is a phishing attempt."""
-    # Check for spammy keywords in the subject line
-    if any(k in email["Subject"] for k in ["scam", "fraud", "urgent"]):
-        return True
-    
-    # Check for spammy keywords in the body of the email
-    if any(k in email.get_payload() for k in ["buy now", "click here"]):
-        return True
-    
-    # Check for suspicious domains
-    if email["From"].lower().endswith(".com"):
-        return True
-    
+def is_phishing_site(url):
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    try:
+        # Check if the domain is in the public suffix list
+        tld = requests.get("https://publicsuffix.org/list/effective_tld_nam[61D[K
+requests.get("https://publicsuffix.org/list/effective_tld_names.dat").text
+        if domain in tld:
+            return True
+    except Exception as e:
+        print(f"Error while checking phishing site: {e}")
     return False
 
-def mitigate_phishing_attack(email):
-    """Mitigate a phishing attack by sending an alert to the sender."""
-    # Send an alert to the sender
-    msg = EmailMessage()
-    msg["Subject"] = "Phishing Attempt Detected"
-    msg["From"] = "phishing@example.com"
-    msg["To"] = email["From"]
-    msg.set_content("This is a phishing attempt. Do not respond to this mes[3D[K
-message.")
-    smtplib.sendmail("smtp.example.com", msg)
-    
-def main():
-    # Get the email from stdin
-    email = input()
-    
-    # Check if the email is a phishing attack
-    if is_phishing_email(email):
-        mitigate_phishing_attack(email)
+def mitigate_phishing_attack(url):
+    # Redirect the user to a known safe URL
+    return "https://www.example.com/"
+
+# Example usage
+if is_phishing_site("http://evilsite.com"):
+    mitigate_phishing_attack("http://evilsite.com")
