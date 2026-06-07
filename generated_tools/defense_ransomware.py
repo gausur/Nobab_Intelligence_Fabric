@@ -1,45 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-07 19:28:04.429640
+# Generated 2026-06-07 21:06:22.483463
 
 import os
+import shutil
 import subprocess
-from pathlib import Path
+import tempfile
 
-def detect_ransomware():
-    # Check for the existence of the "C:\Program Files\RansomwareDetector" [K
-folder, which is created by ransomware malware
-    if not Path("C:\\Program Files\\RansomwareDetector").exists():
-        return False
-    
-    # Check if the ransomware detector is running
-    cmd = "netstat -aon | findstr LISTENING"
-    output = subprocess.check_output(cmd, shell=True)
-    if "C:\\Program Files\\RansomwareDetector" not in str(output):
-        return False
-    
-    # Check if the ransomware detector is running on port 80
-    cmd = "netstat -aon | findstr LISTENING"
-    output = subprocess.check_output(cmd, shell=True)
-    if str(output).find("80") == -1:
-        return False
-    
-    # Check if the ransomware detector is responding to requests on port 80[2D[K
-80
-    cmd = "curl -v http://localhost"
-    output = subprocess.check_output(cmd, shell=True)
-    if str(output).find("Ransomware Detected") == -1:
-        return False
-    
-    # If all checks pass, ransomware is detected and mitigation can be appl[4D[K
-applied
-    print("Ransomware detected. Applying mitigation...")
-    cmd = "taskkill /f /im RansomwareDetector.exe"
-    subprocess.run(cmd, shell=True)
-    cmd = "sc stop ransomware_detector"
-    subprocess.run(cmd, shell=True)
-    cmd = "rm -r C:\\Program Files\\RansomwareDetector"
-    subprocess.run(cmd, shell=True)
-    print("Mitigation applied successfully.")
-    
-    return True
+def detect_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        if "encrypted" in file:
+            return True
+    return False
+
+def mitigate_ransomware(path):
+    # Use subprocess to run a command that unlocks the ransomware-encrypted[20D[K
+ransomware-encrypted files
+    command = f"{unlock_command} {path}"
+    output = subprocess.check_output(command, shell=True)
+    print(f"Unlocked ransomware-encrypted files in {path}")
+    # Use shutil to move the unlocked files to a temporary directory
+    temp_dir = tempfile.mkdtemp()
+    for file in files:
+        if "encrypted" not in file:
+            shutil.move(os.path.join(path, file), os.path.join(temp_dir, fi[2D[K
+file))
+    print(f"Moved unlocked files to temporary directory {temp_dir}")
+    # Remove the ransomware-encrypted files from the original directory
+    for file in files:
+        if "encrypted" in file:
+            os.remove(os.path.join(path, file))
+    print(f"Removed ransomware-encrypted files from {path}")
+
+def main():
+    # Get the path to the directory containing the ransomware-encrypted fil[3D[K
+files
+    path = input("Enter the path to the directory containing the ransomware[10D[K
+ransomware-encrypted files: ")
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+    else:
+        print("No ransomware-encrypted files detected in the given director[8D[K
+directory")
