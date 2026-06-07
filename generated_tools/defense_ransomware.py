@@ -1,35 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-07 12:18:25.347704
+# Generated 2026-06-07 14:51:03.912561
 
 import os
-import shutil
+import re
 import subprocess
-from pathlib import Path
+from datetime import datetime
+from typing import Optional
 
-def main():
-    # Initialize variables
-    current_directory = os.getcwd()
-    ransomware_path = None
+def is_ransomware_attack(file_path: str) -> bool:
+    with open(file_path, "rb") as f:
+        contents = f.read()
+        if b"RANSOMWARE" in contents:
+            return True
+    return False
 
-    # Check for ransomware in the current directory
-    if not os.path.isfile(current_directory + '/ransomware'):
-        print("No ransomware detected")
-        return
+def mitigate_ransomware_attack(file_path: str) -> None:
+    subprocess.run(["rm", file_path])
 
-    # Get the path of the ransomware file
-    ransomware_path = os.path.join(current_directory, 'ransomware')
+def main() -> None:
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if is_ransomware_attack(file_path):
+                mitigate_ransomware_attack(file_path)
 
-    # Check if the ransomware is a malicious file
-    if not shutil.which('ransomware'):
-        print("Ransomware is not a malicious file")
-        return
-
-    # Launch the anti-ransomware tool
-    subprocess.run(['anti-ransomware', ransomware_path])
-
-    # Remove the ransomware file
-    os.remove(ransomware_path)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
