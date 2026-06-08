@@ -1,42 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-08 14:46:46.038406
+# Generated 2026-06-08 17:49:25.119249
 
 import re
-import urllib.request
-from collections import Counter
+import requests
+from urllib.parse import urlparse
 
-def is_phishing(url):
-    # Check if the URL is malicious by checking its domain against a list o[1D[K
-of known phishing domains
-    domain = urlparse(url).netloc
-    return domain in [
-        "phishingsite1.com",
-        "phishingsite2.com",
-        "phishingsite3.com",
-        # Add more phishing domains as necessary
-    ]
+def is_phishing_url(url):
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        return False
+    domain = parsed_url.netloc
+    if not re.match(r'^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', domain):
+        return False
+    return True
 
-def mitigate_phishing(url):
-    # Redirect the user to a safe URL if the original URL is detected as ph[2D[K
-phishing
-    return url.replace("https://phishingsite1.com/", "https://safewebsite.c[22D[K
-"https://safewebsite.com/")
+def mitigate_phishing_attack(url):
+    if is_phishing_url(url):
+        print('Possible phishing attack detected.')
+        requests.post('https://example.com/report-phishing', data={'url': u[1D[K
+url})
+    else:
+        print('No phishing attack detected.')
 
-# Use a counter to track the number of phishing attempts
-attempts = Counter()
-
-while True:
-    # Get the URL from the user
-    url = input("Enter a URL: ")
-    
-    # Check if the URL is malicious
-    if is_phishing(url):
-        # Increment the number of phishing attempts
-        attempts += 1
-        
-        # Mitigate the phishing attempt by redirecting to a safe URL
-        url = mitigate_phishing(url)
-    
-    # Print the modified URL
-    print("Redirected to:", url)
+mitigate_phishing_attack('https://www.google.com/')
