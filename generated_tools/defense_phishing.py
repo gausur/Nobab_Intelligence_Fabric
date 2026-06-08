@@ -1,25 +1,55 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-07 23:01:06.637357
+# Generated 2026-06-08 00:04:51.317648
 
 import re
-from urllib.parse import urlparse
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing_attempt(url):
-    parsed = urlparse(url)
-    if not parsed.hostname:
-        return False
-    hostname = parsed.hostname.lower()
-    if hostname.endswith(".onion") or hostname.endswith(".i2p"):
+def is_phishing_attempt(email):
+    # Check if the email is from a known spam source
+    if email.get("From") in known_spam_sources:
         return True
-    else:
-        return False
+    
+    # Check if the email has a suspicious subject line
+    if re.search(r"phishing|scam", email.get("Subject")):
+        return True
+    
+    # Check if the email contains a malicious link
+    for part in email.iter_parts():
+        if "Content-Disposition" in part:
+            disposition = part["Content-Disposition"]
+            if re.search(r"attachment; filename=\w+", disposition):
+                # If the attachment has a suspicious file name, it's likely[6D[K
+likely malicious
+                return True
+    
+    return False
 
-def mitigate_phishing_attack(url):
-    if is_phishing_attempt(url):
-        print("Possible phishing attempt detected!")
-        input("Please proceed with caution.")
+def mitigate_phishing_attempt(email):
+    # Remove any suspicious links or attachments from the email
+    for part in email.iter_parts():
+        if "Content-Disposition" in part:
+            disposition = part["Content-Disposition"]
+            if re.search(r"attachment; filename=\w+", disposition):
+                # Remove the attachment
+                part.dispose()
+    
+    # Send the modified email to the recipient
+    with smtplib.SMTP("localhost") as server:
+        message = EmailMessage()
+        message["Subject"] = "Your email has been modified"
+        message["From"] = email.get("From")
+        message["To"] = email.get("To")
+        message.set_content(email.as_string())
+        server.sendmail(message)
 
-if __name__ == "__main__":
-    url = input("Enter the URL: ")
-    mitigate_phishing_attack(url)
+def main():
+    # Read the email from stdin
+    email = EmailMessage()
+    email.parse(sys.stdin)
+    
+    # Check if the email is a phishing attempt and mitigate it if necessary[9D[K
+necessary
+    if is_phishing_attempt(email):
+        mitigate_phishing_attempt(email)
