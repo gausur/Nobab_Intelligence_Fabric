@@ -1,59 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-09 07:43:12.515440
+# Generated 2026-06-09 10:55:58.600661
 
 import os
-import hashlib
-import time
+import stat
 
-# Define the list of files and directories to scan for ransomware
-files_to_scan = ["/path/to/file1", "/path/to/file2"]
-directories_to_scan = ["/path/to/directory1", "/path/to/directory2"]
-
-# Define the list of known ransomware hashes
-ransomware_hashes = [
-    "3b4c092ca7531e1689e6dccbfe2be806",  # Ransomware A
-    "a23edc4671eb08e4c3540cbecdd32c57",  # Ransomware B
-    "b8f598df15ad504d111ccbfb6fc85fdb"   # Ransomware C
-]
-
-# Define the list of known clean files
-clean_files = [
-    "/path/to/file3",
-    "/path/to/file4",
-    "/path/to/directory3/file1"
-]
-
-# Scan for ransomware in files and directories
-for file in files_to_scan:
-    with open(file, "rb") as f:
+def detect_ransomware(filepath):
+    """Detects if a file is a ransomware infection by checking its permissi[8D[K
+permissions and contents."""
+    # Check the file's permissions to see if it has been modified
+    mode = os.stat(filepath).st_mode
+    if stat.S_ISGID & mode:
+        return True
+    
+    # Open the file in binary mode to read its contents
+    with open(filepath, "rb") as f:
         data = f.read()
-        hash = hashlib.sha256(data).hexdigest()
-        if hash in ransomware_hashes:
-            print("Ransomware detected in file:", file)
-            # Mitigate the attack by restoring the file from a backup or re[2D[K
-removing it altogether
-            os.remove(file)
+        
+        # Check for known ransomware patterns in the file's contents
+        if b"ransomware" in data or b"encrypt" in data:
+            return True
+    
+    return False
 
-# Scan for ransomware in directories
-for directory in directories_to_scan:
+def mitigate_ransomware(filepath):
+    """Mitigates a ransomware infection by removing the infected file and r[1D[K
+restoring from backup."""
+    # Remove the infected file
+    os.remove(filepath)
+    
+    # Restore the file from backup
+    with open(filepath, "wb") as f:
+        f.write(b"Restored from backup")
+
+def scan_directory(directory):
+    """Scans a directory for ransomware infections and mitigates them."""
+    # Walk the directory tree to find all files and subdirectories
     for root, dirs, files in os.walk(directory):
-        for name in files:
-            path = os.path.join(root, name)
-            with open(path, "rb") as f:
-                data = f.read()
-                hash = hashlib.sha256(data).hexdigest()
-                if hash in ransomware_hashes:
-                    print("Ransomware detected in file:", path)
-                    # Mitigate the attack by restoring the file from a back[4D[K
-backup or removing it altogether
-                    os.remove(path)
-
-# Check for clean files and directories to ensure they are not infected wit[3D[K
-with ransomware
-for file in clean_files:
-    if os.path.exists(file):
-        print("File is clean:", file)
-for directory in directories_to_scan:
-    if os.path.exists(directory):
-        print("Directory is clean:", directory)
+        for file in files:
+            filepath = os.path.join(root, file)
+            
+            # Check if the file is an infected ransomware
+            if detect_ransomware(filepath):
+                mitigate_ransomware(filepath)
