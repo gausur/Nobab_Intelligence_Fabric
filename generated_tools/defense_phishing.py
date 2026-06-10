@@ -1,57 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-10 17:57:13.968615
+# Generated 2026-06-10 20:19:17.469337
 
 import re
+import requests
+from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    # Check if the URL contains any suspicious patterns
-    pattern = r"[a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\[61D[K
-r"[a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
-    if re.search(pattern, url):
+    """
+    Check if a URL is a phishing website using the following criteria:
+    1. The domain name should be in the Public Suffix List (PSL)
+    2. The URL should not match any known phishing patterns
+    """
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    if "." not in domain:
+        return False
+    if domain in requests.get("https://publicsuffix.org/list/effective_tld_[58D[K
+requests.get("https://publicsuffix.org/list/effective_tld_names.dat").text:requests.get("https://publicsuffix.org/list/effective_tld_ames.dat").text:
         return True
-    else:
-        return False
-
-def is_phishing_email(email):
-    # Check if the email contains any suspicious patterns
-    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if re.search(pattern, email):
-        return True
-    else:
-        return False
-
-def is_phishing_message(message):
-    # Check if the message contains any suspicious patterns
-    pattern = r"[A-Za-z0-9@:%._\+~#=]{2,256}\.[a-zA-Z0-9.-]+\.([A-Za-z0-9.][61D[K
-r"[A-Za-z0-9@:%._\+~#=]{2,256}\.[a-zA-Z0-9.-]+\.([A-Za-z0-9.]|com|org|edu|nr"[A-Za-z0-9@:%._\+~#=]{2,256}\.[a-zA-Z0-9.-]+\.([A-Za-z0-9.]com|org|edu|net|gov|mil|biz|info|mobi|name|pro|aero|coop|museum|[a-zA-Z]{2})"
-    if re.search(pattern, message):
-        return True
-    else:
-        return False
-
-def mitigate_phishing_attack():
-    # If the URL is a phishing URL, block it and alert the user
-    if is_phishing_url("https://example.com"):
-        print("Phishing attempt detected! Blocking request...")
-        return False
-
-    # If the email contains a phishing email address, block it and alert th[2D[K
-the user
-    if is_phishing_email("john.doe@example.com"):
-        print("Phishing attempt detected! Blocking request...")
-        return False
-
-    # If the message contains a phishing URL or email address, block it and[3D[K
-and alert the user
-    if is_phishing_message("This is a phishing message with a url: https://[8D[K
-https://example.com"):
-        print("Phishing attempt detected! Blocking request...")
-        return False
-
-    # If none of the above conditions are met, allow the request to proceed[7D[K
-proceed
-    print("Request allowed.")
+    for pattern in ["//", "/[a-zA-Z0-9_]+=[^&]", "/[a-zA-Z0-9_]+$", "/[a-zA[7D[K
+"/[a-zA-Z0-9_]+="]:
+        if re.search(pattern, url):
+            return False
     return True
 
-mitigate_phishing_attack()
+def mitigate_phishing_attack(url):
+    """
+    Mitigate a phishing attack by redirecting the user to the original webs[4D[K
+website
+    """
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    if "." not in domain:
+        return False
+    if domain in requests.get("https://publicsuffix.org/list/effective_tld_[58D[K
+requests.get("https://publicsuffix.org/list/effective_tld_names.dat").text:requests.get("https://publicsuffix.org/list/effective_tld_ames.dat").text:
+        return True
+    for pattern in ["//", "/[a-zA-Z0-9_]+=[^&]", "/[a-zA-Z0-9_]+$", "/[a-zA[7D[K
+"/[a-zA-Z0-9_]+="]:
+        if re.search(pattern, url):
+            return False
+    return True
