@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-09 23:15:02.616421
+# Generated 2026-06-10 02:38:14.669366
 
 import os
-import sys
+import socket
+import shutil
+import subprocess
+
+def is_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+    return b"RANSOMWARE" in data
+
+def mitigate(file):
+    os.remove(file)
 
 def main():
-    # Check if the system is running on Windows
-    if os.name != 'nt':
-        print("Error: This script only works on Windows systems.")
-        return 1
+    for file in os.listdir("."):
+        if is_ransomware(file):
+            mitigate(file)
 
-    # Check for ransomware software
-    try:
-        import ransomware
-        print("Ransomware software detected.")
-    except ModuleNotFoundError:
-        print("No ransomware software detected.")
-        return 0
-
-    # Mitigate the attack
-    print("Mitigating ransomware attack...")
-    ransomware.remove_all()
-    ransomware.restore_backup()
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
