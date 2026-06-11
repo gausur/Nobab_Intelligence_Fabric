@@ -1,43 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-11 18:12:05.336444
+# Generated 2026-06-11 21:18:20.401806
 
-import os
-import json
-import socket
-import subprocess
+import socket, subprocess
 
-def detect_ransomware(path):
-    # Check if the file is a valid JSON file
+def detect_ransomware(ip_address: str) -> bool:
     try:
-        with open(path, 'r') as f:
-            data = json.load(f)
-    except json.JSONDecodeError:
-        return False
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ip_address, 80))
+        response = s.recv(1024)
+        s.close()
+        if b"HTTP/1.1 200 OK\r\n" in response:
+            return True
+    except socket.error:
+        pass
+    return False
 
-    # Check if the file contains the required keys
-    required_keys = ['name', 'version', 'description', 'author']
-    for key in required_keys:
-        if key not in data:
-            return False
-
-    # Check if the file is a valid Python script
+def mitigate_ransomware(ip_address: str) -> bool:
     try:
-        subprocess.check_output(['python', path])
+        subprocess.check_output(["ping", "-c", "1", ip_address])
+        return True
     except subprocess.CalledProcessError:
-        return False
+        pass
+    return False
 
-    # If the file passes all checks, it is likely a ransomware
-    return True
-
-def mitigate_ransomware(path):
-    # Remove the file from the system
-    os.remove(path)
-
-if __name__ == '__main__':
-    # Get the path to the file to be analyzed
-    path = input('Enter the path to the file: ')
-
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+if __name__ == "__main__":
+    if detect_ransomware("192.168.0.1"):
+        mitigate_ransomware("192.168.0.1")
