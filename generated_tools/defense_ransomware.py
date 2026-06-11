@@ -1,33 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-11 14:33:39.383725
+# Generated 2026-06-11 18:12:05.336444
 
 import os
-import re
+import json
+import socket
 import subprocess
 
-def check_for_ransomware():
-    # Check if the system is running Windows
-    if not os.name == "nt":
-        return
+def detect_ransomware(path):
+    # Check if the file is a valid JSON file
+    try:
+        with open(path, 'r') as f:
+            data = json.load(f)
+    except json.JSONDecodeError:
+        return False
 
-    # Check if the system has a ransomware scanner
-    if not subprocess.call(["drscan", "-v"], shell=True):
-        return
+    # Check if the file contains the required keys
+    required_keys = ['name', 'version', 'description', 'author']
+    for key in required_keys:
+        if key not in data:
+            return False
 
-    # Scan for ransomware
-    scan_results = subprocess.check_output(["drscan", "--report-only", "C:\[4D[K
-"C:\\"], shell=True)
-    if not scan_results:
-        return
+    # Check if the file is a valid Python script
+    try:
+        subprocess.check_output(['python', path])
+    except subprocess.CalledProcessError:
+        return False
 
-    # Parse the scan results
-    results = re.search("(?P<infected>\d+) infected files found", scan_resu[9D[K
-scan_results.decode())
-    if not results or int(results["infected"]) == 0:
-        return
+    # If the file passes all checks, it is likely a ransomware
+    return True
 
-    # Mitigate the ransomware attack
-    subprocess.call(["drscan", "--clean"], shell=True)
+def mitigate_ransomware(path):
+    # Remove the file from the system
+    os.remove(path)
 
-check_for_ransomware()
+if __name__ == '__main__':
+    # Get the path to the file to be analyzed
+    path = input('Enter the path to the file: ')
+
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
