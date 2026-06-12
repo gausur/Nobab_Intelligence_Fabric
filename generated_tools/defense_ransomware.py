@@ -1,27 +1,22 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-12 17:37:04.109577
+# Generated 2026-06-12 19:59:47.796257
 
-import os
-import hashlib
-import base64
-import json
+import socket
+import re
 
-def is_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        md5sum = hashlib.md5(data).hexdigest()
-        if md5sum == "03f2b6184c07e8e9a5c5d3f52a2e00d5":
-            return True
-    return False
+def is_ransomware(data):
+    if re.search(r"Ransomware detected", data):
+        return True
+    else:
+        return False
 
-def mitigate_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        if is_ransomware(data):
-            print("Detected ransomware attack!")
-            os.remove(file)
-
-if __name__ == "__main__":
-    for file in os.listdir():
-        mitigate_ransomware(file)
+def mitigate_ransomware(host, port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((host, port))
+    data = s.recv(1024)
+    if is_ransomware(data):
+        s.sendall(b"exit")
+        print("Mitigated ransomware attack on", host, ":", port)
+    else:
+        print("No ransomware attack detected on", host, ":", port)
