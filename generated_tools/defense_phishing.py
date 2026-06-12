@@ -1,30 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-12 14:39:46.457365
+# Generated 2026-06-12 17:36:15.509982
 
 import re
-import smtplib
-from email.message import EmailMessage
+import urllib.parse
+from typing import Union, List
 
-def is_phishing(email):
-    # Check if the email has a suspicious subject line
-    if re.search(r"[^a-zA-Z0-9\s]", email.subject):
-        return True
+class PhishingAttackDetector:
+    def __init__(self, url: str) -> None:
+        self.url = url
 
-    # Check if the email has a suspicious sender address
-    if re.search(r"@[^\.]+\.[a-z]{2,}$", email.sender):
-        return True
+    def detect(self) -> bool:
+        # Check if the URL is a valid HTTP/HTTPS address
+        if not re.match(r'^https?://', self.url):
+            return False
 
-    # Check if the email contains a suspicious attachment
-    for part in email.attachments:
-        if re.search(r"[^a-zA-Z0-9\s]", part.filename):
-            return True
+        # Split the URL into its components
+        parsed_url = urllib.parse.urlsplit(self.url)
 
-    return False
+        # Check if the domain is a valid IP address
+        if parsed_url.hostname:
+            try:
+                ipaddress.ip_address(parsed_url.hostname)
+                return False
+            except ValueError:
+                pass
 
-def mitigate_phishing(email):
-    # Respond with a friendly message
-    response = EmailMessage()
-    response.set_content("Thanks for reaching out! We're just an AI, we don[3D[K
-don't have the capability to receive emails.")
-    smtplib.sendmail("[YOUR_SMTP_SERVER]", email.sender, response)
+        # Check if the URL contains any suspicious keywords or parameters
+        for keyword in ['phishing', 'malware', 'scam']:
+            if keyword in self.url:
+                return True
+        for param in parsed_url.query.split('&'):
+            if re.search(r'=', param):
+                key, value = param.split('=')
+                if key == 'url' and value != urllib.parse.quote_plus(self.u[30D[K
+urllib.parse.quote_plus(self.url):
+                    return True
+        return False
+
+    def mitigate(self) -> None:
+        # Display a warning message to the user
+        print("Warning: Potential phishing attack detected!")
+        print("Please be cautious when clicking on links or entering person[6D[K
+personal information.")
+
+# Usage example
+detector = PhishingAttackDetector('https://www.example.com/phishing-attack'[64D[K
+PhishingAttackDetector('https://www.example.com/phishing-attack')
+if detector.detect():
+    detector.mitigate()
