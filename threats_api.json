@@ -1,19 +1,14 @@
 {
-  "last_updated": "2026-06-11T20:43:38.186757",
+  "last_updated": "2026-06-12T05:14:02.292020",
   "threats": [
     {
-      "timestamp": "2026-06-11T20:43:38.186704",
-      "snippet": "{'keyword': 'ransomware', 'time': 1781210008.3721128}",
+      "timestamp": "2026-06-12T05:14:02.291951",
+      "snippet": "{'keyword': 'ransomware', 'time': 1781238472.1256964}",
       "enrichment": []
     },
     {
-      "timestamp": "2026-06-11T20:43:38.186716",
-      "snippet": "{'keyword': 'zero day exploit', 'time': 1781210042.393949}",
-      "enrichment": []
-    },
-    {
-      "timestamp": "2026-06-11T20:43:38.186721",
-      "snippet": "{'keyword': 'phishing', 'time': 1781210025.0742505}",
+      "timestamp": "2026-06-12T05:14:02.291962",
+      "snippet": "{'keyword': 'zero day exploit', 'time': 1781238538.531856}",
       "enrichment": []
     }
   ]
