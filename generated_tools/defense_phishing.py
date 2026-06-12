@@ -1,20 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-12 11:39:32.740300
+# Generated 2026-06-12 14:39:46.457365
 
 import re
-import requests
-from urllib.parse import urlparse
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing_url(url):
-    parsed = urlparse(url)
-    domain = '.'.join(parsed.netloc.split('.')[-2:])
-    return domain in ['gmail', 'googlemail']
+def is_phishing(email):
+    # Check if the email has a suspicious subject line
+    if re.search(r"[^a-zA-Z0-9\s]", email.subject):
+        return True
 
-def mitigate_phishing_attack():
-    pass
+    # Check if the email has a suspicious sender address
+    if re.search(r"@[^\.]+\.[a-z]{2,}$", email.sender):
+        return True
 
-if __name__ == '__main__':
-    url = input('Enter URL: ')
-    if is_phishing_url(url):
-        mitigate_phishing_attack()
+    # Check if the email contains a suspicious attachment
+    for part in email.attachments:
+        if re.search(r"[^a-zA-Z0-9\s]", part.filename):
+            return True
+
+    return False
+
+def mitigate_phishing(email):
+    # Respond with a friendly message
+    response = EmailMessage()
+    response.set_content("Thanks for reaching out! We're just an AI, we don[3D[K
+don't have the capability to receive emails.")
+    smtplib.sendmail("[YOUR_SMTP_SERVER]", email.sender, response)
