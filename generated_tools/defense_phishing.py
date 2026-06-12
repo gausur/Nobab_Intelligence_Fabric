@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-12 02:45:12.975129
+# Generated 2026-06-12 11:39:32.740300
 
 import re
-from typing import List, Dict
+import requests
+from urllib.parse import urlparse
 
-class PhishingDetector:
-    def __init__(self, domains: List[str], patterns: Dict[str, str]):
-        self.domains = domains
-        self.patterns = patterns
-    
-    def is_phishing(self, url: str) -> bool:
-        for domain in self.domains:
-            if domain in url:
-                return True
-        return False
-    
-    def mitigate_phishing(self, url: str) -> str:
-        for pattern in self.patterns:
-            if re.search(pattern, url):
-                return ""
-        return url
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    domain = '.'.join(parsed.netloc.split('.')[-2:])
+    return domain in ['gmail', 'googlemail']
+
+def mitigate_phishing_attack():
+    pass
+
+if __name__ == '__main__':
+    url = input('Enter URL: ')
+    if is_phishing_url(url):
+        mitigate_phishing_attack()
