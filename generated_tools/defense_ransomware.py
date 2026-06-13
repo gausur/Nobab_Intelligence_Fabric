@@ -1,40 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-13 17:15:48.502340
+# Generated 2026-06-13 19:14:48.458674
 
 import os
-import sys
-import json
-from collections import defaultdict
+import re
+import subprocess
 
-def detect_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    if b"RANSOMWARE" in data:
-        print("Ransomware detected!")
+def detect_ransomware():
+    # Check for common file names and extensions
+    files = os.listdir()
+    for file in files:
+        if "." in file:
+            extension = file.split(".")[-1]
+            if extension in ["exe", "dll", "sys"]:
+                return True
+    
+    # Check for common registry keys
+    try:
+        subprocess.run(["reg", "query", "HKEY_CURRENT_USER\\Software\\Micro[35D[K
+"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion"], capture[7D[K
+capture_output=True)
         return True
-    else:
-        print("No ransomware detected.")
-        return False
+    except subprocess.CalledProcessError as e:
+        if re.search("^ERROR: Registry key not found", e.stderr.decode()):
+            pass
+        else:
+            raise
 
-def mitigate_ransomware(file):
-    with open(file, "rb+") as f:
-        data = f.read()
-    if b"RANSOMWARE" in data:
-        print("Removing ransomware from file.")
-        data = data.replace(b"RANSOMWARE", b"")
-        f.seek(0)
-        f.write(data)
-    else:
-        print("No ransomware detected, nothing to mitigate.")
-
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python ransomware_detector.py file")
-        sys.exit(1)
-    file = sys.argv[1]
-    detect_ransomware(file)
-    mitigate_ransomware(file)
+def mitigate_ransomware():
+    # Uninstall any malicious software
+    subprocess.run(["wmic", "product", "where", "name=\"Malicious Software\[9D[K
+Software\"", "call", "uninstall"])
+    
+    # Delete any malicious files
+    files = os.listdir()
+    for file in files:
+        if "." in file:
+            extension = file.split(".")[-1]
+            if extension in ["exe", "dll", "sys"]:
+                subprocess.run(["del", file])
 
 if __name__ == "__main__":
-    main()
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware():
+        mitigate_ransomware()
