@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-14 19:14:38.761481
+# Generated 2026-06-14 21:04:13.434785
 
 import os
-import stat
+import subprocess
 
-def detect_ransomware():
-    # Check if the file system is read-only
-    if os.access(os.getcwd(), os.W_OK):
-        return False
-    
-    # Check if the file system has any strange permissions
-    for root, dirs, files in os.walk("."):
-        for f in files:
-            path = os.path.join(root, f)
-            mode = stat.S_IMODE(os.stat(path).st_mode)
-            if mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH):
+def is_ransomware(file):
+    try:
+        with open(file, 'rb') as f:
+            data = f.read()
+            if b'XOR' in data or b'DES' in data or b'AES' in data:
+                return True
+            else:
                 return False
-    return True
+    except FileNotFoundError:
+        return False
 
-def mitigate_ransomware():
-    # Change the file system to read-only
-    os.chmod(os.getcwd(), stat.S_IRUSR)
-    
-    # Remove any malicious files or folders
-    for root, dirs, files in os.walk("."):
-        for f in files:
-            path = os.path.join(root, f)
-            if "malicious" in f:
-                os.remove(path)
-        for d in dirs:
-            if "malicious" in d:
-                shutil.rmtree(os.path.join(root, d))
-    return True
+def mitigate_ransomware(file):
+    try:
+        with open(file, 'rb') as f:
+            data = f.read()
+            if b'XOR' in data or b'DES' in data or b'AES' in data:
+                subprocess.run(['rm', '-f', file])
+    except FileNotFoundError:
+        pass
+
+def main():
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            if is_ransomware(os.path.join(root, file)):
+                mitigate_ransomware(os.path.join(root, file))
+
+if __name__ == '__main__':
+    main()
