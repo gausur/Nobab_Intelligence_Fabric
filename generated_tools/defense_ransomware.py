@@ -1,48 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-14 05:30:11.729766
+# Generated 2026-06-14 09:23:02.146153
 
 import os
 import subprocess
-import re
-import json
 import time
 
+def detect_ransomware(path):
+    # Check if the file is a valid executable
+    if not os.access(path, os.X_OK):
+        return False
+
+    # Check if the file has a known malicious string
+    for i in range(1024):
+        if subprocess.run(['strings', path], stdout=subprocess.PIPE).stdout[30D[K
+stdout=subprocess.PIPE).stdout.decode().startswith('Ransomware'):
+            return True
+    return False
+
+def mitigate_ransomware(path):
+    # Remove the file to prevent it from being executed
+    subprocess.run(['rm', path])
+
+# Main function
 def main():
-    # Define the command to run the program
-    cmd = "python -m ransomware_detection"
+    # Get the list of all files in the current directory
+    files = os.listdir()
 
-    # Run the command and store the output in a variable
-    output = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE).stdout[30D[K
-stdout=subprocess.PIPE).stdout
+    # Iterate through the list and detect ransomware
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+            print(f'Detected ransomware in {file}, removing it')
 
-    # Parse the JSON data from the output
-    try:
-        data = json.loads(output)
-    except json.JSONDecodeError:
-        print("Failed to parse JSON data")
-        return
-
-    # Check if the program detected a ransomware attack
-    if "ransomware_detected" in data:
-        if data["ransomware_detected"]:
-            print("Ransomware attack detected!")
-
-            # Mitigate the attack by renaming the infected file and deletin[7D[K
-deleting it
-            try:
-                os.rename(data["infected_file"], "cleaned_" + data["infecte[13D[K
-data["infected_file"])
-                os.remove(data["infected_file"])
-            except OSError as e:
-                print("Failed to mitigate the attack:", e)
-                return
-
-    # Check if the program encountered an error
-    if "error" in data:
-        if data["error"]:
-            print("Encountered an error:", data["error"])
-            return
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
