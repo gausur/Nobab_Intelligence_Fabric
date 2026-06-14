@@ -1,37 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-14 09:24:06.958624
+# Generated 2026-06-14 11:55:04.986596
 
 import re
 import smtplib
+from email.message import EmailMessage
 
-def is_phishing_url(url):
-    pattern = r"^(?:http|https)://\S+"
-    return bool(re.match(pattern, url))
-
-def send_email(recipient, subject, body):
-    server = smtplib.SMTP("smtp.example.com")
-    server.sendmail("no-reply@example.com", recipient, f"Subject: {subject}[9D[K
-{subject}\n\n{body}")
-    server.quit()
-
-def detect_phishing(url):
-    if not is_phishing_url(url):
-        return False
-    try:
-        request = urllib.request.urlopen(url)
-        response = request.read()
-        soup = BeautifulSoup(response, "html.parser")
-        if soup.title and soup.title.string == "Phishing Site":
-            send_email("admin@example.com", "Possible Phishing Attack", f"U[3D[K
-f"URL: {url}")
+def is_phishing_attack(email):
+    # Check if the email contains a suspicious link
+    if "://" in email["Subject"]:
+        return True
+    # Check if the email contains a suspicious attachment
+    for part in email.iter_attachments():
+        if not re.match(r".+\.exe$", part.get_filename()):
             return True
-    except (URLError, ValueError):
-        pass
     return False
 
-if __name__ == "__main__":
-    urls = ["http://www.phishingsite1.com", "https://phishingsite2.net"]
-    for url in urls:
-        if detect_phishing(url):
-            print("Phishing attack detected!")
+def mitigate_phishing_attack(email, sender):
+    # Remove the suspicious link from the email
+    email["Subject"] = re.sub(r"://.*", "", email["Subject"])
+    # Remove the suspicious attachment from the email
+    for part in email.iter_attachments():
+        if not re.match(r".+\.exe$", part.get_filename()):
+            part.dispose()
+    # Send a notification to the sender
+    msg = EmailMessage()
+    msg["Subject"] = "Phishing Attack Detected"
+    msg["From"] = sender
+    msg["To"] = email["From"]
+    msg.set_content("We have detected a phishing attack on your account. Pl[2D[K
+Please check your email for more information.")
+    smtplib.sendmail(msg)
+
+def main():
+    # Parse the email message
+    email = EmailMessage()
+    email.parse(sys.stdin)
+    # Check if the email is a phishing attack
+    if is_phishing_attack(email):
+        mitigate_phishing_attack(email, email["From"])
