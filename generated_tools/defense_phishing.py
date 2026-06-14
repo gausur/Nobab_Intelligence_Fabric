@@ -1,36 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-14 13:46:49.626865
+# Generated 2026-06-14 15:45:26.503317
 
 import re
-from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    parsed = urlparse(url)
-    if not parsed.netloc:
+    # Check if the URL is valid
+    if not url or not re.match(r'^https?://', url):
         return False
-    if not parsed.scheme:
-        return False
-    if parsed.hostname and parsed.hostname.endswith('.'):
+
+    # Check if the URL contains suspicious keywords
+    for keyword in ['phish', 'scam', 'fraud']:
+        if keyword in url.lower():
+            return True
+
+    # Check if the domain name is registered with a known phishing domain r[1D[K
+registry
+    domain = urlparse(url).netloc
+    if domain in PHISHING_DOMAINS:
         return True
-    if not parsed.path:
-        return False
+
+    # Check if the URL is hosted on a known phishing IP address
+    ip_address = urlparse(url).hostname
+    if ip_address in PHISHING_IPS:
+        return True
+
+    # No suspicious keywords or known phishing domain/IP found, assume legi[4D[K
+legitimate
     return False
 
-def mitigate_phishing_attack(url, user_agent):
-    if is_phishing_url(url):
-        print("Phishing attack detected!")
-        # Send a warning email to the user
-        send_email("user@example.com", "Phishing attack detected!", "Please[7D[K
-"Please be cautious when clicking on links.")
-    else:
-        # Proceed with normal operation
-        return True
+# List of known phishing domain registries
+PHISHING_DOMAINS = [
+    'phish.io',
+    'phising.net',
+    'phish.com'
+]
 
-def send_email(to, subject, message):
-    # Implement your own email sending logic here
-    print("Sending email to %s" % (to))
-
-if __name__ == "__main__":
-    mitigate_phishing_attack("http://example.com/phishing-page", "Mozilla/5[10D[K
-"Mozilla/5.0")
+# List of known phishing IP addresses
+PHISHING_IPS = [
+    '192.168.0.1',
+    '192.168.0.2',
+    '192.168.0.3'
+]
