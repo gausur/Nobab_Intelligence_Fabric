@@ -1,47 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-14 15:46:30.785863
+# Generated 2026-06-14 17:15:49.916678
 
 import os
-import subprocess
+import re
+import shutil
 
-def detect_ransomware():
-    # Check if the system is running Linux or Windows
-    system = platform.system()
-    if system == "Linux":
-        # Run a command to check for the presence of ransomware
-        output = subprocess.check_output(["ps", "-ef"])
-        if b"ransomware" in output:
-            return True
-    elif system == "Windows":
-        # Use the Get-WmiObject cmdlet to check for the presence of ransomw[7D[K
-ransomware
-        try:
-            wmi = subprocess.check_output(["powershell", "Get-WmiObject -Cl[3D[K
--Class Win32_Process"])
-            if b"ransomware" in wmi:
-                return True
-        except Exception as e:
-            print("Error while checking for ransomware:", str(e))
-    else:
-        # Unsupported system, return False
-        return False
+def detect_ransomware(file_path):
+    with open(file_path, "rb") as f:
+        contents = f.read()
+        return bool(re.search(b"RANSOMWARE", contents))
 
-def mitigate_ransomware():
-    # Check if the system is running Linux or Windows
-    system = platform.system()
-    if system == "Linux":
-        # Run a command to kill any ransomware processes
-        subprocess.check_output(["killall", "-9", "ransomware"])
-    elif system == "Windows":
-        # Use the Tasklist cmdlet to kill any ransomware processes
-        try:
-            tasklist = subprocess.check_output(["powershell", "Tasklist"])
-            if b"ransomware" in tasklist:
-                subprocess.check_output(["taskkill", "/IM", "ransomware.exe[15D[K
-"ransomware.exe", "/F"])
-        except Exception as e:
-            print("Error while killing ransomware processes:", str(e))
-    else:
-        # Unsupported system, do nothing
-        pass
+def mitigate_ransomware(file_path):
+    if detect_ransomware(file_path):
+        print("Detected ransomware!")
+        shutil.move(file_path, f"{os.getcwd()}/ransomed/{os.path.basename(f[44D[K
+f"{os.getcwd()}/ransomed/{os.path.basename(file_path)}")
+
+def main():
+    for file in os.listdir("."):
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+
+if __name__ == "__main__":
+    main()
