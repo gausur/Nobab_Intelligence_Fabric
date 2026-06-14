@@ -1,26 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-14 17:15:49.916678
+# Generated 2026-06-14 19:14:38.761481
 
 import os
-import re
-import shutil
+import stat
 
-def detect_ransomware(file_path):
-    with open(file_path, "rb") as f:
-        contents = f.read()
-        return bool(re.search(b"RANSOMWARE", contents))
+def detect_ransomware():
+    # Check if the file system is read-only
+    if os.access(os.getcwd(), os.W_OK):
+        return False
+    
+    # Check if the file system has any strange permissions
+    for root, dirs, files in os.walk("."):
+        for f in files:
+            path = os.path.join(root, f)
+            mode = stat.S_IMODE(os.stat(path).st_mode)
+            if mode & (stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH):
+                return False
+    return True
 
-def mitigate_ransomware(file_path):
-    if detect_ransomware(file_path):
-        print("Detected ransomware!")
-        shutil.move(file_path, f"{os.getcwd()}/ransomed/{os.path.basename(f[44D[K
-f"{os.getcwd()}/ransomed/{os.path.basename(file_path)}")
-
-def main():
-    for file in os.listdir("."):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware():
+    # Change the file system to read-only
+    os.chmod(os.getcwd(), stat.S_IRUSR)
+    
+    # Remove any malicious files or folders
+    for root, dirs, files in os.walk("."):
+        for f in files:
+            path = os.path.join(root, f)
+            if "malicious" in f:
+                os.remove(path)
+        for d in dirs:
+            if "malicious" in d:
+                shutil.rmtree(os.path.join(root, d))
+    return True
