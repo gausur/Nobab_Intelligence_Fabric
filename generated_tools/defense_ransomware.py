@@ -1,22 +1,47 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-15 13:01:23.832017
+# Generated 2026-06-15 18:02:41.392174
 
-import subprocess
-import re
+import os
+import sys
+import datetime
+import json
+from urllib import request
+from shutil import rmtree
 
-def detect_ransomware(command):
-    output = subprocess.check_output(["ps", "ax"]).decode()
-    for line in output.splitlines():
-        if "ransom" in line:
-            print("Ransomware detected!")
-            break
-    else:
-        print("No ransomware detected.")
+def is_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        data = f.read()
+        if b"RANSOMWARE" in data:
+            return True
+    return False
 
-def mitigate_ransomware(command):
-    subprocess.call(["killall", "-9", "ransomware"])
-    print("Mitigated ransomware attack!")
+def mitigate_ransomware(filepath):
+    # Remove the ransomware file
+    os.remove(filepath)
+    # Empty the trash
+    for root, dirs, files in os.walk(os.path.expanduser("~/.Trash")):
+        for f in files:
+            os.remove(os.path.join(root, f))
+    # Remove the ransomware from the system's memory
+    for process in psutil.process_iter():
+        try:
+            if "ransomware" in process.name():
+                process.terminate()
+        except Exception as e:
+            print(f"Failed to terminate ransomware process: {e}")
+    # Restart the system
+    os.system("sudo shutdown -r now")
 
-detect_ransomware("ps ax | grep -i 'ransom'")
-mitigate_ransomware("killall -9 ransomware")
+def main():
+    try:
+        filepath = sys.argv[1]
+    except IndexError:
+        print("Usage: python mitigate_ransomware.py <filepath>")
+        return
+
+    if is_ransomware(filepath):
+        mitigate_ransomware(filepath)
+
+if __name__ == "__main__":
+    main()
