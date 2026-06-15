@@ -1,47 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-15 18:02:41.392174
+# Generated 2026-06-15 20:49:40.142428
 
 import os
-import sys
-import datetime
-import json
-from urllib import request
-from shutil import rmtree
+import subprocess
+import re
 
-def is_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            return True
-    return False
-
-def mitigate_ransomware(filepath):
-    # Remove the ransomware file
-    os.remove(filepath)
-    # Empty the trash
-    for root, dirs, files in os.walk(os.path.expanduser("~/.Trash")):
-        for f in files:
-            os.remove(os.path.join(root, f))
-    # Remove the ransomware from the system's memory
-    for process in psutil.process_iter():
-        try:
-            if "ransomware" in process.name():
-                process.terminate()
-        except Exception as e:
-            print(f"Failed to terminate ransomware process: {e}")
-    # Restart the system
-    os.system("sudo shutdown -r now")
-
-def main():
+def detect_ransomware():
     try:
-        filepath = sys.argv[1]
-    except IndexError:
-        print("Usage: python mitigate_ransomware.py <filepath>")
-        return
+        output = subprocess.check_output(['ps', 'aux'])
+        process_list = output.decode('utf-8').split('\n')
+        for process in process_list:
+            if 'ransom' in process:
+                print("Ransomware detected")
+                return True
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to detect ransomware: {e}")
+        return False
+    else:
+        return False
 
-    if is_ransomware(filepath):
-        mitigate_ransomware(filepath)
+def mitigate_ransomware():
+    try:
+        output = subprocess.check_output(['lsblk', '-o', 'NAME,MOUNTPOINT'][18D[K
+'NAME,MOUNTPOINT'])
+        mountpoints = output.decode('utf-8').split('\n')
+        for mountpoint in mountpoints:
+            if 'ransom' in mountpoint:
+                print("Mitigating ransomware attack...")
+                subprocess.run(['umount', '-lf', mountpoint])
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to mitigate ransomware: {e}")
 
-if __name__ == "__main__":
-    main()
+if detect_ransomware():
+    mitigate_ransomware()
