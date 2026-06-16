@@ -1,42 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-16 06:30:46.222395
+# Generated 2026-06-16 12:11:22.595332
 
 import os
 import json
+import subprocess
+import signal
+from datetime import datetime
 
-def detect_ransomware(directory):
-    # Check if the directory contains a known ransomware file
-    for filename in os.listdir(directory):
-        if filename == "ransomware.exe":
-            return True
+def is_ransomware(filename):
+    try:
+        with open(filename, "rb") as f:
+            pe_data = f.read()
+    except FileNotFoundError:
+        return False
 
-    # Check if the directory has any files that have been encrypted with ra[2D[K
-ransomware
-    for filename in os.listdir(directory):
-        if not os.path.isfile(filename):
-            continue
-        with open(filename, "r") as f:
-            file_data = json.load(f)
-            if "ransomware" in file_data:
-                return True
-    return False
+    # Check for the presence of a "CryptoAPI" signature in the PE file
+    if b"CryptoAPI" not in pe_data:
+        return False
 
-def mitigate_ransomware(directory):
-    # Remove any encrypted files
-    for filename in os.listdir(directory):
-        if not os.path.isfile(filename):
-            continue
-        with open(filename, "r") as f:
-            file_data = json.load(f)
-            if "ransomware" in file_data:
-                os.remove(filename)
+    # Check for the presence of a "Ransomware" message in the PE file
+    if b"Ransomware" not in pe_data:
+        return False
+
     return True
 
+def mitigate(pid):
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
 def main():
-    directory = "/path/to/directory"
-    if detect_ransomware(directory):
-        mitigate_ransomware(directory)
-        print("Ransomware detected and mitigated")
-    else:
-        print("No ransomware detected")
+    # Get a list of all running processes
+    proc_list = subprocess.check_output(["ps", "ax"]).decode().splitlines()[28D[K
+"ax"]).decode().splitlines()[1:]
+
+    # Iterate over the process list and check for ransomware infection
+    for pid, command in proc_list:
+        if is_ransomware(command):
+            mitigate(pid)
+
+if __name__ == "__main__":
+    main()
