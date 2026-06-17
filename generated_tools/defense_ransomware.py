@@ -1,59 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-17 11:33:01.485465
+# Generated 2026-06-17 15:00:13.760876
 
 import os
-import subprocess
+import sys
+import time
+import datetime
+import socket
 import json
-from pathlib import Path
+from subprocess import check_output
 
-def detect_ransomware():
-    # Check if the system is running Windows
-    if os.name != 'nt':
-        print('This script only works on Windows systems')
-        return
+def detect_ransomware(ip):
+    try:
+        # Get the IP address of the device making the request
+        hostname = socket.gethostbyaddr(ip)
+        # Check if the hostname is in the ransomware list
+        with open("ransomware_list.json") as f:
+            ransomware_list = json.load(f)
+            if hostname in ransomware_list:
+                return True
+            else:
+                return False
+    except Exception as e:
+        # If there's an error, return False
+        print("Error detecting ransomware:", e)
+        return False
 
-    # Get a list of all processes running on the system
-    process_list = subprocess.check_output(['tasklist', '/svc']).decode().s[19D[K
-'/svc']).decode().splitlines()
+def mitigate_ransomware(ip):
+    try:
+        # Shutdown the device
+        check_output(["shutdown", "-h", "now"])
+    except Exception as e:
+        # If there's an error, print the error message and exit
+        print("Error mitigating ransomware:", e)
+        sys.exit(1)
 
-    # Filter the list to get only the processes that have been modified rec[3D[K
-recently
-    modified_processes = [process for process in process_list if os.path.ge[10D[K
-os.path.getmtime(process) > (time.time() - 10)]
-
-    # Check if any of the modified processes are known ransomware tools
-    for process in modified_processes:
-        if 'ransomware' in process:
-            print('Ransomware detected!')
-            return True
-
-    # If no ransomware was detected, output a success message
-    print('No ransomware detected.')
-    return False
-
-def mitigate_ransomware():
-    # Check if the system is running Windows
-    if os.name != 'nt':
-        print('This script only works on Windows systems')
-        return
-
-    # Get a list of all processes running on the system
-    process_list = subprocess.check_output(['tasklist', '/svc']).decode().s[19D[K
-'/svc']).decode().splitlines()
-
-    # Filter the list to get only the processes that have been modified rec[3D[K
-recently
-    modified_processes = [process for process in process_list if os.path.ge[10D[K
-os.path.getmtime(process) > (time.time() - 10)]
-
-    # Check if any of the modified processes are known ransomware tools
-    for process in modified_processes:
-        if 'ransomware' in process:
-            print('Killing ransomware process...')
-            subprocess.run(['taskkill', '/im', process])
-
-if __name__ == '__main__':
-    # Run the detection and mitigation functions
-    detect_ransomware()
-    mitigate_ransomware()
+if __name__ == "__main__":
+    try:
+        ip = sys.argv[1]
+        # Check if the IP address is in the ransomware list
+        if detect_ransomware(ip):
+            # If it's a ransomware attack, mitigate it
+            mitigate_ransomware(ip)
+    except Exception as e:
+        # If there's an error, print the error message and exit
+        print("Error detecting or mitigating ransomware:", e)
+        sys.exit(1)
