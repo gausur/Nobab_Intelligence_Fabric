@@ -1,36 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-17 20:06:02.058407
+# Generated 2026-06-17 22:33:17.049183
 
-import requests
-from urllib.parse import urlparse
+import re
+import smtplib
 
-def is_phishing_site(url):
-    try:
-        parsed_url = urlparse(url)
-        hostname = parsed_url.hostname
-        response = requests.get("https://check-phishing.com/{}".format(host[56D[K
-requests.get("https://check-phishing.com/{}".format(hostname))
-        if response.status_code == 200 and "phishing" in response.text:
+def is_phishing_url(url):
+    # Check if the URL is in the format of https://www.example.com/
+    if not url.startswith("https://"):
+        return False
+    
+    # Check if the URL contains any suspicious keywords
+    for keyword in ["fake", "scam", "malware"]:
+        if keyword in url:
             return True
-    except Exception:
-        pass
+    
     return False
 
-def mitigate_phishing(url):
-    try:
-        parsed_url = urlparse(url)
-        hostname = parsed_url.hostname
-        requests.get("https://stop-phishing.com/{}".format(hostname))
-    except Exception:
-        pass
+def is_phishing_email(sender, subject, body):
+    # Check if the sender's email address contains any suspicious keywords
+    for keyword in ["fake", "scam", "malware"]:
+        if keyword in sender:
+            return True
+    
+    # Check if the subject line contains any suspicious keywords
+    for keyword in ["fake", "scam", "malware"]:
+        if keyword in subject:
+            return True
+    
+    # Check if the body of the email contains any suspicious keywords
+    for keyword in ["fake", "scam", "malware"]:
+        if keyword in body:
+            return True
+    
+    return False
 
-def main():
-    url = "https://www.example.com"
-    if is_phishing_site(url):
-        mitigate_phishing(url)
+def mitigate_phishing_attack(sender, subject, body):
+    # If the email is a phishing attack, block it
+    if is_phishing_email(sender, subject, body):
+        print("Phishing attack detected!")
+        smtplib.sendmail(sender, "admin@example.com", "Blocked email: " + s[1D[K
+subject)
     else:
-        print("This site does not appear to be a phishing site.")
-
-if __name__ == "__main__":
-    main()
+        # If the email is not a phishing attack, allow it to pass through
+        print("Email passed through successfully.")
+        smtplib.sendmail(sender, "admin@example.com", "Allowed email: " + s[1D[K
+subject)
