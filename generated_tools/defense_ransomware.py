@@ -1,46 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-18 19:22:23.370380
+# Generated 2026-06-18 22:02:58.398242
 
 import os
-import json
-import shutil
+import re
 import subprocess
 
-def detect_ransomware(filename):
-    # Check if the file is a valid JSON document
+def detect_ransomware():
+    # Check if the system is vulnerable to ransomware attacks
     try:
-        with open(filename, "r") as f:
-            data = json.load(f)
-    except ValueError:
-        return False
-    
-    # Check if the "message" key exists and is not empty
-    if "message" in data and data["message"] != "":
-        return True
-    
-    return False
+        output = subprocess.check_output(["/usr/bin/ransomware-scan"])
+        if "Infected" in output:
+            print("Ransomware detected!")
+            return True
+        else:
+            print("No ransomware detected.")
+            return False
+    except subprocess.CalledProcessError:
+        print("Failed to execute the ransomware scanner.")
+        return None
 
-def mitigate_ransomware(filename):
-    # Remove the file from disk
+def mitigate_ransomware():
+    # Try to recover the data and prevent further encryption
     try:
-        os.remove(filename)
-    except OSError:
-        pass
+        output = subprocess.check_output(["/usr/bin/recovery-tool"])
+        if "Recovered" in output:
+            print("Data recovered successfully!")
+            return True
+        else:
+            print("Failed to recover data.")
+            return False
+    except subprocess.CalledProcessError:
+        print("Failed to execute the recovery tool.")
+        return None
 
-    # Notify the user that the file has been removed
-    print("The ransomware attack has been mitigated.")
-
-# Main function to detect and mitigate ransomware attacks
-def main():
-    # Get a list of all files in the current directory
-    filenames = os.listdir()
-    
-    # Iterate through each file and check if it is a valid JSON document
-    for filename in filenames:
-        if detect_ransomware(filename):
-            mitigate_ransomware(filename)
-
-# Call the main function
 if __name__ == "__main__":
-    main()
+    detected = detect_ransomware()
+    if detected:
+        mitigated = mitigate_ransomware()
+        if mitigated:
+            print("Mitigation successful!")
+        else:
+            print("Failed to mitigate ransomware attack.")
+    else:
+        print("No ransomware detected.")
