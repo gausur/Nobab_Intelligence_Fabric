@@ -1,38 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-18 10:10:15.807568
+# Generated 2026-06-18 14:02:12.528166
 
 import os
-import subprocess
+import hashlib
+import json
+import requests
 from pathlib import Path
 
-def get_file_extensions(path):
-    file_extensions = []
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            _, extension = os.path.splitext(f)
-            if extension not in file_extensions:
-                file_extensions.append(extension)
-    return file_extensions
+def detect_ransomware(file_path):
+    file_hash = hashlib.sha256(open(file_path, 'rb').read()).hexdigest()
+    url = "https://api.example.com/check_file"
+    params = {"file_hash": file_hash}
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        data = json.loads(response.content)
+        if data["is_ransomware"]:
+            print("Ransomware detected!")
+            return True
+    else:
+        print("Error checking file hash")
+        return False
 
-def get_ransomware_files(file_extensions, path):
-    ransomware_files = []
-    for root, dirs, files in os.walk(path):
-        for f in files:
-            _, extension = os.path.splitext(f)
-            if extension in file_extensions:
-                ransomware_files.append(os.path.join(root, f))
-    return ransomware_files
+def mitigate_ransomware():
+    for root, dirs, files in os.walk(Path("/")):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if detect_ransomware(file_path):
+                print("Removing ransomware file:", file_path)
+                os.remove(file_path)
+    print("Mitigation complete!")
 
-def decrypt_ransomware_files(ransomware_files):
-    for file in ransomware_files:
-        subprocess.call(["decrypt", file])
-
-def main():
-    file_extensions = get_file_extensions("path/to/files")
-    ransomware_files = get_ransomware_files(file_extensions, "path/to/files[14D[K
-"path/to/files")
-    decrypt_ransomware_files(ransomware_files)
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    mitigate_ransomware()
