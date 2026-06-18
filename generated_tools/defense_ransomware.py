@@ -1,35 +1,58 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-18 14:02:12.528166
+# Generated 2026-06-18 17:00:14.341334
 
 import os
-import hashlib
-import json
-import requests
-from pathlib import Path
+import sys
+import socket
+import subprocess
+import time
 
-def detect_ransomware(file_path):
-    file_hash = hashlib.sha256(open(file_path, 'rb').read()).hexdigest()
-    url = "https://api.example.com/check_file"
-    params = {"file_hash": file_hash}
-    response = requests.get(url, params=params)
-    if response.status_code == 200:
-        data = json.loads(response.content)
-        if data["is_ransomware"]:
-            print("Ransomware detected!")
-            return True
-    else:
-        print("Error checking file hash")
-        return False
+def check_for_ransomware():
+    # Check if the current process is being run as root or with elevated pr[2D[K
+privileges
+    if os.getuid() != 0:
+        print("Please run this script with elevated privileges to detect ra[2D[K
+ransomware.")
+        sys.exit(1)
+
+    # Check for any running processes that are suspected of being ransomwar[9D[K
+ransomware
+    for proc in psutil.process_iter():
+        try:
+            cmdline = " ".join(proc.cmdline())
+            if "ransomware" in cmdline:
+                print(f"Suspicious process found: {cmdline}")
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+    # Check for any open connections that are suspicious
+    for connection in psutil.net_connections():
+        if connection.raddr is not None and "ransomware" in connection.radd[15D[K
+connection.raddr[0]:
+            print(f"Suspicious connection found: {connection}")
 
 def mitigate_ransomware():
-    for root, dirs, files in os.walk(Path("/")):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                print("Removing ransomware file:", file_path)
-                os.remove(file_path)
-    print("Mitigation complete!")
+    # Kill any suspicious processes
+    for proc in psutil.process_iter():
+        try:
+            cmdline = " ".join(proc.cmdline())
+            if "ransomware" in cmdline:
+                print(f"Killing process: {cmdline}")
+                proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+    # Close any suspicious connections
+    for connection in psutil.net_connections():
+        if connection.raddr is not None and "ransomware" in connection.radd[15D[K
+connection.raddr[0]:
+            print(f"Closing connection: {connection}")
+            connection.close()
+
+def main():
+    check_for_ransomware()
+    mitigate_ransomware()
 
 if __name__ == "__main__":
-    mitigate_ransomware()
+    main()
