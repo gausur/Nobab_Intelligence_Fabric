@@ -1,39 +1,25 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-18 05:32:30.753526
+# Generated 2026-06-18 10:10:39.687493
 
 import re
-import smtplib
-from email import message_from_bytes
+from urllib.parse import urlparse
 
-def is_phishing_url(url):
-    return re.search(r"https?://(www\.)?example\.com", url)
-
-def get_email_message(data):
-    # Extract the email message from the data
-    try:
-        msg = message_from_bytes(data)
-        return msg
-    except Exception as e:
-        print("Failed to extract email message:", e)
-        return None
-
-def mitigate_phishing_attack(msg):
-    # Check if the email contains a phishing URL
-    url = msg.get("href")
-    if is_phishing_url(url):
-        print("Phishing attack detected!")
-        # TODO: Take appropriate action, such as blocking the IP address or[2D[K
-or sending an alert
+def is_phishing_attack(url):
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if "@" in domain:
+        return True
     else:
-        print("No phishing attack detected.")
+        return False
 
-def main():
-    # Read data from stdin
-    data = sys.stdin.read()
-    msg = get_email_message(data)
-    if msg is not None:
-        mitigate_phishing_attack(msg)
+def mitigate_phishing_attack(url):
+    if is_phishing_attack(url):
+        print("Possible phishing attack detected!")
+        exit()
+    else:
+        pass
 
 if __name__ == "__main__":
-    main()
+    url = input("Enter URL: ")
+    mitigate_phishing_attack(url)
