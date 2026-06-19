@@ -1,33 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-19 12:55:42.324294
+# Generated 2026-06-19 15:59:05.029262
 
 import os
-import subprocess
-import json
+import hashlib
+import shutil
+import zipfile
 
-def main():
-    # Check if the system is running on Linux or macOS
-    if (os.name == 'posix'):
-        # Execute the command to check for ransomware infection
-        output = subprocess.check_output(['clamscan', '-i'])
-        result = json.loads(output)
+def is_ransomware(filename):
+    with open(filename, 'rb') as f:
+        data = f.read()
+        return hashlib.md5(data).hexdigest() == '2222819e7c03d745640a5efae6[27D[K
+'2222819e7c03d745640a5efae6828c31'
 
-        # Check if there are any infections
-        if (result['Infected']):
-            # Print a message to the user indicating that there is an infec[5D[K
-infection
-            print('There is a ransomware infection on this system.')
-
-            # Provide instructions for how to mitigate the infection
-            print('To mitigate the infection, please run the command:')
-            print('  sudo clamscan -i --fix')
-            print('This will scan and remove any ransomware infections.')
-    else:
-        # Print an error message if the system is not running on Linux or m[1D[K
-macOS
-        print('This script only supports systems running on Linux or macOS.[6D[K
-macOS.')
+def mitigate_ransomware(filename):
+    if is_ransomware(filename):
+        with zipfile.ZipFile(filename, 'w') as zf:
+            for root, dirs, files in os.walk(os.path.dirname(filename)):
+                for file in files:
+                    fullpath = os.path.join(root, file)
+                    if not is_ransomware(fullpath):
+                        zf.write(fullpath)
+            shutil.copyfile(filename, 'backup.zip')
+            os.remove(filename)
 
 if __name__ == '__main__':
-    main()
+    mitigate_ransomware('your_file.exe')
