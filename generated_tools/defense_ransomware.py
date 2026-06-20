@@ -1,87 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-20 21:10:23.562212
+# Generated 2026-06-20 23:02:17.504402
 
-import os
-import time
 import socket
-import hashlib
-import subprocess
-import json
+import time
+import sys
 
-def detect_ransomware(path):
-    """
-    Detects if the given path is infected with ransomware by checking for k[1D[K
-known file names and extensions.
+def scan_for_ransomware(ip, port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        s.connect((ip, port))
+        return True
+    except:
+        return False
+    finally:
+        s.close()
 
-    Args:
-        path (str): The path to check for ransomware infection.
+def detect_ransomware():
+    # Scan for ransomware on all open ports
+    for port in range(1, 65535):
+        if scan_for_ransomware("localhost", port):
+            print(f"Ransomware detected on port {port}")
+            mitigate_ransomware(port)
 
-    Returns:
-        bool: True if the path is infected, False otherwise.
-    """
-    # List of known ransomware file names and extensions
-    file_names = [
-        "unlockme",
-        "unlocker",
-        "win32.torrent",
-        "readme.txt"
-    ]
-    ext_names = [
-        ".exe",
-        ".bat",
-        ".com",
-        ".cmd",
-        ".msi",
-        ".rar",
-        ".zip"
-    ]
+def mitigate_ransomware(port):
+    # Stop the ransomware process
+    os.system(f"kill -9 $(lsof -t -i:port)")
+    # Restore backups
+    os.system(f"cp /backup/file /var/www")
+    # Notify IT department
+    send_notification()
 
-    # Check if any of the file names or extensions are present in the path
-    for name in file_names:
-        if name in os.listdir(path):
-            return True
-    for ext in ext_names:
-        if os.path.splitext(path)[1] == ext:
-            return True
-    return False
+def send_notification():
+    # Send an email to the IT department
+    smtp = smtplib.SMTP("smtp.gmail.com", 587)
+    smtp.starttls()
+    smtp.login("your-email@gmail.com", "your-password")
+    subject = "Ransomware detected on port {}".format(port)
+    body = """
+    A ransomware attack has been detected on port {}. The attacker has take[4D[K
+taken control of the system and is encrypting files.
+    To mitigate the attack, we have stopped the ransomware process, restore[7D[K
+restored backups, and notified the IT department.
+    Please take immediate action to prevent further damage.
+    """.format(port)
+    smtp.sendmail("your-email@gmail.com", "it_department@example.com", subj[4D[K
+subject, body)
+    smtp.quit()
 
-def mitigate_ransomware(path):
-    """
-    Mitigates the ransomware infection by removing the infected files and r[1D[K
-restarting the system.
-
-    Args:
-        path (str): The path to the infected file or directory.
-    """
-    # Remove the infected files and directories
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            if detect_ransomware(os.path.join(root, name)):
-                os.remove(os.path.join(root, name))
-        for name in dirs:
-            if detect_ransomware(os.path.join(root, name)):
-                os.rmdir(os.path.join(root, name))
-    # Restart the system to clear any malicious processes
-    subprocess.run(["shutdown", "/r", "/t", "0"])
-
-def main():
-    """
-    The main function that runs the ransomware detection and mitigation scr[3D[K
-script.
-    """
-    # Get the current directory path
-    cwd = os.getcwd()
-    # Check if the current directory is infected with ransomware
-    if detect_ransomware(cwd):
-        # If yes, mitigate the infection and restart the system
-        mitigate_ransomware(cwd)
-    else:
-        # Otherwise, check for any subdirectories that may be infected
-        for root, dirs, files in os.walk(cwd):
-            for name in dirs:
-                if detect_ransomware(os.path.join(root, name)):
-                    mitigate_ransomware(os.path.join(root, name))
-
-if __name__ == "__main__":
-    main()
+detect_ransomware()
