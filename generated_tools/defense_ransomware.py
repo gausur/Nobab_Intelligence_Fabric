@@ -1,25 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-20 15:30:55.208934
+# Generated 2026-06-20 17:19:36.091164
 
 import os
 import subprocess
-import time
 
 def detect_ransomware():
-    # Check if the system is infected with ransomware
-    output = subprocess.check_output("sudo ransomware-detect")
-    if "Ransomware detected" in output:
-        return True
-    else:
-        return False
+    # Check for known ransomware files
+    if os.path.isfile('/usr/share/ransomware/ransomware.txt'):
+        print('Ransomware detected!')
+
+    # Check for known ransomware processes
+    subprocess.check_output(['ps', 'aux'])
+    if any(x in p for x in ['ransomware', 'encrypt']):
+        print('Ransomware process detected!')
 
 def mitigate_ransomware():
-    # Restore the system from a backup and reboot
-    subprocess.call("sudo restore-system --backup=latest")
-    subprocess.call("sudo reboot")
+    # Restart the system to avoid further damage
+    subprocess.check_output(['reboot'])
 
-if detect_ransomware():
+if __name__ == '__main__':
+    detect_ransomware()
     mitigate_ransomware()
-else:
-    print("No ransomware detected.")

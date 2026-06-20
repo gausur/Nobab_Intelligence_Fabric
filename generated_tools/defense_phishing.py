@@ -1,39 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-20 15:33:44.299558
+# Generated 2026-06-20 17:20:40.980959
 
 import re
-import socket
+import urllib.parse
+from email.message import EmailMessage
 
-def detect_phishing(url):
-    # Check if the URL is valid
-    try:
-        socket.gethostbyname(url)
-    except:
-        return False
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious characters or patterns
+    for char in ["://", "www.", ".com", ".org", ".net"]:
+        if char in url:
+            return False
+    return True
 
-    # Check for common phishing URLs
-    if re.search(r'https?://(www.)?google\.(com|co\.uk)/', url):
-        return False
-    elif re.search(r'https?://(www.)?facebook\.(com|co\.uk)/', url):
-        return False
-    elif re.search(r'https?://(www.)?twitter\.(com|co\.uk)/', url):
-        return False
-    elif re.search(r'https?://(www.)?linkedin\.(com|co\.uk)/', url):
-        return False
-    elif re.search(r'https?://(www.)?youtube\.(com|co\.uk)/', url):
-        return False
+def extract_email(message):
+    # Extract the email address from the message body
+    match = re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", me[2D[K
+message)
+    if match:
+        return match.group()
+    else:
+        return None
 
-    # Check for common phishing domain names
-    if re.search(r'\.(info|co\.uk|net)$', url):
-        return True
+def is_phishing_email(email):
+    # Check if the email address contains any suspicious characters or patt[4D[K
+patterns
+    for char in ["@", ".com", ".org", ".net"]:
+        if char in email:
+            return False
+    return True
 
-    # Check for common phishing parameters
-    if re.search(r'https?://(www.)?([\w-]+\.)+([\w]+)/[?&]', url):
-        return True
+def main():
+    # Read the message from stdin
+    message = sys.stdin.read()
 
-    # Check for common phishing path patterns
-    if re.search(r'/(login|signin|signup|register|admin|account)\b', url):
-        return True
+    # Parse the message as an EmailMessage object
+    msg = EmailMessage()
+    msg.set_payload(message)
+    msg.parse()
 
-    return False
+    # Extract the email address and URL from the message
+    email = extract_email(msg.get_payload())
+    url = msg.get("From").split("<")[1].split(">")[0]
+
+    # Check if the email address or URL is suspicious
+    if is_phishing_email(email) or is_phishing_url(url):
+        print("Phishing attack detected!")
+    else:
+        print("No phishing attack detected.")
+
+if __name__ == "__main__":
+    main()
