@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-20 00:05:46.588698
+# Generated 2026-06-20 05:08:05.083515
 
-import sys
 import os
+import sys
 
-def main():
-    # Check if the system is running Windows
-    if sys.platform == 'win32':
-        # Get the list of all processes
-        process_list = os.popen('tasklist').readlines()
-        for line in process_list:
-            # Split the line into columns
-            columns = line.split()
-            # Check if the process name contains "ransom" or "crypt"
-            if 'ransom' in columns[0] or 'crypt' in columns[0]:
-                # Print a message indicating that a ransomware process was [K
-detected
-                print('Ransomware detected!')
-                # Kill the process
-                os.system('taskkill /im "' + columns[0] + '"')
-    else:
-        # If the system is not Windows, print an error message
-        print('Error: Only Windows systems are supported for this script')
+def is_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+        if b"RANSOMWARE" in data:
+            return True
+        else:
+            return False
 
-if __name__ == '__main__':
-    main()
+def mitigate_ransomware(file):
+    with open(file, "wb") as f:
+        f.write(b"MITIGATED")
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python ransomware_detector.py <file>")
+        sys.exit(1)
+    file = sys.argv[1]
+    if is_ransomware(file):
+        mitigate_ransomware(file)
