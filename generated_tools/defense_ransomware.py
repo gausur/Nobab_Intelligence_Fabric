@@ -1,34 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-19 22:46:49.428980
+# Generated 2026-06-20 00:05:46.588698
 
+import sys
 import os
-import subprocess
-
-def detect_ransomware(filename):
-    # Check if the file is encrypted
-    try:
-        with open(filename, "rb") as f:
-            magic = f.read(4)
-        if magic == b"\x9e\x7f\x89\xfb":
-            return True
-    except FileNotFoundError:
-        return False
-    return False
-
-def mitigate_ransomware(filename):
-    # Decrypt the file using the built-in decryption tool
-    try:
-        subprocess.check_call(["crypto", "--decrypt", filename])
-    except subprocess.CalledProcessError:
-        print("Failed to decrypt the file")
 
 def main():
-    # Get a list of all files in the current directory
-    filenames = os.listdir()
-    for filename in filenames:
-        if detect_ransomware(filename):
-            mitigate_ransomware(filename)
+    # Check if the system is running Windows
+    if sys.platform == 'win32':
+        # Get the list of all processes
+        process_list = os.popen('tasklist').readlines()
+        for line in process_list:
+            # Split the line into columns
+            columns = line.split()
+            # Check if the process name contains "ransom" or "crypt"
+            if 'ransom' in columns[0] or 'crypt' in columns[0]:
+                # Print a message indicating that a ransomware process was [K
+detected
+                print('Ransomware detected!')
+                # Kill the process
+                os.system('taskkill /im "' + columns[0] + '"')
+    else:
+        # If the system is not Windows, print an error message
+        print('Error: Only Windows systems are supported for this script')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
