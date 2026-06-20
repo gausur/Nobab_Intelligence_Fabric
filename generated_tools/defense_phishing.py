@@ -1,46 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-20 08:45:40.725109
+# Generated 2026-06-20 11:13:04.747947
 
 import re
-import smtplib
-from email.parser import Parser
+import requests
+from urllib.parse import urlparse
 
-def is_phishing_email(email):
-    if not email:
+def is_phishing(url):
+    parsed = urlparse(url)
+    if not parsed.scheme or not parsed.netloc:
         return False
-
-    try:
-        parser = Parser()
-        message = parser.parsestr(email)
-
-        subject = message['subject']
-        body = message.get_payload()
-
-        # Check for common phishing keywords in the subject and body of the[3D[K
-the email
-        if re.search(r'phishing|scam|malware', subject, re.IGNORECASE) or \[1D[K
-\
-                re.search(r'click here to confirm your account|confirm you[3D[K
-your email address', body, re.IGNORECASE):
-            return True
-    except:
-        pass
-
-    # Check for suspicious links in the email
-    if message.get_payload():
-        for link in message.get_payload():
-            if re.search(r'phishing|scam|malware', link, re.IGNORECASE):
-                return True
-
+    hostname = parsed.hostname
+    if not hostname:
+        return False
+    # Check for common phishing patterns in the URL
+    if re.search(r"https?://[\w.-]+.[a-z]{2,}$", url):
+        return True
+    # Check for common phishing patterns in the domain name
+    if hostname.endswith(".co") or hostname.endswith(".io") or hostname.end[12D[K
+hostname.endswith(".ly"):
+        return True
+    # Check for common phishing patterns in the path
+    if re.search(r"/phishing|/click-here", url):
+        return True
     return False
 
-def mitigate_phishing_attack(email):
-    # Send an email to the recipient with a phishing warning
-    sender = 'your@email.com'
-    subject = 'Phishing Attempt Detected'
-    body = f'Dear {email["from"]},<br><br>We have detected a phishing attem[5D[K
-attempt from your email address ({email["from"]}). Please ignore any suspic[6D[K
-suspicious emails or links you may have received.<br><br>Sincerely,<br>{sen[35D[K
-received.<br><br>Sincerely,<br>{sender}'
-    smtplib.sendmail(sender, email["to"], subject, body)
+def mitigate_phishing(url, user_agent=None):
+    if is_phishing(url):
+        # Block the request with a 403 status code
+        response = requests.Response()
+        response.status_code = 403
+        response.headers["Content-Type"] = "text/plain"
+        response.content = "Phishing detected, access denied."
+        return response
+    # Proceed with the request as normal
+    return requests.get(url, headers={"User-Agent": user_agent})
