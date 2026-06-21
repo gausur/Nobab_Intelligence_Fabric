@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-21 12:09:03.007435
+# Generated 2026-06-21 15:11:05.714016
 
 import re
+import urllib
 
 def is_phishing_url(url):
-    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    match = re.search(pattern, url)
-    if match:
-        return True
-    else:
+    if not url:
         return False
-
-def mitigate_phishing_attack(url):
-    if is_phishing_url(url):
-        # Mitigation code goes here
-        print("Phishing attack detected!")
-    else:
-        print("No phishing attack detected.")
-
-mitigate_phishing_attack("https://example.com")
+    
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    
+    # Check for common phishing domains
+    if domain in ['example.com', 'fakeemail.com']:
+        return True
+    
+    # Check for phishing subdomains
+    if domain.startswith('www.'):
+        main_domain = domain[4:]
+        if main_domain in ['example.com', 'fakeemail.com']:
+            return True
+    
+    # Check for malicious patterns in the URL
+    if re.search(r'[^a-zA-Z0-9.-]', url):
+        return True
+    
+    return False

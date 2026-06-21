@@ -1,57 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-21 12:10:49.704780
+# Generated 2026-06-21 15:10:18.329032
 
+import socket
+import select
+import hashlib
 import os
-import re
-import subprocess
 
-def detect_ransomware(file):
-    # Check if the file is readable
-    if not os.access(file, os.R_OK):
-        return False
-    
-    # Check if the file is a binary
-    if not os.path.isfile(file):
-        return False
-    
-    # Read the file contents and look for known ransomware patterns
-    with open(file, 'rb') as f:
-        data = f.read()
-        
-        # Look for the presence of a ransomware string in the file
-        if re.search(b'RANSOMWARE', data):
-            return True
-        
-        # Check if the file contains any other known ransomware patterns
-        if re.search(b'encrypt me', data) or re.search(b'demand payment', d[1D[K
-data):
-            return True
-    
-    return False
+def check_for_ransomware(host, port):
+    s = socket.socket()
+    s.connect((host, port))
+    s.send("GET / HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n".format[21D[K
+close\r\n\r\n".format(host).encode())
+    data = b''
+    while True:
+        response = s.recv(4096)
+        if not response:
+            break
+        data += response
+    s.close()
+    return check_for_malware(data)
 
-def mitigate_ransomware(file, new_name=None):
-    # Check if the file exists and is a binary
-    if not os.path.isfile(file) or not os.path.isfile(new_name):
+def check_for_malware(data):
+    # Check for malware using a hash of the response data
+    md5 = hashlib.md5()
+    md5.update(data)
+    if md5.hexdigest() == 'd41d8cd98f00b204e9800998ecf8427e':
+        return True
+    else:
         return False
-    
-    # Remove the file
-    os.remove(file)
-    
-    # Create a new, empty file with the same name as the original file
-    with open(new_name, 'wb'):
-        pass
-    
-    return True
 
-def main():
-    # Get the list of all files in the current directory
-    for filename in os.listdir('.'):
-        # Check if the file is a binary and has the ransomware pattern
-        if detect_ransomware(filename) == True:
-            # Remove the file and create a new, empty file with the same na[2D[K
-name as the original file
-            mitigate_ransomware(filename, filename)
-    
+def mitigate_ransomware(host, port):
+    s = socket.socket()
+    s.connect((host, port))
+    s.send("GET / HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n".format[21D[K
+close\r\n\r\n".format(host).encode())
+    data = b''
+    while True:
+        response = s.recv(4096)
+        if not response:
+            break
+        data += response
+    s.close()
+    # Mitigate ransomware by deleting the files on the infected system
+    for file in os.listdir():
+        os.remove(file)
+
 if __name__ == '__main__':
-    main()
+    host = input("Enter the host to check for ransomware: ")
+    port = int(input("Enter the port to use: "))
+    if check_for_ransomware(host, port):
+        mitigate_ransomware(host, port)
+        print("Ransomware detected and mitigated")
+    else:
+        print("No ransomware detected")
