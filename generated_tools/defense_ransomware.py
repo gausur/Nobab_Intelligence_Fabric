@@ -1,39 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-21 09:42:21.859224
+# Generated 2026-06-21 12:10:49.704780
 
 import os
 import re
 import subprocess
-from typing import List
 
-def detect_ransomware(file_path: str) -> bool:
-    """Detects if a file is infected with ransomware by checking its conten[6D[K
-contents"""
-    with open(file_path, "rb") as f:
-        content = f.read()
-        if b"ransomware" in content or b"encrypted" in content:
+def detect_ransomware(file):
+    # Check if the file is readable
+    if not os.access(file, os.R_OK):
+        return False
+    
+    # Check if the file is a binary
+    if not os.path.isfile(file):
+        return False
+    
+    # Read the file contents and look for known ransomware patterns
+    with open(file, 'rb') as f:
+        data = f.read()
+        
+        # Look for the presence of a ransomware string in the file
+        if re.search(b'RANSOMWARE', data):
             return True
-        else:
-            return False
+        
+        # Check if the file contains any other known ransomware patterns
+        if re.search(b'encrypt me', data) or re.search(b'demand payment', d[1D[K
+data):
+            return True
+    
+    return False
 
-def mitigate_ransomware(file_path: str) -> None:
-    """Removes the ransomware from the infected file"""
-    with open(file_path, "wb") as f:
-        content = b""
-        for line in f.readlines():
-            if not re.search(r"ransomware|encrypted", line):
-                content += line
-        f.write(content)
+def mitigate_ransomware(file, new_name=None):
+    # Check if the file exists and is a binary
+    if not os.path.isfile(file) or not os.path.isfile(new_name):
+        return False
+    
+    # Remove the file
+    os.remove(file)
+    
+    # Create a new, empty file with the same name as the original file
+    with open(new_name, 'wb'):
+        pass
+    
+    return True
 
-def main() -> None:
-    """Main function to detect and mitigate ransomware attacks"""
-    file_paths = []  # List of all files in the directory
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                mitigate_ransomware(file_path)
-
-if __name__ == "__main__":
+def main():
+    # Get the list of all files in the current directory
+    for filename in os.listdir('.'):
+        # Check if the file is a binary and has the ransomware pattern
+        if detect_ransomware(filename) == True:
+            # Remove the file and create a new, empty file with the same na[2D[K
+name as the original file
+            mitigate_ransomware(filename, filename)
+    
+if __name__ == '__main__':
     main()
