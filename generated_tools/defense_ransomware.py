@@ -1,56 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-21 15:10:18.329032
+# Generated 2026-06-21 17:24:58.926698
 
-import socket
-import select
-import hashlib
 import os
+import sys
+import subprocess
 
-def check_for_ransomware(host, port):
-    s = socket.socket()
-    s.connect((host, port))
-    s.send("GET / HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n".format[21D[K
-close\r\n\r\n".format(host).encode())
-    data = b''
-    while True:
-        response = s.recv(4096)
-        if not response:
-            break
-        data += response
-    s.close()
-    return check_for_malware(data)
-
-def check_for_malware(data):
-    # Check for malware using a hash of the response data
-    md5 = hashlib.md5()
-    md5.update(data)
-    if md5.hexdigest() == 'd41d8cd98f00b204e9800998ecf8427e':
-        return True
-    else:
+def is_ransomware(filepath):
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+            if b"ransomware" in data or b"encrypt" in data:
+                return True
+            else:
+                return False
+    except Exception:
         return False
 
-def mitigate_ransomware(host, port):
-    s = socket.socket()
-    s.connect((host, port))
-    s.send("GET / HTTP/1.1\r\nHost: {}\r\nConnection: close\r\n\r\n".format[21D[K
-close\r\n\r\n".format(host).encode())
-    data = b''
-    while True:
-        response = s.recv(4096)
-        if not response:
-            break
-        data += response
-    s.close()
-    # Mitigate ransomware by deleting the files on the infected system
-    for file in os.listdir():
-        os.remove(file)
+def decrypt_file(filepath):
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+            if b"encrypted" in data:
+                process = subprocess.Popen(["mydecryptiontool"], stdin=subp[10D[K
+stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                output, _ = process.communicate(input=data)
+                with open(filepath, "wb") as f:
+                    f.write(output)
+        return True
+    except Exception:
+        return False
 
-if __name__ == '__main__':
-    host = input("Enter the host to check for ransomware: ")
-    port = int(input("Enter the port to use: "))
-    if check_for_ransomware(host, port):
-        mitigate_ransomware(host, port)
-        print("Ransomware detected and mitigated")
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python ransomware_mitigation.py <filepath>")
+        sys.exit(1)
+    filepath = sys.argv[1]
+    if is_ransomware(filepath):
+        decrypt_file(filepath)
+        print("Ransomware detected and mitigated.")
     else:
-        print("No ransomware detected")
+        print("No ransomware detected.")
+
+if __name__ == "__main__":
+    main()
