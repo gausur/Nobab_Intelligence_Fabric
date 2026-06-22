@@ -1,43 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-22 02:58:44.988858
+# Generated 2026-06-22 08:54:03.316732
 
 import re
-import smtplib
+import requests
+from urllib.parse import urlparse
 
-def is_phishing_email(subject, sender):
-    """
-    Check if the email subject and sender match a known phishing pattern.
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    if parsed.scheme != "https":
+        return True
+    if parsed.netloc.endswith(".co"):
+        return True
+    return False
 
-    Parameters:
-        subject (str): The subject line of the email.
-        sender (str): The email address of the sender.
-
-    Returns:
-        bool: True if the email is likely to be a phishing attack, False ot[2D[K
-otherwise.
-    """
-    # Check for common phishing patterns in the subject and sender
-    pattern = re.compile(r'Fake|Scam|Phish')
-    return (pattern.search(subject) or pattern.search(sender)) is not None
-
-def mitigate_phishing_attack(email):
-    """
-    Mitigate a phishing attack by marking the email as spam and reporting i[1D[K
-it to the relevant authorities.
-
-    Parameters:
-        email (str): The email message to be processed.
-    """
-    # Mark the email as spam
-    email['X-Spam-Flag'] = 'True'
-    # Report the email to the relevant authorities
-    smtplib.sendmail(email['From'], ['spam@example.com'])
-
-def main():
-    # Read the email message from stdin
-    email = input()
-    # Check if the email is a phishing attack
-    if is_phishing_email(email['Subject'], email['Sender']):
-        # Mitigate the phishing attack
-        mitigate_phishing_attack(email)
+def mitigate_phishing_attack(url, request_method="GET", data=None):
+    if is_phishing_url(url):
+        raise ValueError("Phishing attack detected")
+    response = requests.request(request_method, url, data=data)
+    return response
