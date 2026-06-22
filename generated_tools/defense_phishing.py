@@ -1,38 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-22 21:34:07.844298
+# Generated 2026-06-22 23:17:26.515834
 
 import re
 import requests
 
-def is_phishing_attack(url):
-    # Check if the URL is valid
-    if not url or not re.match(r'^https?://', url):
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious patterns
+    pattern = r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_[61D[K
+r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)"
+    if re.search(pattern, url):
+        return True
+    else:
         return False
-    
-    # Fetch the website's content and analyze it
-    response = requests.get(url)
-    if response.status_code != 200:
-        return False
-    
-    # Check for suspicious patterns in the HTML
-    html = response.text
-    if '<script>' in html or '</script>' in html:
-        return True
-    if '<iframe src=' in html or '<frame src=' in html:
-        return True
-    if '<a href="javascript:' in html:
-        return True
-    
-    # Check for suspicious headers
-    headers = response.headers
-    if 'x-frame-options' in headers and headers['x-frame-options'] == 'DENY[5D[K
-'DENY':
-        return True
-    if 'content-security-policy' in headers and 'script-src' not in headers[7D[K
-headers['content-security-policy']:
-        return True
-    
-    # If none of the above checks triggered, it's likely a legitimate websi[5D[K
-website
-    return False
+
+def mitigate_phishing_attack(url):
+    # Send a request to the URL to see if it's legitimate
+    try:
+        requests.get(url)
+    except requests.exceptions.ConnectionError:
+        print("Invalid URL")
+    else:
+        # Check the response status code and content type
+        if response.status_code == 200 and response.headers["Content-Type"][32D[K
+response.headers["Content-Type"] == "text/html":
+            return True
+        else:
+            return False
+
+def detect_phishing(url):
+    # Combine the two functions to detect phishing attacks
+    if is_phishing_url(url) and mitigate_phishing_attack(url):
+        print("Possible phishing attack detected!")
+    else:
+        print("No phishing attack detected.")

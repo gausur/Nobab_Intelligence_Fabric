@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-22 21:32:52.308614
+# Generated 2026-06-22 23:15:06.636692
 
 import os
 import subprocess
 import time
+import re
 
 def detect_ransomware():
-    # Check if the machine is infected with ransomware
-    try:
-        subprocess.run(['ls', '-la'], stdout=subprocess.PIPE, stderr=subpro[13D[K
-stderr=subprocess.STDOUT)
-    except (FileNotFoundError, OSError):
-        return True
-    return False
+    # Check if the system is infected with ransomware
+    result = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE)
+    output = result.stdout.decode('utf-8')
+    if re.search(r'^E[A-Z]{2}', output):
+        # Found ransomware, remove all files with an EA prefix
+        subprocess.run(['rm', '-rf', 'EA*'])
+        print("Ransomware detected and removed")
+    else:
+        print("No ransomware detected")
 
 def mitigate_ransomware():
-    # Try to remove the ransomware and restore the system
-    try:
-        subprocess.run(['rm', '-rf', '/'], stdout=subprocess.PIPE, stderr=s[8D[K
-stderr=subprocess.STDOUT)
-        subprocess.run(['systemctl', 'restart'], stdout=subprocess.PIPE, st[2D[K
-stderr=subprocess.STDOUT)
-    except (FileNotFoundError, OSError):
-        return False
-    return True
+    # Check if the system is infected with ransomware
+    result = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE)
+    output = result.stdout.decode('utf-8')
+    if re.search(r'^E[A-Z]{2}', output):
+        # Found ransomware, remove all files with an EA prefix
+        subprocess.run(['rm', '-rf', 'EA*'])
+        print("Ransomware detected and removed")
+    else:
+        print("No ransomware detected")
 
-while detect_ransomware():
-    time.sleep(10)
-    if mitigate_ransomware():
-        break
+def main():
+    detect_ransomware()
+    mitigate_ransomware()
+
+if __name__ == "__main__":
+    main()
