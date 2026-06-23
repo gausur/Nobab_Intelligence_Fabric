@@ -1,49 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-23 10:33:11.378370
+# Generated 2026-06-23 13:40:56.075895
 
 import re
 import requests
 from bs4 import BeautifulSoup
 
-def detect_phishing(url):
-    # Send a request to the URL and get the HTML response
-    response = requests.get(url)
-    html = response.content
+def is_phishing_site(url):
+    # Check if the URL is a known phishing site
+    return url in PHISHING_SITES
 
-    # Parse the HTML with BeautifulSoup
-    soup = BeautifulSoup(html, "html.parser")
+def mitigate_phishing_attack():
+    # Mitigate the phishing attack by displaying an error message and redir[5D[K
+redirecting to the homepage
+    print("Phishing attempt detected!")
+    return "Home"
 
-    # Check if the HTML contains any suspicious tags or attributes
-    for tag in soup.find_all("a"):
-        if tag["href"].startswith("javascript:"):
-            return True
-
-    # Check if the HTML contains any suspicious CSS styles
-    for style in soup.find_all("style"):
-        for rule in style.text.split("\n"):
-            if rule.lower().startswith("position: absolute;"):
-                return True
-
-    return False
-
-def mitigate_phishing(url):
-    # Send a request to the URL and get the HTML response
-    response = requests.get(url)
-    html = response.content
-
-    # Parse the HTML with BeautifulSoup
-    soup = BeautifulSoup(html, "html.parser")
-
-    # Remove any suspicious tags or attributes from the HTML
-    for tag in soup.find_all("a"):
-        if tag["href"].startswith("javascript:"):
-            del tag["href"]
-
-    # Remove any suspicious CSS styles from the HTML
-    for style in soup.find_all("style"):
-        for rule in style.text.split("\n"):
-            if rule.lower().startswith("position: absolute;"):
-                del rule
-
-    return soup.prettify()
+def main(url):
+    if is_phishing_site(url):
+        mitigate_phishing_attack()
+    else:
+        # Proceed with normal operation
+        pass
