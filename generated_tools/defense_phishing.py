@@ -1,36 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-22 23:17:26.515834
+# Generated 2026-06-23 02:34:02.310818
 
 import re
 import requests
 
-def is_phishing_url(url):
-    # Check if the URL contains any suspicious patterns
-    pattern = r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_[61D[K
-r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"r"[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)"
-    if re.search(pattern, url):
-        return True
-    else:
+def is_phishing(url):
+    """Check if the URL is a phishing site."""
+    # Check if the URL is a valid HTTPS URL
+    if not url.startswith("https://"):
         return False
-
-def mitigate_phishing_attack(url):
-    # Send a request to the URL to see if it's legitimate
+    
+    # Send a HEAD request to the URL to get the headers
     try:
-        requests.get(url)
-    except requests.exceptions.ConnectionError:
-        print("Invalid URL")
-    else:
-        # Check the response status code and content type
-        if response.status_code == 200 and response.headers["Content-Type"][32D[K
-response.headers["Content-Type"] == "text/html":
+        response = requests.head(url, allow_redirects=True)
+    except requests.exceptions.RequestException:
+        return False
+    
+    # Check if the server responded with a 200 status code
+    if not response.ok:
+        return False
+    
+    # Check if the "X-Frame-Options" header is set to "DENY"
+    xframe_options = response.headers.get("X-Frame-Options")
+    if xframe_options == "DENY":
+        return True
+    
+    # Check if the "Content-Security-Policy" header is set to "default-src [K
+'none' 'unsafe-inline'"
+    content_security_policy = response.headers.get("Content-Security-Policy[45D[K
+response.headers.get("Content-Security-Policy")
+    if content_security_policy == "default-src 'none' 'unsafe-inline'":
+        return True
+    
+    # Check if the URL is a known phishing site
+    for pattern in PHISHING_SITES:
+        if re.search(pattern, url):
             return True
-        else:
-            return False
+    
+    return False
 
-def detect_phishing(url):
-    # Combine the two functions to detect phishing attacks
-    if is_phishing_url(url) and mitigate_phishing_attack(url):
-        print("Possible phishing attack detected!")
-    else:
-        print("No phishing attack detected.")
+def mitigate_phishing(url):
+    """Mitigate phishing attacks by redirecting to a known safe URL."""
+    # Redirect the user to a known safe URL
+    return "https://example.com"
+
+# Define a list of known phishing sites
+PHISHING_SITES = [
+    r".*facebook\.com.*",
+    r".*google\.com.*",
+    r".*twitter\.com.*"
+]
