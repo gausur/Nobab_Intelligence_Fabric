@@ -1,36 +1,25 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-23 13:39:01.803559
+# Generated 2026-06-23 16:24:27.081547
 
 import os
-import json
-from urllib.request import urlopen
-from urllib.error import URLError
+import time
 
-def detect_ransomware(filepath):
-    try:
-        with open(filepath, "rb") as f:
-            data = f.read()
-            if b"Yo! Don't forget to pay the ransom!" in data:
-                return True
-            else:
-                return False
-    except URLError:
-        return False
+def detect_ransomware(path):
+    for file in os.listdir(path):
+        if file.endswith('.docx'):
+            with open(file, 'rb') as f:
+                data = f.read()
+                if b'WannaCry' in data or b'NotPetya' in data:
+                    return True
+    return False
 
-def mitigate_ransomware(filepath):
-    try:
-        with open(filepath, "wb") as f:
-            f.write(b"The ransom has been paid! Please unlock your files.")[8D[K
-files.")
-            return True
-    except URLError:
-        return False
+def mitigate_ransomware(path):
+    for file in os.listdir(path):
+        if detect_ransomware(file):
+            os.remove(file)
 
-def main():
-    filepath = os.getcwd() + "/example_file.txt"
-    if detect_ransomware(filepath):
-        mitigate_ransomware(filepath)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    start_time = time.time()
+    mitigate_ransomware('path/to/files')
+    print("Elapsed time:", time.time() - start_time)

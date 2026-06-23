@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-23 13:40:56.075895
+# Generated 2026-06-23 16:24:00.440318
 
 import re
 import requests
-from bs4 import BeautifulSoup
+from urllib import parse
 
-def is_phishing_site(url):
-    # Check if the URL is a known phishing site
-    return url in PHISHING_SITES
-
-def mitigate_phishing_attack():
-    # Mitigate the phishing attack by displaying an error message and redir[5D[K
-redirecting to the homepage
-    print("Phishing attempt detected!")
-    return "Home"
-
-def main(url):
-    if is_phishing_site(url):
-        mitigate_phishing_attack()
-    else:
-        # Proceed with normal operation
+def detect_phishing(url):
+    parsed = parse.urlparse(url)
+    domain = parsed.netloc
+    if not re.match(r'^[a-z0-9.-]+$', domain):
+        return False
+    try:
+        headers = requests.head(url, allow_redirects=False).headers
+        content_type = headers.get('content-type')
+        if content_type and 'text/html' in content_type:
+            return True
+    except Exception:
         pass
+    return False
