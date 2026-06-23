@@ -1,49 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-23 19:08:33.851335
+# Generated 2026-06-23 21:27:21.530711
 
 import re
+import smtplib
+from email.message import EmailMessage
+from urllib.parse import urlparse
 
-def is_phishing_attack(url):
-    """
-    Detects if the given URL is a phishing attack.
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    return (parsed.netloc == "example.com" and parsed.path == "/login") or [K
+(parsed.netloc == "example.com" and parsed.path == "/register")
 
-    Args:
-        url (str): The URL to check for phishing attacks.
+def is_phishing_email(email):
+    return re.match(r"^.*\.(com|net|org)$", email)
 
-    Returns:
-        bool: True if the URL is a phishing attack, False otherwise.
-    """
-    # Regular expression to match known phishing website patterns
-    pattern = r"^https?://(www\.)?(fake|phish|malware)\.(com|net|org)/.*$"
+def mitigate_phishing(message):
+    if is_phishing_url(message.get("ref")):
+        print("Phishing URL detected!")
+        message["ref"] = ""
+    if is_phishing_email(message.get("from")):
+        print("Phishing email address detected!")
+        message["from"] = ""
+    return message
 
-    # Match the URL against the regular expression
-    if re.match(pattern, url):
-        return True
-    else:
-        return False
-
-def mitigate_phishing_attack(url):
-    """
-    Mitigates a phishing attack by redirecting the user to the home page.
-
-    Args:
-        url (str): The URL of the phishing website.
-    """
-    # Redirect the user to the home page
-    print("Redirecting to home page...")
-    return "https://www.example.com"
+def send_email(message):
+    smtplib.SMTP("localhost").sendmail(
+        message["from"],
+        message["to"],
+        message["text"],
+        {
+            "Content-Type": "text/plain",
+            "Subject": message["subject"]
+        }
+    )
 
 def main():
-    """
-    Main function for the script.
-    """
-    url = input("Enter URL: ")
-
-    if is_phishing_attack(url):
-        mitigate_phishing_attack(url)
-    else:
-        print("Not a phishing attack.")
+    message = EmailMessage()
+    message.set_content("Hello, world!")
+    message["from"] = "john@example.com"
+    message["to"] = "jane@example.org"
+    message["subject"] = "Test email"
+    mitigate_phishing(message)
+    send_email(message)
 
 if __name__ == "__main__":
     main()
