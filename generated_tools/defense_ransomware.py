@@ -1,37 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-23 06:46:15.651523
+# Generated 2026-06-23 10:32:13.077628
 
 import os
+import shutil
+import subprocess
 import time
-import socket
-import hashlib
 
-def detect_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    hash = hashlib.sha256(data).hexdigest()
-    if hash == "0e8dc9dde1c24081b3db7f94ee8a9079bb6a213d":
+def detect_ransomware():
+    # Check if the system has been infected by ransomware
+    if "ransomware" in str(subprocess.check_output("ps aux")):
+        print("Ransomware detected!")
         return True
     else:
+        print("No ransomware detected.")
         return False
 
-def mitigate_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    new_data = b"This is not a ransomware file."
-    if data == new_data:
-        return True
+def mitigate_ransomware():
+    # Restart the system to wipe out any malicious code
+    if detect_ransomware():
+        subprocess.run(["shutdown", "-r", "now"])
+        time.sleep(5)
+        print("System restarting...")
+        os.startfile(os.path.join(os.getcwd(), "restart"))
     else:
-        return False
+        print("No ransomware detected.")
 
-def main():
-    for file in os.listdir("."):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-            print(f"Mitigated ransomware attack on {file}")
-        else:
-            print(f"No ransomware attack detected on {file}")
-
-if __name__ == "__main__":
-    main()
+mitigate_ransomware()
