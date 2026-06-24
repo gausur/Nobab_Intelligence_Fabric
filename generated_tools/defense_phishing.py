@@ -1,36 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-24 10:17:28.053642
+# Generated 2026-06-24 13:14:26.989462
 
 import re
-from urllib.parse import urlparse
+import requests
+from bs4 import BeautifulSoup
 
-def is_phishing_attack(url):
-    parsed = urlparse(url)
-    hostname = parsed.hostname
+def is_phishing_site(url):
+    # Check if the URL is valid
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            return False
+    except requests.exceptions.RequestException:
+        return False
 
-    # Check if the URL is a subdomain of known phishing domains
-    if hostname in PHISHING_DOMAINS:
+    # Check if the website has a valid SSL certificate
+    try:
+        response = requests.get(url, verify=True)
+        if response.status_code != 200:
+            return False
+    except requests.exceptions.RequestException:
+        return False
+
+    # Parse the HTML content of the website
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Check for common phishing techniques
+    if re.search(r'fake\-logo', str(soup)):
         return True
-
-    # Check if the URL contains suspicious query parameters
-    for param in parsed.query.split("&"):
-        key, value = param.split("=")
-        if key == "redirect" or key == "return":
-            if not re.match(r"^https?://", value):
-                return True
-
-    # Check if the URL contains suspicious headers
-    for header in parsed.headers:
-        if header in ["x-frame-options", "content-security-policy"]:
-            return True
-
-    return False
-
-# List of known phishing domains
-PHISHING_DOMAINS = [
-    "example.com",
-    "phish.com",
-    "fake.org",
-    "scam.net"
-]
+    elif re.search(r'click\-here\.com', str(soup)):
+        return True
+    elif re.search(r'free\-[a-zA-Z0-9]+', str(soup)):
+        return True
+    elif re.search(r'buy\-now\.com', str(soup)):
+        return True
+    elif re.search(r'download\-here\.com', str(soup)):
+        return True
+    else:
+        return False

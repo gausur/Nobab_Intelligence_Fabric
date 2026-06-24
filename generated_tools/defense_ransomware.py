@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-24 10:16:13.546489
+# Generated 2026-06-24 13:15:47.853291
 
 import os
-import re
+import hashlib
 import subprocess
 
-def detect_ransomware(filepath):
-    """Detects ransomware in a given file path using regular expressions"""[14D[K
-expressions"""
-    with open(filepath, 'rb') as f:
-        data = f.read()
-        pattern = re.compile(b'[A-Za-z0-9+/]{4}==', re.IGNORECASE)
-        matches = pattern.findall(data)
-        if len(matches) > 1:
+def is_ransomware(file):
+    # Calculate the SHA256 checksum of the file
+    sha256 = hashlib.sha256()
+    with open(file, "rb") as f:
+        for chunk in iter(lambda: f.read(1024), b""):
+            sha256.update(chunk)
+
+    # Check if the checksum matches a known ransomware signature
+    known_signatures = [
+        "c385bb7d2f304ecb94546e148316ef8e",  # Ransom.Win32.worm
+        "daa0ac81bcc6130b42d4c0c6b67f7e29",  # Win32.RANSOMWARE.A
+    ]
+    for sig in known_signatures:
+        if sha256.hexdigest() == sig:
             return True
-        else:
-            return False
+    return False
 
-def mitigate_ransomware(filepath):
-    """Mitigates ransomware infection by overwriting the file with a dummy [K
-data"""
-    with open(filepath, 'wb') as f:
-        f.write('This is not a valid file'.encode())
+def mitigate(file):
+    # Remove the file to prevent the ransomware from encrypting it
+    os.remove(file)
 
-def main():
-    # Get all files in current directory
-    for root, dirs, files in os.walk('.'):
-        for filename in files:
-            filepath = os.path.join(root, filename)
-            if detect_ransomware(filepath):
-                mitigate_ransomware(filepath)
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    files = subprocess.check_output(["ls", "-1"]).splitlines()
+    for file in files:
+        if is_ransomware(file):
+            mitigate(file)
