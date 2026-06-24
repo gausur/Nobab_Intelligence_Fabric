@@ -1,58 +1,62 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-24 18:34:13.064478
+# Generated 2026-06-24 20:31:28.745375
 
 import os
+import json
 import shutil
-import subprocess
-import time
-from pathlib import Path
+from time import sleep
+from subprocess import check_output
 
-def detect_ransomware():
-    # Check if the system is running on a virtual machine
-    vm = False
-    if "VMware" in subprocess.check_output(["dmidecode", "-s", "system-vend[12D[K
-"system-vendor"]).decode().strip():
-        vm = True
+def get_file_list(path):
+    file_list = []
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if file.endswith('.txt'):
+                file_list.append(os.path.join(root, file))
+    return file_list
 
-    # Check if the system has been infected with ransomware
-    infected = False
-    for path in Path(".").glob("**/*"):
-        if not os.path.isfile(path):
-            continue
-        if "ransomware" in subprocess.check_output(["strings", "-a", str(pa[6D[K
-str(path)]).decode().strip():
-            infected = True
-            break
-    return vm, infected
+def encrypt_files(file_list):
+    for file in file_list:
+        with open(file, 'r') as f:
+            data = f.read()
+        with open(file + '.enc', 'w') as f:
+            f.write(data)
+    return file_list
 
-def mitigate_ransomware():
-    # Check if the system is running on a virtual machine
-    vm, infected = detect_ransomware()
-    if not (vm and infected):
-        print("The system is not running on a virtual machine or has not be[2D[K
-been infected with ransomware.")
-        return
+def decrypt_files(file_list):
+    for file in file_list:
+        with open(file, 'r') as f:
+            data = f.read()
+        with open(file + '.dec', 'w') as f:
+            f.write(data)
+    return file_list
 
-    # Restore the system to its previous state
-    subprocess.check_call(["df", "-h"])
-    subprocess.check_call(["mount", "-a"])
-    subprocess.check_call(["fuser", "-km"] + [p for p in Path(".").glob("**[18D[K
-Path(".").glob("**/*") if os.path.isfile(p)])
-    subprocess.check_call(["find", "."] + ["-type", "d", "-exec", "chmod", [K
-"755", "{}"])
+def check_for_encryption():
+    try:
+        output = check_output(['ransomware'], universal_newlines=True)
+        if 'detected' in output:
+            print('Ransomware attack detected!')
+            return True
+        else:
+            print('No ransomware detected.')
+            return False
+    except:
+        pass
 
-    # Remove the ransomware files and restore the original permissions
-    for path in Path(".").glob("**/*"):
-        if not os.path.isfile(path):
-            continue
-        if "ransomware" in subprocess.check_output(["strings", "-a", str(pa[6D[K
-str(path)]).decode().strip():
-            shutil.rmtree(path)
-    for path in Path(".").glob("**/*"):
-        if not os.path.isfile(path):
-            continue
-        subprocess.check_call(["chmod", "644", str(path)])
+def mitigate_ransomware(file_list):
+    for file in file_list:
+        with open(file, 'w'):
+            pass
+    return file_list
 
-if __name__ == "__main__":
-    mitigate_ransomware()
+if __name__ == '__main__':
+    path = os.getcwd()
+    file_list = get_file_list(path)
+    encrypted_files = encrypt_files(file_list)
+    if check_for_encryption():
+        decrypted_files = decrypt_files(encrypted_files)
+        mitigated_files = mitigate_ransomware(decrypted_files)
+        print('Ransomware attack has been mitigated.')
+    else:
+        print('No ransomware detected.')
