@@ -1,36 +1,22 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-24 20:32:37.883311
+# Generated 2026-06-24 22:11:28.243548
 
 import re
-import socket
+import requests
 
-# Define the list of known phishing URLs
-phishing_urls = [
-    "https://www.example1.com",
-    "https://www.example2.com",
-    "https://www.example3.com"
-]
-
-def is_phishing(url):
-    # Check if the URL matches any of the known phishing URLs
-    for phishing_url in phishing_urls:
-        if re.match(r"^" + phishing_url + "$", url):
-            return True
+def detect_phishing(url):
+    """
+    Detects if the given URL is a phishing site using regular expressions
+    :param url: The URL to be checked
+    :return: True if it is a phishing site, False otherwise
+    """
+    regex = r"^(?:(?:https?|ftp):\/\/)?(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z[63D[K
+r"^(?:(?:https?|ftp):\/\/)?(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?r"^(?:(?:https?|ftp):\/\/)?(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z-9])?\.)+(?:[a-z]{2,6}\.?|[a-z0-9-]{2,}\.?)|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d{1[a-z]{2,6}\.?|[a-z0-9-]{2,}\.?)|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d{1,5})?(?:\/\S*)?$"
+    if re.match(regex, url):
+        response = requests.get(url)
+        if response.status_code == 200:
+            content = response.content
+            if b"<title>Login | Phishing Website</title>" in content:
+                return True
     return False
-
-def mitigate_phishing(ip, port):
-    # Connect to the server and send a request
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    try:
-        s.connect((ip, port))
-        s.sendall("GET / HTTP/1.0\r\nHost: example.com\r\n\r\n".encode())
-        response = s.recv(4096)
-        if is_phishing(response):
-            print("Possible phishing attack detected!")
-    finally:
-        s.close()
-
-# Start the script in a loop to continuously monitor for phishing attacks
-while True:
-    mitigate_phishing("127.0.0.1", 80)
