@@ -1,34 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-24 13:15:47.853291
+# Generated 2026-06-24 16:15:43.492216
 
 import os
-import hashlib
+import shutil
 import subprocess
 
-def is_ransomware(file):
-    # Calculate the SHA256 checksum of the file
-    sha256 = hashlib.sha256()
-    with open(file, "rb") as f:
-        for chunk in iter(lambda: f.read(1024), b""):
-            sha256.update(chunk)
-
-    # Check if the checksum matches a known ransomware signature
-    known_signatures = [
-        "c385bb7d2f304ecb94546e148316ef8e",  # Ransom.Win32.worm
-        "daa0ac81bcc6130b42d4c0c6b67f7e29",  # Win32.RANSOMWARE.A
-    ]
-    for sig in known_signatures:
-        if sha256.hexdigest() == sig:
+def detect_ransomware(path):
+    # Check if the path is a directory or a file
+    if os.path.isdir(path):
+        # If it's a directory, check if there are any files with the ".RAN"[6D[K
+".RAN" extension
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.endswith(".RAN"):
+                    return True
+    else:
+        # If it's a file, check if its name ends with ".RAN"
+        if path.endswith(".RAN"):
             return True
     return False
 
-def mitigate(file):
-    # Remove the file to prevent the ransomware from encrypting it
-    os.remove(file)
+def mitigate_ransomware(path):
+    # Check if the path is a directory or a file
+    if os.path.isdir(path):
+        # If it's a directory, delete all files with the ".RAN" extension
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if file.endswith(".RAN"):
+                    os.remove(os.path.join(root, file))
+    else:
+        # If it's a file, delete it
+        os.remove(path)
 
 if __name__ == "__main__":
-    files = subprocess.check_output(["ls", "-1"]).splitlines()
-    for file in files:
-        if is_ransomware(file):
-            mitigate(file)
+    # Parse the command-line arguments
+    args = sys.argv[1:]
+    if len(args) != 1:
+        print("Usage: python mitigate_ransomware.py <path>")
+        exit()
+    path = args[0]
+
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
