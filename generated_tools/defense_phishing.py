@@ -1,43 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-24 06:39:55.150486
+# Generated 2026-06-24 10:17:28.053642
 
 import re
-import smtplib
-from email import message_from_bytes
+from urllib.parse import urlparse
 
-def is_phishing(msg):
-    # Check if the sender's domain matches the recipient's domain
-    if msg["From"].split("@")[-1] == msg["To"].split("@")[-1]:
+def is_phishing_attack(url):
+    parsed = urlparse(url)
+    hostname = parsed.hostname
+
+    # Check if the URL is a subdomain of known phishing domains
+    if hostname in PHISHING_DOMAINS:
         return True
-    
-    # Check if the email contains any suspicious links or attachments
-    for part in message_from_bytes(msg.as_bytes()).walk():
-        if "content-disposition" in part:
-            # Attachment found, assume it's a phishing attack
+
+    # Check if the URL contains suspicious query parameters
+    for param in parsed.query.split("&"):
+        key, value = param.split("=")
+        if key == "redirect" or key == "return":
+            if not re.match(r"^https?://", value):
+                return True
+
+    # Check if the URL contains suspicious headers
+    for header in parsed.headers:
+        if header in ["x-frame-options", "content-security-policy"]:
             return True
-        elif "href=" in part:
-            # Suspicious link found, assume it's a phishing attack
-            return True
-    
-    # No suspicious links or attachments found, assume it's not a phishing [K
-attack
+
     return False
 
-def mitigate_phishing(msg):
-    # Send the email to an admin for review
-    smtplib.sendmail("admin@example.com", msg["To"], "Subject: Phishing Att[3D[K
-Attack Detected")
-    
-# Main function to detect and mitigate phishing attacks
-def detect_and_mitigate():
-    # Connect to the mail server
-    server = smtplib.SMTP("mail.example.com", 25)
-    
-    # Loop through all incoming emails
-    for msg in server.incoming_emails:
-        if is_phishing(msg):
-            mitigate_phishing(msg)
-
-# Run the main function to start detecting and mitigating phishing attacks
-detect_and_mitigate()
+# List of known phishing domains
+PHISHING_DOMAINS = [
+    "example.com",
+    "phish.com",
+    "fake.org",
+    "scam.net"
+]

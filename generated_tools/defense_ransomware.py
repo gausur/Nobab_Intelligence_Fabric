@@ -1,33 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-24 06:41:48.029187
+# Generated 2026-06-24 10:16:13.546489
 
 import os
-import subprocess
 import re
+import subprocess
 
-def detect_ransomware(filename):
-    # Check if the file is a valid executable file
-    if not os.path.isfile(filename) or not os.access(filename, os.X_OK):
-        return False
-    
-    # Run the "strings" command on the file to see if it contains any known[5D[K
-known ransomware strings
-    output = subprocess.check_output(['strings', filename])
-    for line in output.decode().splitlines():
-        if re.search(r'RANSOMWARE|encrypt|lock|demand|pay', line):
+def detect_ransomware(filepath):
+    """Detects ransomware in a given file path using regular expressions"""[14D[K
+expressions"""
+    with open(filepath, 'rb') as f:
+        data = f.read()
+        pattern = re.compile(b'[A-Za-z0-9+/]{4}==', re.IGNORECASE)
+        matches = pattern.findall(data)
+        if len(matches) > 1:
             return True
-    
-    # If the file does not contain any known ransomware strings, it is like[4D[K
-likely safe
-    return False
+        else:
+            return False
 
-def mitigate_ransomware(filename):
-    # Delete the file to prevent the ransomware from encrypting it
-    os.remove(filename)
-    
-    # Notify the user that the file has been deleted and suggest backing up[2D[K
-up any important data
-    print("Ransomware detected! File deleted.")
-    print("Please backup your important data before attempting to restore t[1D[K
-the file.")
+def mitigate_ransomware(filepath):
+    """Mitigates ransomware infection by overwriting the file with a dummy [K
+data"""
+    with open(filepath, 'wb') as f:
+        f.write('This is not a valid file'.encode())
+
+def main():
+    # Get all files in current directory
+    for root, dirs, files in os.walk('.'):
+        for filename in files:
+            filepath = os.path.join(root, filename)
+            if detect_ransomware(filepath):
+                mitigate_ransomware(filepath)
+
+if __name__ == '__main__':
+    main()
