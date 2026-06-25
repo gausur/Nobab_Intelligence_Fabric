@@ -1,53 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-25 00:04:14.516802
+# Generated 2026-06-25 04:01:47.342109
 
-import os
-import sys
+import socket
+import subprocess
 
-def detect_ransomware(directory):
-    # Check if the directory contains any encrypted files
-    for file in os.listdir(directory):
-        if "." not in file:
-            continue
-        extension = file.split(".")[-1]
-        if extension == "enc":
-            return True
+def detect_ransomware(ip):
+    # Check if the IP is in a known ransomware C&C server list
+    with open("known_ransomware_servers.txt", "r") as f:
+        for line in f:
+            if ip in line:
+                return True
     return False
 
-def mitigate_ransomware(directory):
-    # Delete all encrypted files
-    for file in os.listdir(directory):
-        if "." not in file:
-            continue
-        extension = file.split(".")[-1]
-        if extension == "enc":
-            os.remove(os.path.join(directory, file))
+def mitigate_ransomware(ip):
+    # Shut down the affected machine
+    subprocess.run(["shutdown", "-h", "now"])
 
-def main():
-    # Check if the script is being run with sudo privileges
-    if not os.getuid() == 0:
-        print("This script must be run with sudo privileges.")
-        sys.exit(1)
-
-    # Get the directory to scan for ransomware
-    directory = input("Enter the directory to scan for ransomware: ")
-
-    # Check if the directory exists and is readable
-    if not os.path.isdir(directory):
-        print("The specified directory does not exist.")
-        sys.exit(1)
-    elif not os.access(directory, os.R_OK):
-        print("You do not have read access to the specified directory.")
-        sys.exit(1)
-
-    # Detect and mitigate ransomware in the directory
-    if detect_ransomware(directory):
-        print("Ransomware detected in the directory.")
-        mitigate_ransomware(directory)
-        print("Mitigation successful.")
-    else:
-        print("No ransomware detected in the directory.")
-
+# Main function
 if __name__ == "__main__":
-    main()
+    ip = socket.gethostbyname(socket.gethostname())
+    if detect_ransomware(ip):
+        mitigate_ransomware(ip)
