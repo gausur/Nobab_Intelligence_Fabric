@@ -1,36 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-24 22:10:13.077077
+# Generated 2026-06-25 00:04:14.516802
 
-import json
 import os
-import subprocess
+import sys
 
-def detect_ransomware(file):
-    # Check if file is encrypted
-    encryption_status = subprocess.run(['file', file], capture_output=True,[20D[K
-capture_output=True, text=True)
-    if 'encrypted' in encryption_status.stdout:
-        return True
-    else:
-        return False
+def detect_ransomware(directory):
+    # Check if the directory contains any encrypted files
+    for file in os.listdir(directory):
+        if "." not in file:
+            continue
+        extension = file.split(".")[-1]
+        if extension == "enc":
+            return True
+    return False
 
-def mitigate_ransomware(file):
-    # Check if file is encrypted
-    if detect_ransomware(file):
-        # Decrypt file
-        subprocess.run(['cryptodec', file], capture_output=True, text=True)[10D[K
-text=True)
-        return True
-    else:
-        # File is not encrypted
-        return False
+def mitigate_ransomware(directory):
+    # Delete all encrypted files
+    for file in os.listdir(directory):
+        if "." not in file:
+            continue
+        extension = file.split(".")[-1]
+        if extension == "enc":
+            os.remove(os.path.join(directory, file))
 
 def main():
-    files = os.listdir('.')
-    for file in files:
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+    # Check if the script is being run with sudo privileges
+    if not os.getuid() == 0:
+        print("This script must be run with sudo privileges.")
+        sys.exit(1)
 
-if __name__ == '__main__':
+    # Get the directory to scan for ransomware
+    directory = input("Enter the directory to scan for ransomware: ")
+
+    # Check if the directory exists and is readable
+    if not os.path.isdir(directory):
+        print("The specified directory does not exist.")
+        sys.exit(1)
+    elif not os.access(directory, os.R_OK):
+        print("You do not have read access to the specified directory.")
+        sys.exit(1)
+
+    # Detect and mitigate ransomware in the directory
+    if detect_ransomware(directory):
+        print("Ransomware detected in the directory.")
+        mitigate_ransomware(directory)
+        print("Mitigation successful.")
+    else:
+        print("No ransomware detected in the directory.")
+
+if __name__ == "__main__":
     main()

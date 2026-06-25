@@ -1,22 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-24 22:11:28.243548
+# Generated 2026-06-25 00:04:56.309166
 
 import re
-import requests
+from urllib import parse
 
-def detect_phishing(url):
-    """
-    Detects if the given URL is a phishing site using regular expressions
-    :param url: The URL to be checked
-    :return: True if it is a phishing site, False otherwise
-    """
-    regex = r"^(?:(?:https?|ftp):\/\/)?(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z[63D[K
-r"^(?:(?:https?|ftp):\/\/)?(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?r"^(?:(?:https?|ftp):\/\/)?(?:(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z-9])?\.)+(?:[a-z]{2,6}\.?|[a-z0-9-]{2,}\.?)|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d{1[a-z]{2,6}\.?|[a-z0-9-]{2,}\.?)|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d{1,5})?(?:\/\S*)?$"
-    if re.match(regex, url):
-        response = requests.get(url)
-        if response.status_code == 200:
-            content = response.content
-            if b"<title>Login | Phishing Website</title>" in content:
-                return True
+def is_phishing_url(url):
+    # Check if the URL is valid
+    if not parse.urlparse(url).scheme:
+        return False
+    
+    # Check if the URL contains any suspicious keywords
+    for keyword in ["phish", "fishing", "scam"]:
+        if keyword in url:
+            return True
+    
+    # Check if the URL is a HTTP or HTTPS link
+    if parse.urlparse(url).scheme not in ["http", "https"]:
+        return False
+    
+    # Check if the domain name is valid
+    try:
+        parse.urlparse(url).netloc
+    except AttributeError:
+        return False
+    
     return False
+
+def mitigate_phishing_attack(url):
+    if is_phishing_url(url):
+        print("Phishing attack detected!")
+    else:
+        print("No phishing attacks detected.")
+
+if __name__ == "__main__":
+    url = input("Enter URL to check: ")
+    mitigate_phishing_attack(url)
