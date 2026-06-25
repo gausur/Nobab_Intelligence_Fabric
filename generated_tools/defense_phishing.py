@@ -1,42 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-25 10:39:53.592246
+# Generated 2026-06-25 13:18:09.287615
 
 import re
 import smtplib
 from email.message import EmailMessage
 
-def check_email(email):
-    # Check if the email is valid
-    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", em[2D[K
-email):
+def detect_phishing(email):
+    # Check if the email is from a trusted sender
+    if not email["From"].startswith("no-reply") and not email["From"].endsw[19D[K
+email["From"].endswith(".example.com"):
         return False
     
-    # Check if the email is from a legitimate sender
-    try:
-        smtplib.SMTP("smtp.gmail.com").sendmail(email)
-    except smtplib.SMTPSenderRefused:
+    # Check if the email has a valid "Reply-To" header
+    if not email["Reply-To"]:
+        return False
+    
+    # Check if the email has a valid "Subject" header
+    if not re.match(r"^[A-Za-z0-9 ]+", email["Subject"]):
+        return False
+    
+    # Check if the email has a valid "Message-Id" header
+    if not re.match(r"<[\w\.\-\_]+@[\w\.\-\_]+\.\w+>", email["Message-Id"])[20D[K
+email["Message-Id"]):
+        return False
+    
+    # Check if the email has a valid "X-Mailer" header
+    if not re.match(r"^[A-Za-z0-9]+/[\d\.]+$", email["X-Mailer"]):
         return False
     
     return True
 
-def mitigate_phishing(message):
-    # Check if the message is a phishing attack
-    if check_email(message["From"]):
-        # Handle the phishing attack
-        pass
+def mitigate_phishing(email):
+    # Send an alert to the recipient's administrator
+    admin = "admin@example.com"
+    msg = EmailMessage()
+    msg["From"] = email["From"]
+    msg["To"] = admin
+    msg["Subject"] = "Phishing Attempt Detected"
+    msg.set_content(f"The email {email['Subject']} from {email['From']} has[3D[K
+has been flagged as a phishing attempt and may be spam.")
+    smtplib.SMTP("localhost").send_message(msg)
 
-# Initialize the email message
-msg = EmailMessage()
+def main():
+    # Read the email from stdin
+    email = sys.stdin.read()
+    
+    # Detect and mitigate phishing attacks
+    if detect_phishing(email):
+        mitigate_phishing(email)
 
-# Set the sender and recipient
-msg["From"] = "john.doe@example.com"
-msg["To"] = "jane.smith@example.com"
-
-# Set the subject and body of the email
-msg["Subject"] = "Phishing Attack Detected!"
-msg["Body"] = "This is a phishing attack, do not click on any links or prov[4D[K
-provide any personal information."
-
-# Mitigate the phishing attack
-mitigate_phishing(msg)
+if __name__ == "__main__":
+    main()

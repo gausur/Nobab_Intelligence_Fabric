@@ -1,53 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-25 10:40:58.171932
+# Generated 2026-06-25 13:19:39.585591
 
 import os
-import sys
 import shutil
+import time
 import subprocess
+import psutil
 
 def detect_ransomware():
-    # Check if the system is running Windows
-    if not sys.platform.startswith('win'):
+    # Check if the system is infected with ransomware
+    if not os.path.exists("/var/tmp/ransomware"):
         return False
     
-    # Get the list of installed applications on the system
-    output = subprocess.check_output(['wmic', 'product', 'get', '/format:li[11D[K
-'/format:list'])
-    applications = output.decode().splitlines()
+    # Check if the ransomware is encrypting files
+    if not os.path.exists("/.ransomware"):
+        return False
     
-    # Check if any of the installed applications are known ransomware
-    for application in applications:
-        if application.startswith('Ransomware'):
-            return True
+    # Check if the ransomware is demanding a ransom
+    if not os.path.exists("/var/tmp/ransomware/ransom.txt"):
+        return False
     
-    # No ransomware detected
-    return False
+    # Check if the ransomware is waiting for user input
+    if not os.path.exists("/.ransomware/waiting_for_user"):
+        return False
+    
+    return True
 
 def mitigate_ransomware():
-    # Check if the system is running Windows
-    if not sys.platform.startswith('win'):
-        return False
+    # Kill all processes related to the ransomware
+    for proc in psutil.process_iter():
+        if "ransomware" in proc.name():
+            proc.kill()
     
-    # Get the list of installed applications on the system
-    output = subprocess.check_output(['wmic', 'product', 'get', '/format:li[11D[K
-'/format:list'])
-    applications = output.decode().splitlines()
+    # Remove the ransomware's files and directories
+    shutil.rmtree("/var/tmp/ransomware", ignore_errors=True)
+    os.remove("/.ransomware")
+    os.remove("/var/tmp/ransomware/ransom.txt")
     
-    # Check if any of the installed applications are known ransomware
-    for application in applications:
-        if application.startswith('Ransomware'):
-            # Uninstall the ransomware application
-            subprocess.run(['wmic', 'product', 'where', f'name="{applicatio[19D[K
-f'name="{application}"', 'call', 'uninstall'])
-    
-    # No ransomware detected
-    return False
+    # Restart the system to clear the infection
+    subprocess.run(["reboot"])
 
-if __name__ == "__main__":
-    if detect_ransomware():
-        print("Ransomware detected!")
-        mitigate_ransomware()
-    else:
-        print("No ransomware detected.")
+if detect_ransomware():
+    mitigate_ransomware()
