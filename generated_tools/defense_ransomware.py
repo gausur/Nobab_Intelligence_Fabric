@@ -1,31 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-25 21:26:08.563032
+# Generated 2026-06-25 23:11:19.686557
 
-import os
-import subprocess
+import socket
+import time
 
-def main():
-    # Check if the system is vulnerable to ransomware
-    check_vulnerability()
-
-    # Detect ransomware infection
-    detect_ransomware()
-
-    # Mitigate ransomware infection
-    mitigate_infection()
-
-def check_vulnerability():
-    # Check if the system is vulnerable to ransomware by scanning for known[5D[K
-known vulnerabilities
-    pass
-
-def detect_ransomware():
-    # Detect ransomware infection by scanning for known malicious files and[3D[K
-and processes
-    pass
-
-def mitigate_infection():
-    # Mitigate ransomware infection by removing malicious files, disconnect[10D[K
-disconnecting from the internet, and restoring backups
-    pass
+def detect_ransomware(host, port):
+    s = socket.socket()
+    try:
+        s.connect((host, port))
+    except socket.error as e:
+        print("Error connecting to server:", e)
+        return False
+    
+    time.sleep(5)
+    data = s.recv(1024)
+    if not data or "ransom" in data:
+        print("Ransomware detected!")
+        return True
+    else:
+        print("No ransomware detected.")
+        return False
