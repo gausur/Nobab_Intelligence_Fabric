@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-25 16:18:53.925304
+# Generated 2026-06-25 19:06:52.338484
 
 import re
-import urllib.parse
 
-def is_phishing_url(url):
-    parsed_url = urllib.parse.urlparse(url)
-    if parsed_url.scheme == 'http' or parsed_url.scheme == 'https':
-        return True
-    else:
+def is_phishing_attempt(url):
+    pattern = r"^(?:http|https)://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])[61D[K
+r"^(?:http|https)://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{r"^(?:http|https)://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\,6}\.?|[A-Z0-9-]{2,}\.?)|localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d{1,5})?(?:/?|[/?]\S+)$"
+    if not re.match(pattern, url):
         return False
 
-def is_phishing_domain(domain):
-    if domain[-1] != '.':
-        domain += '.'
-    if domain.endswith('.com') or domain.endswith('.net'):
-        return True
-    else:
+    pattern = r"^www\.([A-Z0-9]+(?:-[A-Z0-9]+)*)\.com$"
+    domain = re.search(pattern, url)
+    if domain is None:
         return False
 
-def detect_and_mitigate_phishing(url, domain):
-    if is_phishing_url(url) or is_phishing_domain(domain):
-        print('Phishing attack detected!')
-        # Mitigation code goes here
-    else:
-        pass
+    pattern = r"^[a-z0-9]{16}$"
+    random_string = re.search(pattern, url)
+    if random_string is not None:
+        return True
+
+    return False
+
+def mitigate_phishing_attempt(url):
+    # replace the URL with a warning message
+    print("WARNING: Phishing attempt detected!")
+
+# example usage
+url = "http://www.example.com/qwertyuiopasdfghjklzxcvbnm1234567890"
+if is_phishing_attempt(url):
+    mitigate_phishing_attempt(url)
