@@ -1,45 +1,63 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-25 13:19:39.585591
+# Generated 2026-06-25 16:21:24.582543
 
 import os
-import shutil
-import time
+import re
 import subprocess
-import psutil
+from collections import defaultdict
+from typing import Dict, List
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    if not os.path.exists("/var/tmp/ransomware"):
+def detect_ransomware(path: str) -> bool:
+    """Detect ransomware by analyzing file and directory permissions."""
+    # Get the current user and group IDs
+    uid = os.getuid()
+    gid = os.getgid()
+
+    # Check if the current user is the owner of the given path
+    if os.stat(path).st_uid != uid:
         return False
-    
-    # Check if the ransomware is encrypting files
-    if not os.path.exists("/.ransomware"):
-        return False
-    
-    # Check if the ransomware is demanding a ransom
-    if not os.path.exists("/var/tmp/ransomware/ransom.txt"):
-        return False
-    
-    # Check if the ransomware is waiting for user input
-    if not os.path.exists("/.ransomware/waiting_for_user"):
-        return False
-    
+
+    # Get a list of all files and directories in the given path
+    file_list = []
+    for root, dirs, files in os.walk(path):
+        file_list += [os.path.join(root, f) for f in files]
+
+    # Check if any files or directories have group permissions set to other[5D[K
+other than the current user and group
+    for file in file_list:
+        perms = oct(stat.S_IMODE(os.stat(file).st_mode))[2:]
+        if "rwx" not in perms[:3]:  # Check the first three characters of t[1D[K
+the permissions string
+            return False
+        elif "r-x" in perms[:3] and "---" in perms[3:]:  # Check the first [K
+three characters and the fourth character of the permissions string
+            return False
+
+    # If no ransomware is detected, return True
     return True
 
-def mitigate_ransomware():
-    # Kill all processes related to the ransomware
-    for proc in psutil.process_iter():
-        if "ransomware" in proc.name():
-            proc.kill()
-    
-    # Remove the ransomware's files and directories
-    shutil.rmtree("/var/tmp/ransomware", ignore_errors=True)
-    os.remove("/.ransomware")
-    os.remove("/var/tmp/ransomware/ransom.txt")
-    
-    # Restart the system to clear the infection
-    subprocess.run(["reboot"])
+def mitigate_ransomware(path: str) -> None:
+    """Mitigate ransomware by changing file and directory permissions."""
+    # Get the current user and group IDs
+    uid = os.getuid()
+    gid = os.getgid()
 
-if detect_ransomware():
-    mitigate_ransomware()
+    # Change the ownership of all files and directories in the given path t[1D[K
+to the current user and group
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            file_path = os.path.join(root, f)
+            subprocess.run(f"chown {uid}:{gid} {file_path}", shell=True)
+
+    # Change the permissions of all files and directories in the given path[4D[K
+path to "rwxr-x---"
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            file_path = os.path.join(root, f)
+            subprocess.run(f"chmod 750 {file_path}", shell=True)
+
+if __name__ == "__main__":
+    # Detect ransomware in the current directory and its subdirectories
+    if detect_ransomware("."):
+        mitigate_ransomware(".")
