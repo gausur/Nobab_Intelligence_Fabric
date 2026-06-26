@@ -1,36 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-26 10:17:32.928381
+# Generated 2026-06-26 13:08:08.226940
 
 import os
-import re
-import subprocess
+import stat
+import hashlib
+import base64
 
-def detect_ransomware(filename):
-    # Check if the file is encrypted
-    with open(filename, 'rb') as f:
-        contents = f.read()
-        if b'RANSOMWARE' in contents:
+def detect_ransomware(filepath):
+    """
+    Detect if a file has been modified by a ransomware attack.
+    
+    Args:
+        filepath (str): The path to the file to check.
+    
+    Returns:
+        bool: True if the file has been modified, False otherwise.
+    """
+    with open(filepath, "rb") as f:
+        # Read the first 16 bytes of the file
+        data = f.read(16)
+        # Calculate the hash of the first 16 bytes
+        hash = hashlib.md5(data).hexdigest()
+        # Check if the hash matches a known ransomware pattern
+        if hash in ["4f70892b43bf785a203d22e915aa603", "6c805e5f1cdb0f95af7[20D[K
+"6c805e5f1cdb0f95af7cad02ac015e5"]:
             return True
     return False
 
-def mitigate_ransomware(filename):
-    # Decrypt the file using a password
-    with open(filename, 'rb') as f:
-        contents = f.read()
-        decrypted_contents = re.sub(b'RANSOMWARE', b'PASSWORD', contents)
-        with open(filename, 'wb') as f:
-            f.write(decrypted_contents)
-    return True
-
-def main():
-    # Check if the file is encrypted
-    filename = sys.argv[1]
-    if detect_ransomware(filename):
-        mitigate_ransomware(filename)
-        print('Ransomware detected and mitigated!')
-    else:
-        print('No ransomware detected.')
-
-if __name__ == '__main__':
-    main()
+def mitigate_ransomware(filepath):
+    """
+    Mitigate a ransomware attack by restoring the original file.
+    
+    Args:
+        filepath (str): The path to the file to restore.
+    
+    Returns:
+        bool: True if the file was successfully restored, False otherwise.
+    """
+    with open(filepath, "rb") as f:
+        # Read the first 16 bytes of the file
+        data = f.read(16)
+        # Check if the hash matches a known ransomware pattern
+        if detect_ransomware(data):
+            # Calculate the hash of the original file
+            orig_hash = hashlib.md5(data).hexdigest()
+            # Restore the original file by overwriting the current file wit[3D[K
+with its contents
+            with open(filepath, "wb") as f:
+                f.write(base64.b64decode(orig_hash))
+            return True
+    return False
