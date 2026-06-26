@@ -1,53 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-26 13:08:08.226940
+# Generated 2026-06-26 16:10:51.042423
 
 import os
-import stat
-import hashlib
-import base64
+import shutil
 
-def detect_ransomware(filepath):
+def detect_ransomware(path):
     """
-    Detect if a file has been modified by a ransomware attack.
-    
-    Args:
-        filepath (str): The path to the file to check.
-    
-    Returns:
-        bool: True if the file has been modified, False otherwise.
+    Detect if a path is infected with ransomware by checking for the presen[6D[K
+presence of the ransom note file.
+    :param path: The path to check.
+    :return: True if the path is infected, False otherwise.
     """
-    with open(filepath, "rb") as f:
-        # Read the first 16 bytes of the file
-        data = f.read(16)
-        # Calculate the hash of the first 16 bytes
-        hash = hashlib.md5(data).hexdigest()
-        # Check if the hash matches a known ransomware pattern
-        if hash in ["4f70892b43bf785a203d22e915aa603", "6c805e5f1cdb0f95af7[20D[K
-"6c805e5f1cdb0f95af7cad02ac015e5"]:
-            return True
-    return False
+    return os.path.exists(os.path.join(path, "ransom.note"))
 
-def mitigate_ransomware(filepath):
+def mitigate_ransomware(path):
     """
-    Mitigate a ransomware attack by restoring the original file.
-    
-    Args:
-        filepath (str): The path to the file to restore.
-    
-    Returns:
-        bool: True if the file was successfully restored, False otherwise.
+    Mitigate an infection with ransomware by removing the ransom note file [K
+and encrypting the files in the directory.
+    :param path: The path to mitigate.
+    :return: None.
     """
-    with open(filepath, "rb") as f:
-        # Read the first 16 bytes of the file
-        data = f.read(16)
-        # Check if the hash matches a known ransomware pattern
-        if detect_ransomware(data):
-            # Calculate the hash of the original file
-            orig_hash = hashlib.md5(data).hexdigest()
-            # Restore the original file by overwriting the current file wit[3D[K
-with its contents
-            with open(filepath, "wb") as f:
-                f.write(base64.b64decode(orig_hash))
-            return True
-    return False
+    if detect_ransomware(path):
+        os.remove(os.path.join(path, "ransom.note"))
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                file_path = os.path.join(root, file)
+                shutil.copyfile(file_path, file_path + ".encrypted")
+                os.remove(file_path)
+
+if __name__ == "__main__":
+    mitigate_ransomware("path/to/infected/directory")
