@@ -1,51 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-26 02:38:05.598413
+# Generated 2026-06-26 06:48:15.243504
 
 import socket
-import ssl
 import hashlib
-import os
 
-def detect_ransomware(file):
-    # Check if the file is a valid PE file
-    try:
-        pe = pefile.PE(file)
-    except Exception as e:
-        return False
+def check_for_ransomware(data):
+    # Check if the data contains the ransomware string
+    if b'ransomware' in data:
+        # Hash the data to identify it
+        hash = hashlib.sha256(data).hexdigest()
+        # Send a warning message to the server
+        socket.send('WARNING: RANSOMWARE DETECTED - HASH: {}'.format(hash))[17D[K
+{}'.format(hash))
+    else:
+        # No ransomware detected, do nothing
+        pass
 
-    # Check if the file contains the ransomware signature
-    for section in pe.sections():
-        if b"ransomware" in section.get_data():
-            return True
+# Initialize the socket
+socket = socket.socket()
 
-    return False
+# Connect to the server
+socket.connect((HOST, PORT))
 
-def mitigate_ransomware(file):
-    # Decrypt the file using the AES-256 algorithm with a random key
-    key = hashlib.sha256(os.urandom(32)).digest()
-    cipher = AES.new(key, AES.MODE_CBC)
-    with open(file, "rb") as f:
-        data = f.read()
-    decrypted_data = cipher.decrypt(data)
+# Receive data from the server
+data = socket.recv(1024)
 
-    # Write the decrypted data to a new file
-    with open("decrypted_" + file, "wb") as f:
-        f.write(decrypted_data)
-
-# Get the list of files to scan
-files = os.listdir()
-
-# Iterate over each file and detect if it's a ransomware
-for file in files:
-    # Check if the file is a valid PE file
-    try:
-        pe = pefile.PE(file)
-    except Exception as e:
-        continue
-
-    # Check if the file contains the ransomware signature
-    for section in pe.sections():
-        if b"ransomware" in section.get_data():
-            # Mitigate the ransomware by decrypting the file
-            mitigate_ransomware(file)
+# Check for ransomware
+check_for_ransomware(data)
