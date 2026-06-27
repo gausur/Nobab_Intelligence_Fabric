@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-27 15:12:30.581960
+# Generated 2026-06-27 18:07:44.211618
 
 import re
-import urllib.parse
-import socket
+import urllib.request
+from email.utils import parseaddr
 
-def is_phishing_url(url):
-    parsed_url = urllib.parse.urlparse(url)
-    if parsed_url.scheme not in ["http", "https"]:
-        return False
-    if parsed_url.netloc == "":
-        return False
-    if parsed_url.path.lower().startswith("/mailto:"):
-        return True
-    if parsed_url.hostname.split(".")[-1] in ["com", "edu", "gov", "mil", "[1D[K
-"net", "org"]:
-        return False
-    if parsed_url.hostname.endswith("edu"):
-        return False
-    if parsed_url.path == "/":
-        return True
-    return False
+def is_valid_email(email):
+    regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    return re.search(regex, email) is not None
+
+def extract_email_from_url(url):
+    regex = r"mailto:(.*)"
+    match = re.search(regex, url)
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def is_phishing_site(url):
+    site_name = urllib.request.urlopen(url).geturl()
+    site_name = site_name.split("/")[2]
+    return site_name in ["gmail", "yahoo", "outlook"]
 
 def mitigate_phishing(url):
-    if is_phishing_url(url):
-        print("Phishing URL detected!")
-        exit(1)
+    if is_phishing_site(url):
+        print("Warning: Phishing site detected!")
     else:
-        print("Not a phishing URL.")
-        exit(0)
+        print("Site not recognized as phishing.")
+
+if __name__ == "__main__":
+    url = input("Enter URL to check: ")
+    mitigate_phishing(url)
