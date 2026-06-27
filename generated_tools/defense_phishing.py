@@ -1,34 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-27 18:07:44.211618
+# Generated 2026-06-27 20:07:52.468934
 
 import re
-import urllib.request
-from email.utils import parseaddr
+import requests
 
-def is_valid_email(email):
-    regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    return re.search(regex, email) is not None
+def is_phishing_url(url):
+    # Check if the URL is valid
+    try:
+        response = requests.get(url, allow_redirects=False)
+    except requests.exceptions.RequestException as e:
+        return False
 
-def extract_email_from_url(url):
-    regex = r"mailto:(.*)"
-    match = re.search(regex, url)
+    # Check if the URL is a redirect to another domain
+    location = response.headers.get("Location")
+    if location and not location.startswith(url):
+        return True
+
+    # Check for common phishing patterns in the HTML content
+    pattern = r"(?i)(?<=<script>).*?(?=</script>)"
+    html_content = response.text
+    match = re.search(pattern, html_content)
     if match:
-        return match.group(1)
-    else:
-        return None
+        return True
 
-def is_phishing_site(url):
-    site_name = urllib.request.urlopen(url).geturl()
-    site_name = site_name.split("/")[2]
-    return site_name in ["gmail", "yahoo", "outlook"]
+    # Check for common phishing patterns in the HTTP headers
+    pattern = r"x-frame-options:[ ]*deny"
+    header = response.headers.get("X-Frame-Options")
+    if header and re.match(pattern, header):
+        return True
 
-def mitigate_phishing(url):
-    if is_phishing_site(url):
-        print("Warning: Phishing site detected!")
-    else:
-        print("Site not recognized as phishing.")
-
-if __name__ == "__main__":
-    url = input("Enter URL to check: ")
-    mitigate_phishing(url)
+    return False
