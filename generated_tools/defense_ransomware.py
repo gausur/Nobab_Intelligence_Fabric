@@ -1,28 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-28 20:55:43.832760
+# Generated 2026-06-28 21:58:40.387033
 
 import os
 import subprocess
-from pathlib import Path
+import time
 
-def detect_ransomware():
-    # Check for the presence of the ransomware file in the system
-    if Path("/path/to/ransomware").exists():
-        print("Ransomware detected!")
-        # Mitigate the attack by removing the ransomware file and shutting [K
-down the system
-        subprocess.run(["rm", "-f", "/path/to/ransomware"])
-        subprocess.run(["shutdown", "-h", "now"])
+def detect_ransomware(file):
+    # Check if file is infected with ransomware
+    command = "strings {} | grep -i 'your name'".format(file)
+    output = subprocess.check_output(command, shell=True).decode()
+    if "your name" in output:
+        return True
     else:
-        print("No ransomware detected.")
+        return False
+
+def mitigate_ransomware(file):
+    # Unlock the file and remove ransom note
+    command = "strings {} | grep -v 'your name' > temp".format(file)
+    subprocess.check_output(command, shell=True).decode()
+    os.remove(file)
+    os.rename("temp", file)
 
 def main():
-    # Run the detection script at regular intervals to check for any ransom[6D[K
-ransomware attacks
-    while True:
-        detect_ransomware()
-        time.sleep(3600)  # Check every hour
+    # Get the list of files to check
+    files = ["/path/to/file1", "/path/to/file2"]
+
+    # Check each file for ransomware and mitigate if necessary
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+            print("Ransomware detected and mitigated: {}".format(file))
+        else:
+            print("No ransomware detected: {}".format(file))
 
 if __name__ == "__main__":
     main()

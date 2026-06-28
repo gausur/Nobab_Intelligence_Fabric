@@ -1,48 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-28 20:56:41.875734
+# Generated 2026-06-28 22:00:02.664095
 
 import re
-from urllib.parse import urlparse
+import urllib.parse
+from typing import Union
 
-class PhishingAttackDetector:
-    def __init__(self, url):
-        self.url = url
-        self.host = None
-        self.domain = None
-
-    def is_phishing_attack(self):
-        if not self.host or not self.domain:
-            return False
-
-        # Check if the host is a subdomain of the domain
-        if self.host.endswith(f'.{self.domain}'):
-            return True
-
-        # Check if the domain is a TLD (Top Level Domain)
-        try:
-            parsed_url = urlparse(self.url)
-            domain_name = parsed_url.netloc
-            tlds = [tld[0] for tld in re.findall(r'([^.]+?\.[^.]+?\.[^.]+?)[37D[K
-re.findall(r'([^.]+?\.[^.]+?\.[^.]+?)', domain_name)]
-            if len(tlds) == 1:
-                return True
-        except:
-            pass
-
+def is_phishing_url(url: str) -> bool:
+    parsed_url = urllib.parse.urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
         return False
+    for pattern in PHISHING_URL_PATTERNS:
+        if re.search(pattern, parsed_url.netloc):
+            return True
+    return False
 
-    def mitigate_phishing_attack(self):
-        # TODO: Implement mitigation strategies here
-        print("Phishing attack detected!")
-
-def main():
-    url = "https://example.com"
-    detector = PhishingAttackDetector(url)
-    if detector.is_phishing_attack():
-        detector.mitigate_phishing_attack()
+def mitigate_phishing_attack(url: str) -> Union[str, None]:
+    if is_phishing_url(url):
+        return None
     else:
-        print("No phishing attack detected!")
+        return url
 
-if __name__ == "__main__":
-    main()
+PHISHING_URL_PATTERNS = [
+    r"(?i)\b(?:google|facebook|twitter)\b",
+    r"\b(?:https?://)?(?:www\.)?(?:google|facebook|twitter)\.com/(?:verify)r"\b(?:https?://)?(?:www\.)?(?:google|facebook|twitter)\.com/(?:verify)?(?:\?.*)?$",
+    r"\b(?:https?://)?(?:www\.)?(?:google|facebook|twitter)\.com/(?:settingr"\b(?:https?://)?(?:www\.)?(?:google|facebook|twitter)\.com/(?:settings|accounts)/(?:privacy|security)/(?:password|two-factor)/(?:\?.*)?$"
+]
