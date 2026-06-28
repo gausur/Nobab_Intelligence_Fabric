@@ -1,52 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-27 23:01:28.802411
+# Generated 2026-06-28 00:00:49.466679
 
 import os
-import shutil
-import subprocess
+import json
+import base64
+import hashlib
+import zipfile
 
-def detect_ransomware(file):
-    """
-    Detect if the given file is a ransomware sample.
+def detect_ransomware(file_path):
+    with open(file_path, "rb") as f:
+        file_data = f.read()
+        sha256 = hashlib.sha256(file_data).hexdigest()
+        if sha256 in RANSOMWARE_DB:
+            return True
+    return False
 
-    Args:
-        file (str): The path to the file to check.
+def mitigate_ransomware(file_path):
+    with zipfile.ZipFile(file_path, "r") as zf:
+        for file in zf.namelist():
+            if detect_ransomware(zf.open(file)):
+                zf.extract(file, file_path)
+                break
+    return True
 
-    Returns:
-        bool: True if the file is a ransomware sample, False otherwise.
-    """
-    try:
-        subprocess.check_output(["file", file])
-    except subprocess.CalledProcessError:
-        return False
-    else:
-        return "ransomware" in subprocess.check_output(["file", file]).deco[11D[K
-file]).decode("utf-8")
-
-def mitigate_ransomware(file):
-    """
-    Mitigate a ransomware attack by deleting the infected file and all its [K
-copies.
-
-    Args:
-        file (str): The path to the file to delete.
-    """
-    try:
-        shutil.rmtree(os.path.dirname(file))
-    except OSError:
-        pass
-    else:
-        os.remove(file)
-
-def main():
-    """
-    Main function to detect and mitigate ransomware attacks.
-    """
-    for file in os.listdir("."):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-            print("Ransomware detected and mitigated:", file)
+RANSOMWARE_DB = json.loads(os.environ["RANSOMWARE_DB"])
 
 if __name__ == "__main__":
-    main()
+    if detect_ransomware(sys.argv[1]):
+        mitigate_ransomware(sys.argv[1])
