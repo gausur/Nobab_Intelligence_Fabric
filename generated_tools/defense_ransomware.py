@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-28 07:49:02.689896
+# Generated 2026-06-28 10:25:39.654869
 
 import os
-import sys
 import hashlib
 import subprocess
 
-def is_ransomware(file):
-    with open(file, 'rb') as f:
+def detect_ransomware(filepath):
+    """
+    Detects if a file is a ransomware by comparing its MD5 hash to known ma[2D[K
+malicious files.
+    :param filepath: The path to the file to be checked.
+    :return: True if the file is a ransomware, False otherwise.
+    """
+    with open(filepath, "rb") as f:
         data = f.read()
-    sha256sum = hashlib.sha256(data).hexdigest()
-    if sha256sum == 'YOUR_RANSOMWARE_SHA256_HASH':
-        return True
-    else:
-        return False
+        md5_hash = hashlib.md5(data).hexdigest()
+        return md5_hash in ["malicious_md5_hash1", "malicious_md5_hash2"]
 
-def mitigate(file):
-    with open(file, 'wb') as f:
-        f.write(b'Your mitigation here')
+def mitigate_ransomware(filepath):
+    """
+    Mitigates a ransomware attack by deleting the infected file.
+    :param filepath: The path to the file to be deleted.
+    """
+    os.remove(filepath)
 
 def main():
-    files = os.listdir()
-    for file in files:
-        if is_ransomware(file):
-            mitigate(file)
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            if detect_ransomware(os.path.join(root, file)):
+                mitigate_ransomware(os.path.join(root, file))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
