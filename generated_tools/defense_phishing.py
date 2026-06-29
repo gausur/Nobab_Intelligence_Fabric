@@ -1,36 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-29 10:28:31.243523
+# Generated 2026-06-29 14:46:58.726083
 
 import re
-import smtplib
 
-def is_phishing(email):
-    pattern = r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6[61D[K
-r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
-    if re.search(pattern, email):
-        return True
-    else:
+def is_phishing(url):
+    # Check if the URL is in the format of <scheme>://<host>:<port>/<path>
+    match = re.match(r"^([a-z]+)://([^\s/]+)(?::(\d+))?(/.*)?$", url)
+    if not match:
         return False
 
-def mitigate_phishing(email):
-    sender = email["From"]
-    recipient = email["To"]
-    subject = email["Subject"]
-    body = email["Body"]
-    if is_phishing(sender) or is_phishing(recipient):
-        smtplib.SMTP("smtp.gmail.com", 587).sendmail(sender, recipient, "Th[3D[K
-"This is a phishing attack. Do not click on any links.")
+    # Check if the URL is from a known phishing domain
+    host = match.group(2)
+    if host in ["example.com", "fake-domain.com"]:
+        return True
 
-def main():
-    email = {
-        "From": "john.doe@phish.com",
-        "To": "jane.smith@gmail.com",
-        "Subject": "Important: Click this link to verify your account",
-        "Body": "Hello Jane, please click on the link below to verify your [K
-account."
-    }
-    mitigate_phishing(email)
+    # Check if the URL has any suspicious query parameters
+    params = match.group(4)
+    if params and re.search(r"[a-z]+=([^&]|$)", params):
+        return True
 
-if __name__ == "__main__":
-    main()
+    return False
+
+def mitigate_phishing(url):
+    # Replace the URL with a safe version
+    safe_url = url.replace("://fake-domain.com/", "://example.com/")
+    print(safe_url)
