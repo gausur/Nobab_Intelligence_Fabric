@@ -1,44 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-29 17:32:43.026714
+# Generated 2026-06-29 19:49:30.514179
 
 import os
-import time
+import sys
+import json
 
-def is_ransomware_attack():
-    # Check if the file system is read-only
-    if not os.access(os.getcwd(), os.W_OK):
-        return True
-    
-    # Check if there are any suspicious files or directories
-    for root, dirs, files in os.walk(os.getcwd()):
-        for file in files:
-            if file.endswith(".ransomware"):
-                return True
-    
-    # Check if there is a ransomware message on the clipboard
-    if len(str(pyperclip.paste())) > 0 and "RANSOMWARE" in str(pyperclip.pa[16D[K
-str(pyperclip.paste()):
-        return True
-    
+def detect_ransomware(path):
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+        if b"$RANSOMWARE" in data:
+            return True
+    except Exception as e:
+        print("Error while detecting ransomware:", str(e))
     return False
 
-def mitigate_ransomware_attack():
-    # Set the file system read-write
-    os.chmod(os.getcwd(), 0o755)
-    
-    # Delete any suspicious files or directories
-    for root, dirs, files in os.walk(os.getcwd()):
-        for file in files:
-            if file.endswith(".ransomware"):
-                os.remove(file)
-    
-    # Clear the ransomware message on the clipboard
-    pyperclip.clear()
+def mitigate_ransomware(path):
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+        if b"$RANSOMWARE" in data:
+            print("Detected ransomware, attempting to mitigate...")
+            # Remove the ransomware payload from the file
+            with open(path, "wb") as f:
+                f.write(data.replace(b"$RANSOMWARE", b""))
+            print("Mitigation successful!")
+    except Exception as e:
+        print("Error while mitigating ransomware:", str(e))
 
-while True:
-    if is_ransomware_attack():
-        mitigate_ransomware_attack()
-        print("Ransomware attack detected and mitigated")
-    else:
-        time.sleep(60)
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python ransomware_detector.py /path/to/file")
+        sys.exit()
+    path = sys.argv[1]
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
