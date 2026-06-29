@@ -1,29 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-29 21:19:29.483215
+# Generated 2026-06-29 22:50:33.614835
 
 import os
-import shutil
-import tempfile
-from pathlib import Path
+import subprocess
 
 def detect_ransomware(path):
-    """Detects ransomware infection by checking for the presence of a speci[5D[K
-specific file or directory."""
-    return Path(path).joinpath('RansomwareInfected').is_file()
+    # Check if the file is locked by the OS
+    try:
+        with open(path, 'rb'):
+            pass
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            return True
+    return False
 
 def mitigate_ransomware(path):
-    """Mitigates a ransomware infection by deleting the infected file or di[2D[K
-directory and creating a new one."""
-    shutil.rmtree(path)
-    with tempfile.NamedTemporaryFile() as f:
-        f.write(b'This is a new file')
-    os.rename(f.name, path)
+    # Check if the file is locked by the OS
+    try:
+        with open(path, 'rb'):
+            pass
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            # Unlock the file
+            subprocess.call(['sudo', 'fuser', '-k', path])
+            return True
+    return False
 
 def main():
-    """Main function to detect and mitigate ransomware attacks."""
-    if detect_ransomware('/path/to/infected/file'):
-        mitigate_ransomware('/path/to/infected/file')
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            if detect_ransomware(os.path.join(root, file)):
+                mitigate_ransomware(os.path.join(root, file))
 
 if __name__ == '__main__':
     main()
