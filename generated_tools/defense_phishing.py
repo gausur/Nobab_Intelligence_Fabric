@@ -1,28 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-29 14:46:58.726083
+# Generated 2026-06-29 17:31:36.156542
 
 import re
+import sys
+from typing import List, Union
 
-def is_phishing(url):
-    # Check if the URL is in the format of <scheme>://<host>:<port>/<path>
-    match = re.match(r"^([a-z]+)://([^\s/]+)(?::(\d+))?(/.*)?$", url)
-    if not match:
+class PhishingDetector:
+    def __init__(self):
+        self.patterns = []
+        self.load_patterns()
+
+    def load_patterns(self):
+        with open("phishing_patterns.txt", "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                self.patterns.append(line)
+
+    def detect_phishing(self, url: str) -> bool:
+        for pattern in self.patterns:
+            if re.search(pattern, url):
+                return True
         return False
 
-    # Check if the URL is from a known phishing domain
-    host = match.group(2)
-    if host in ["example.com", "fake-domain.com"]:
-        return True
+    def mitigate_phishing(self, url: str) -> Union[str, None]:
+        if self.detect_phishing(url):
+            print("Phishing attack detected!")
+            return None
+        else:
+            return url
 
-    # Check if the URL has any suspicious query parameters
-    params = match.group(4)
-    if params and re.search(r"[a-z]+=([^&]|$)", params):
-        return True
-
-    return False
-
-def mitigate_phishing(url):
-    # Replace the URL with a safe version
-    safe_url = url.replace("://fake-domain.com/", "://example.com/")
-    print(safe_url)
+if __name__ == "__main__":
+    detector = PhishingDetector()
+    urls = [sys.argv[1], sys.argv[2]]
+    for url in urls:
+        print(detector.mitigate_phishing(url))

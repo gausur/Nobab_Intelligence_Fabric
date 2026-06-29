@@ -1,31 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-29 14:45:56.820326
+# Generated 2026-06-29 17:32:43.026714
 
 import os
-import subprocess
+import time
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    try:
-        subprocess.check_output(['powershell', 'Get-Process | Where-Object [K
-{$_.Name -eq "Ransomware"}'])
+def is_ransomware_attack():
+    # Check if the file system is read-only
+    if not os.access(os.getcwd(), os.W_OK):
         return True
-    except subprocess.CalledProcessError:
-        # If the system is not infected, return False
-        return False
+    
+    # Check if there are any suspicious files or directories
+    for root, dirs, files in os.walk(os.getcwd()):
+        for file in files:
+            if file.endswith(".ransomware"):
+                return True
+    
+    # Check if there is a ransomware message on the clipboard
+    if len(str(pyperclip.paste())) > 0 and "RANSOMWARE" in str(pyperclip.pa[16D[K
+str(pyperclip.paste()):
+        return True
+    
+    return False
 
-def mitigate_ransomware():
-    # Check if the system is infected with ransomware and call the appropri[8D[K
-appropriate function to mitigate it
-    if detect_ransomware():
-        # If the system is infected, call the function to remove the ransom[6D[K
-ransomware files
-        remove_ransomware()
+def mitigate_ransomware_attack():
+    # Set the file system read-write
+    os.chmod(os.getcwd(), 0o755)
+    
+    # Delete any suspicious files or directories
+    for root, dirs, files in os.walk(os.getcwd()):
+        for file in files:
+            if file.endswith(".ransomware"):
+                os.remove(file)
+    
+    # Clear the ransomware message on the clipboard
+    pyperclip.clear()
+
+while True:
+    if is_ransomware_attack():
+        mitigate_ransomware_attack()
+        print("Ransomware attack detected and mitigated")
     else:
-        # If the system is not infected, return False
-        return False
-
-def remove_ransomware():
-    # Remove all the ransomware files and folders from the system
-    subprocess.check_call(['powershell', 'Remove-Item -Path * -Force'])
+        time.sleep(60)
