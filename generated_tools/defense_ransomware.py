@@ -1,43 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-30 13:09:13.325057
+# Generated 2026-06-30 16:20:36.245206
 
 import os
-import time
 import json
-import subprocess
-from urllib.request import urlopen
+import time
 
-def is_ransomware(file):
-    # Check if file is a zip file
-    if not file.endswith('.zip'):
-        return False
-    
-    # Read the first 1024 bytes of the file
-    with open(file, 'rb') as f:
-        data = f.read(1024)
-    
-    # Check if the file contains a certain string
-    if b'Ransomware detected' in data:
-        return True
-    else:
-        return False
+def detect_ransomware(path):
+    # Check if the file is encrypted
+    with open(path, "rb") as f:
+        data = f.read()
+        if b"AES" in data:
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(file):
-    # Unzip the file
-    subprocess.run(['unzip', file], shell=True)
-    
-    # Remove the original zip file
-    os.remove(file)
+def mitigate_ransomware(path):
+    # Remove the file
+    os.remove(path)
 
+# Main function to run the detection and mitigation
 def main():
-    # Get a list of all files in the current directory
-    files = [f for f in os.listdir() if os.path.isfile(f)]
-    
-    # Iterate over each file and check if it is a ransomware
-    for file in files:
-        if is_ransomware(file):
-            mitigate_ransomware(file)
+    # Get the current working directory
+    cwd = os.getcwd()
+    # Iterate over all files in the current directory
+    for root, dirs, files in os.walk(cwd):
+        for file in files:
+            path = os.path.join(root, file)
+            if detect_ransomware(path):
+                mitigate_ransomware(path)
+                print("Ransomware detected and mitigated: {}".format(path))[17D[K
+{}".format(path))
+    return 0
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
