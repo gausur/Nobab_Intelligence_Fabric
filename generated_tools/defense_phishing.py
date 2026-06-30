@@ -1,26 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-06-30 10:28:36.607904
+# Generated 2026-06-30 13:07:20.600291
 
 import re
-import socket
+from urllib.parse import urlparse
 
 def is_phishing(url):
-    pattern = r"^http[s]?://(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])[61D[K
-r"^http[s]?://(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{r"^http[s]?://(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])\.)+[a-zA-Z]{2,6}$"
-    if not re.match(pattern, url):
+    parsed = urlparse(url)
+    if not parsed.netloc:
         return False
-    try:
-        socket.gethostbyname(url)
-    except socket.gaierror:
+    if not re.match("^[a-zA-Z0-9.-]+$", parsed.netloc):
+        return True
+    if re.search("://\w+\.", parsed.netloc):
+        return True
+    if re.search("\.\w+", parsed.netloc):
         return True
     return False
 
 def mitigate_phishing(url):
     if is_phishing(url):
-        print("Phishing attack detected!")
-        # Add your custom logic here to block the URL or notify the user
+        print("Phishing attempt detected!")
+        return "https://example.com"
+    else:
+        return url
+
+def main():
+    url = input("Enter a URL: ")
+    mitigated_url = mitigate_phishing(url)
+    if mitigated_url != url:
+        print("Mitigated URL:", mitigated_url)
 
 if __name__ == "__main__":
-    url = input("Enter a URL: ")
-    mitigate_phishing(url)
+    main()
