@@ -1,51 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-06-30 18:33:15.629437
+# Generated 2026-06-30 20:57:33.482217
 
 import os
-import subprocess
-import shutil
+import re
+import json
 
-def detect_ransomware(directory):
-    # Check if the directory is encrypted
-    try:
-        output = subprocess.check_output(['ls', '-l', directory])
-        for line in output.splitlines():
-            if 'Encrypted' in line:
-                return True
-    except FileNotFoundError:
-        pass
-    # Check if the directory contains a ransomware file
-    try:
-        with open(os.path.join(directory, 'ransomware')) as f:
-            return True
-    except FileNotFoundError:
-        pass
-    return False
+# Define the list of file extensions that should be scanned for ransomware
+file_extensions = [".exe", ".dll", ".sys"]
 
-def mitigate_ransomware(directory):
-    # Remove the encrypted files
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if detect_ransomware(os.path.join(root, file)):
-                os.remove(os.path.join(root, file))
-    # Remove the ransomware file
-    try:
-        with open(os.path.join(directory, 'ransomware')) as f:
-            os.remove(f.name)
-    except FileNotFoundError:
-        pass
-    # Restore backups
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if detect_backup(os.path.join(root, file)):
-                shutil.copyfile(os.path.join(root, file), os.path.join(root[17D[K
-os.path.join(root, 'backup', file))
-    # Remove the backup directory
-    try:
-        shutil.rmtree(os.path.join(directory, 'backup'))
-    except FileNotFoundError:
-        pass
+# Define the list of known ransomware signatures
+ransomware_signatures = ["1234567890abcdef", "fedcba9876543210"]
 
-if __name__ == '__main__':
-    mitigate_ransomware('/')
+# Scan the file system for ransomware
+for root, dirs, files in os.walk("/"):
+    # Iterate through each file and check if it has a known ransomware sign[4D[K
+signature
+    for filename in files:
+        filepath = os.path.join(root, filename)
+        with open(filepath, "rb") as f:
+            data = f.read()
+            for sig in ransomware_signatures:
+                if re.search(sig, data):
+                    # If a match is found, notify the user and delete the f[1D[K
+file
+                    print("Ransomware detected: {}".format(filepath))
+                    os.unlink(filepath)
+                    break
+
+# Scan the registry for ransomware
+for key in winreg.HKEY_LOCAL_MACHINE.keys():
+    try:
+        reg_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key)
+        value = winreg.QueryValueEx(reg_key, "Software\\Microsoft\\Windows\[30D[K
+"Software\\Microsoft\\Windows\\CurrentVersion")
+        if value[0] == ransomware_signature:
+            print("Ransomware detected: {}".format(key))
+    except WindowsError as e:
+        pass
