@@ -1,41 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-01 00:03:00.962192
+# Generated 2026-07-01 04:17:27.229898
 
 import re
-import smtplib
 
-def is_phishing_attack(email):
-    # Check if the email contains any suspicious words or phrases
-    for word in ["phishing", "scam", "fraud"]:
-        if word in email.lower():
-            return True
-    
-    # Check if the email contains a suspicious sender address
-    sender = email["From"]
-    if not re.match(r"^.*@\w+\.\w+$", sender):
+def is_phishing(url):
+    pattern = r"https?://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,3}(/\S*)?$"
+    if not re.match(pattern, url):
+        return False
+    else:
         return True
-    
-    # Check if the email contains a suspicious subject line
-    subject = email["Subject"]
-    for phrase in ["urgent", "important", "alert"]:
-        if phrase in subject.lower():
-            return True
-    
-    # Check if the email contains any suspicious attachments
-    for attachment in email.iter_attachments():
-        if attachment.get_content_type() not in ["text/plain", "text/html"][12D[K
-"text/html"]:
-            return True
-    
-    return False
 
-def mitigate_phishing_attack(email):
-    # Remove the email from the spam folder
-    smtplib.SMTP("smtp.gmail.com").sendmail("from@gmail.com", "to@example.c[13D[K
-"to@example.com", f"DELETE {email['Subject']}")
-    
-    # Report the attack to the authorities
-    import requests
-    requests.post("https://www.example.com/report-phishing-attack", json={"[7D[K
-json={"subject": email["Subject"], "sender": email["From"]})
+def mitigate_phishing(url):
+    # Implement your mitigation strategy here
+    pass
+
+if __name__ == "__main__":
+    url = input("Enter URL: ")
+    if is_phishing(url):
+        mitigate_phishing(url)
+    else:
+        print("URL is not a phishing site.")
