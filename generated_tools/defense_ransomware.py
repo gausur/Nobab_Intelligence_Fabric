@@ -1,30 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-01 14:14:40.967393
+# Generated 2026-07-01 17:11:06.186132
 
 import os
-import json
-import subprocess
+import sys
+import hashlib
+import base64
 
-def detect_ransomware(file):
-    """Detects ransomware in a given file using the RIFF fingerprinting alg[3D[K
-algorithm."""
-    # Load the RIFF fingerprinting database
-    with open("riff.json", "r") as f:
-        db = json.load(f)
-
-    # Calculate the hash of the file
-    hash = subprocess.run(["sha256sum", file], stdout=subprocess.PIPE).stdo[28D[K
-stdout=subprocess.PIPE).stdout.decode()
-
-    # Check if the hash is in the database
-    for entry in db:
-        if hash == entry["hash"]:
+def detect_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        file_data = f.read()
+        file_hash = hashlib.sha256(file_data).hexdigest()
+        if file_hash == "YOUR_HASH_HERE":
+            print("Ransomware detected!")
             return True
-
-    # If the hash is not in the database, return False
     return False
 
-def mitigate_ransomware(file):
-    """Mitigates a ransomware attack by deleting the affected file."""
-    os.remove(file)
+def mitigate_ransomware():
+    os.remove(sys.argv[1])
+    sys.exit()
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python ransomware_detector.py <filepath>")
+        sys.exit()
+    if detect_ransomware(sys.argv[1]):
+        mitigate_ransomware()
