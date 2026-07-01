@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-01 19:44:44.409669
+# Generated 2026-07-01 21:21:20.141513
 
-import os
-import hashlib
-import time
+import socket
+import subprocess
 
-def detect_ransomware(filepath):
-    # Calculate the SHA256 hash of the file
-    with open(filepath, "rb") as f:
-        file_hash = hashlib.sha256(f.read()).hexdigest()
-    
-    # Check if the file has been modified since the last time it was backed[6D[K
-backed up
-    if os.path.getmtime(filepath) > time.time() - 30 * 86400:
-        return False
-    
-    # Check if the file's hash is different from the backup hash
-    with open("backup_hashes.txt", "r") as f:
+def check_ransomware(ip_address):
+    # Check if the IP address is in the ransomware list
+    with open("ransomware_list.txt", "r") as f:
         for line in f:
-            if file_hash == line.strip():
+            if ip_address == line.strip():
                 return True
-    
     return False
 
-def mitigate_ransomware(filepath):
-    # Delete the infected file
-    os.remove(filepath)
-    
-    # Create a new backup of the file
-    with open("backup_hashes.txt", "a") as f:
-        f.write(file_hash + "\n")
-    
-    # Notify the user that the ransomware has been mitigated
-    print("The ransomware attack has been mitigated.")
+def mitigate_ransomware(ip_address):
+    # Send a message to the IP address to stop the ransomware attack
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((ip_address, 80))
+        s.sendall(b"GET /stop HTTP/1.1\r\nHost: ransomware.com\r\n\r\n")
+    # Kill the process associated with the IP address
+    subprocess.run(["pkill", "-f", ip_address])
+
+# Main function to detect and mitigate ransomware attacks
+def main():
+    # Get the list of IP addresses to check from a file
+    with open("ip_list.txt", "r") as f:
+        for line in f:
+            ip_address = line.strip()
+            if check_ransomware(ip_address):
+                mitigate_ransomware(ip_address)
+
+if __name__ == "__main__":
+    main()
