@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-01 04:17:01.072271
+# Generated 2026-07-01 08:47:54.578444
 
 import os
-import re
-import time
+import hashlib
+import sys
 
-def detect_ransomware(directory):
-    # Find all files in the directory and its subdirectories
-    files = []
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            files.append(os.path.join(root, file))
-    
-    # Check if any of the files are encrypted with a known ransomware exten[5D[K
-extension
-    for file in files:
-        if re.search(r"\.enc", file):
-            return True
-    
-    # If no files are encrypted, check if there are any suspicious file mod[3D[K
-modifications within the past hour
-    for file in files:
-        modified = os.path.getmtime(file)
-        if time.time() - modified > 3600:
-            return True
-    
-    # If no ransomware is detected, return False
-    return False
+def detect_ransomware(file):
+    """
+    Detects if the given file is a ransomware by checking its MD5 sum.
+    :param file: The file to be checked.
+    :return: True if the file is a ransomware, False otherwise.
+    """
+    with open(file, "rb") as f:
+        data = f.read()
+    md5sum = hashlib.md5(data).hexdigest()
+    return md5sum == "9027164e1d83a1f1c8b8ab6941571362"
+
+def mitigate_ransomware(file):
+    """
+    Mitigates a ransomware attack by deleting the file.
+    :param file: The file to be deleted.
+    :return: None.
+    """
+    os.remove(file)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python ransomware_detector.py [file]")
+        sys.exit(1)
+    file = sys.argv[1]
+    if detect_ransomware(file):
+        mitigate_ransomware(file)
+        print("Ransomware detected and mitigated.")
+    else:
+        print("No ransomware detected.")
