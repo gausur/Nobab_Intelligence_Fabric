@@ -1,34 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-01 21:21:20.141513
+# Generated 2026-07-01 23:06:01.008532
 
-import socket
+import os
 import subprocess
+import shutil
+import json
 
-def check_ransomware(ip_address):
-    # Check if the IP address is in the ransomware list
-    with open("ransomware_list.txt", "r") as f:
-        for line in f:
-            if ip_address == line.strip():
-                return True
+def detect_ransomware(file):
+    # Check if the file is a regular file
+    if not os.path.isfile(file):
+        return False
+
+    # Get the file's contents using subprocess.check_output()
+    with open(file, "rb") as f:
+        data = f.read()
+
+    # Check if the file contains a known ransomware pattern
+    for pattern in ["RANSOMWARE", "PAY_US", "OR_WE_WILL_DELETE_ALL_YOUR_DAT[31D[K
+"OR_WE_WILL_DELETE_ALL_YOUR_DATA"]:
+        if pattern in data:
+            return True
+
+    # If no patterns are found, the file is likely not ransomware
     return False
 
-def mitigate_ransomware(ip_address):
-    # Send a message to the IP address to stop the ransomware attack
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((ip_address, 80))
-        s.sendall(b"GET /stop HTTP/1.1\r\nHost: ransomware.com\r\n\r\n")
-    # Kill the process associated with the IP address
-    subprocess.run(["pkill", "-f", ip_address])
+def mitigate_ransomware(file):
+    # Check if the file is a regular file
+    if not os.path.isfile(file):
+        return False
 
-# Main function to detect and mitigate ransomware attacks
+    # Get the file's contents using subprocess.check_output()
+    with open(file, "rb") as f:
+        data = f.read()
+
+    # Replace any ransomware patterns in the file with known good data
+    for pattern in ["RANSOMWARE", "PAY_US", "OR_WE_WILL_DELETE_ALL_YOUR_DAT[31D[K
+"OR_WE_WILL_DELETE_ALL_YOUR_DATA"]:
+        data = data.replace(pattern, "This is not a ransomware message.")
+
+    # Write the modified file back to disk using shutil.copyfile()
+    with open(file, "wb") as f:
+        f.write(data)
+
+    return True
+
 def main():
-    # Get the list of IP addresses to check from a file
-    with open("ip_list.txt", "r") as f:
-        for line in f:
-            ip_address = line.strip()
-            if check_ransomware(ip_address):
-                mitigate_ransomware(ip_address)
+    # Get a list of all files in the current directory and its subdirectori[12D[K
+subdirectories
+    for file in os.walk("."):
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
 if __name__ == "__main__":
     main()
