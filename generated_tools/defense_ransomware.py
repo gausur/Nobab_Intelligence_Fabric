@@ -1,56 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-01 23:06:01.008532
+# Generated 2026-07-02 02:34:26.939667
 
 import os
+import socket
 import subprocess
-import shutil
-import json
+from urllib import request
 
-def detect_ransomware(file):
-    # Check if the file is a regular file
-    if not os.path.isfile(file):
-        return False
-
-    # Get the file's contents using subprocess.check_output()
-    with open(file, "rb") as f:
-        data = f.read()
-
-    # Check if the file contains a known ransomware pattern
-    for pattern in ["RANSOMWARE", "PAY_US", "OR_WE_WILL_DELETE_ALL_YOUR_DAT[31D[K
-"OR_WE_WILL_DELETE_ALL_YOUR_DATA"]:
-        if pattern in data:
+def detect_ransomware(ip):
+    try:
+        # Make a request to the IP address to see if it responds with 200 O[1D[K
+OK
+        response = request.urlopen('http://' + ip)
+        if response.status == 200:
             return True
-
-    # If no patterns are found, the file is likely not ransomware
-    return False
-
-def mitigate_ransomware(file):
-    # Check if the file is a regular file
-    if not os.path.isfile(file):
+    except Exception as e:
+        print(e)
         return False
 
-    # Get the file's contents using subprocess.check_output()
-    with open(file, "rb") as f:
-        data = f.read()
+def mitigate_ransomware(ip):
+    # Kill the process that is listening on the IP address
+    command = f'kill $(lsof -i :{ip} | awk \'{{print $2}}\')'
+    subprocess.run(command, shell=True)
 
-    # Replace any ransomware patterns in the file with known good data
-    for pattern in ["RANSOMWARE", "PAY_US", "OR_WE_WILL_DELETE_ALL_YOUR_DAT[31D[K
-"OR_WE_WILL_DELETE_ALL_YOUR_DATA"]:
-        data = data.replace(pattern, "This is not a ransomware message.")
+# Get a list of all IP addresses in the network
+ips = [ip for ip in socket.getaddrinfo(socket.gethostname(), None)[0]]
 
-    # Write the modified file back to disk using shutil.copyfile()
-    with open(file, "wb") as f:
-        f.write(data)
-
-    return True
-
-def main():
-    # Get a list of all files in the current directory and its subdirectori[12D[K
-subdirectories
-    for file in os.walk("."):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-
-if __name__ == "__main__":
-    main()
+# Iterate through each IP address and detect if it is a ransomware server
+for ip in ips:
+    # If the IP address is a ransomware server, mitigate it
+    if detect_ransomware(ip):
+        mitigate_ransomware(ip)
