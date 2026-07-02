@@ -1,30 +1,17 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-02 20:59:37.060880
+# Generated 2026-07-02 22:03:47.548197
 
 import re
-import urllib.parse
 
 def is_phishing_url(url):
-    parsed_url = urllib.parse.urlparse(url)
-    hostname = parsed_url.hostname
-    if not hostname:
-        return False
-    if hostname == "localhost":
-        return True
-    if hostname[-1] == ".com" and len(hostname) > 5:
-        # Check if the hostname is a subdomain of a known phishing domain
-        for suffix in ["youporn.com", "pornhub.com"]:
-            if hostname.endswith("." + suffix):
-                return True
-    return False
+    pattern = r"https?://\w+\.\w+/\w+"
+    return bool(re.match(pattern, url))
 
-def mitigate_phishing_attacks(url):
-    if is_phishing_url(url):
-        raise ValueError("Phishing attack detected!")
-    else:
-        print("No phishing attacks detected.")
-
-if __name__ == "__main__":
-    url = input("Enter the URL to check for phishing attacks: ")
-    mitigate_phishing_attacks(url)
+def mitigate_phishing_attack(request_headers):
+    if "Referer" in request_headers:
+        referer_url = request_headers["Referer"]
+        if is_phishing_url(referer_url):
+            return {"Content-Type": "text/plain"}, "Phishing attack detecte[7D[K
+detected."
+    return None, None
