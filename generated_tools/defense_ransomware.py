@@ -1,39 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-03 02:32:39.569283
+# Generated 2026-07-03 06:25:20.741480
 
 import os
-import hashlib
-import re
+import stat
+import time
+from shutil import copyfile
 
-def detect_ransomware(file):
-    # Check if the file is a valid executable
-    if not file.endswith(".exe"):
-        return False
-    
-    # Read the first 256 bytes of the file
-    with open(file, "rb") as f:
-        data = f.read(256)
-    
-    # Check if the file contains a known ransomware pattern
-    for pattern in ["RANSOM", "RANDOM"]:
-        if re.search(pattern, data):
+def is_ransomware(filename):
+    """Check if a file is a ransomware by analyzing its metadata"""
+    try:
+        st = os.stat(filename)
+        mode = stat.S_IMODE(st.st_mode)
+        if mode & 0o111 != 0 and (st.st_uid == os.geteuid() or st.st_gid ==[2D[K
+== os.getegid()):
             return True
-    
-    # Check if the file's hash is not in the known good list
-    with open("known_good_hashes.txt") as f:
-        for line in f:
-            if hashlib.sha256(data).hexdigest() == line.strip():
-                return False
-    
-    # If all else fails, assume the file is a ransomware
-    return True
+    except OSError:
+        pass
+    return False
 
-def mitigate_ransomware(file):
-    # Delete the file to prevent further damage
-    os.remove(file)
+def mitigate(filename):
+    """Mitigate a ransomware attack by renaming the file and copying it to [K
+a safe location"""
+    new_filename = "ransomware.backup"
+    try:
+        os.rename(filename, new_filename)
+        copyfile(new_filename, "safe_location")
+        return True
+    except OSError:
+        pass
+    return False
+
+def scan():
+    """Scan for ransomware files in the current directory"""
+    for filename in os.listdir("."):
+        if is_ransomware(filename):
+            mitigate(filename)
 
 if __name__ == "__main__":
-    for file in os.listdir():
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+    scan()
