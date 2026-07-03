@@ -1,36 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-02 23:58:58.747290
+# Generated 2026-07-03 02:32:39.569283
 
 import os
-import subprocess
+import hashlib
+import re
 
-def detect_ransomware():
-    # Check if the system is running Windows
-    if os.name == "nt":
-        # Run the command to check for ransomware
-        output = subprocess.check_output(["sc", "query", "state=running"])
-        # If the output contains "ransomware", it means the system is infec[5D[K
-infected
-        if b"ransomware" in output:
+def detect_ransomware(file):
+    # Check if the file is a valid executable
+    if not file.endswith(".exe"):
+        return False
+    
+    # Read the first 256 bytes of the file
+    with open(file, "rb") as f:
+        data = f.read(256)
+    
+    # Check if the file contains a known ransomware pattern
+    for pattern in ["RANSOM", "RANDOM"]:
+        if re.search(pattern, data):
             return True
-    # If the system is not running Windows, or if the check for ransomware [K
-failed, return False
-    else:
-        return False
+    
+    # Check if the file's hash is not in the known good list
+    with open("known_good_hashes.txt") as f:
+        for line in f:
+            if hashlib.sha256(data).hexdigest() == line.strip():
+                return False
+    
+    # If all else fails, assume the file is a ransomware
+    return True
 
-def mitigate_ransomware():
-    # Check if the system is running Windows
-    if os.name == "nt":
-        # Run the command to stop the ransomware process
-        subprocess.run(["taskkill", "/f", "/im", "ransomware"])
-    # If the system is not running Windows, or if the check for ransomware [K
-failed, return False
-    else:
-        return False
+def mitigate_ransomware(file):
+    # Delete the file to prevent further damage
+    os.remove(file)
 
-# Check if the system is infected with ransomware
-if detect_ransomware():
-    mitigate_ransomware()
-else:
-    print("No ransomware detected.")
+if __name__ == "__main__":
+    for file in os.listdir():
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
