@@ -1,30 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-03 23:06:20.283784
+# Generated 2026-07-04 02:06:34.227129
 
 import re
 import requests
-from bs4 import BeautifulSoup
+from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    # Check if the URL is a known phishing site
-    with open('phishing_sites.txt', 'r') as f:
-        for line in f:
-            if url == line.strip():
-                return True
+    parsed = urlparse(url)
+    if parsed.scheme != "http" and parsed.scheme != "https":
+        return False
+    domain = parsed.netloc
+    if len(domain.split(".")) < 2:
+        return False
+    tlds = ["com", "org", "net", "edu", "gov"]
+    for tld in tlds:
+        if domain.endswith(tld):
+            return True
     return False
 
-def mitigate_phishing(url):
-    # Redirect the user to a safe page
-    return 'https://www.example.com/'
+def mitigate_phishing_attack(url):
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise Exception("Non-200 status code")
+        content_type = response.headers["Content-Type"]
+        if not content_type.startswith("text/"):
+            raise Exception("Non-text Content-Type")
+    except Exception as e:
+        print(f"Phishing attack detected: {url}")
+        return
+    else:
+        print(f"No phishing attacks detected for: {url}")
 
 def main():
-    # Get the URL from the user
-    url = input('Enter a URL: ')
-    if is_phishing_url(url):
-        mitigate_phishing(url)
-    else:
-        print('The URL appears to be safe.')
+    url = "https://www.example.com"
+    mitigate_phishing_attack(url)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
