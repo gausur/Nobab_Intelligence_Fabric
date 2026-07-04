@@ -1,27 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-04 21:53:53.988525
+# Generated 2026-07-04 22:54:58.817321
 
 import os
+import subprocess
 import json
+from urllib.request import urlopen
+
+def detect_ransomware(filepath):
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+        decoded_data = data.decode("utf-8", errors="ignore")
+        if "RANSOM" in decoded_data:
+            return True
+        else:
+            return False
+    except UnicodeDecodeError:
+        return False
+
+def mitigate_ransomware(filepath):
+    try:
+        with open(filepath, "rb") as f:
+            data = f.read()
+        decoded_data = data.decode("utf-8", errors="ignore")
+        if "RANSOM" in decoded_data:
+            # Remove the malicious code
+            with open(filepath, "wb") as f:
+                f.write(data)
+    except UnicodeDecodeError:
+        pass
 
 def main():
-    # Read config file
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-    
-    # Define detection functions
-    def detect_ransomware(file):
-        return file.endswith('.crypt') or file.startswith('!')
-    
-    def mitigate_ransomware(file):
-        os.rename(file, f'{file}.bak')
-    
-    # Iterate through files and detect ransomware
-    for root, dirs, files in os.walk('/'):
-        for file in files:
-            if detect_ransomware(file):
-                mitigate_ransomware(os.path.join(root, file))
-    
-if __name__ == '__main__':
+    filepath = "/path/to/your/file"
+    if detect_ransomware(filepath):
+        mitigate_ransomware(filepath)
+
+if __name__ == "__main__":
     main()

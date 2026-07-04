@@ -1,48 +1,65 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-04 21:52:51.642702
+# Generated 2026-07-04 22:52:10.980145
 
-import re
-import json
 import requests
+from bs4 import BeautifulSoup
 
-def is_phishing_url(url):
-    # Check if the URL is a valid HTTPS URL
-    if not url.startswith("https://"):
+def is_phishing(url):
+    # Check if the URL is a valid HTTP/HTTPS URL
+    if not url.startswith(('http://', 'https://')):
         return False
-    
-    # Send a HEAD request to the URL and check the response status code
+
+    # Send an HTTP request to the URL and get the HTML response
     try:
-        response = requests.head(url)
-        if response.status_code == 404:
-            return False
-        elif response.status_code != 200:
+        response = requests.get(url)
+        html = response.text
+    except requests.RequestException:
+        return False
+
+    # Parse the HTML content using BeautifulSoup
+    soup = BeautifulSoup(html, 'html.parser')
+
+    # Look for common phishing indicators such as suspicious links, images,[7D[K
+images, or forms
+    for link in soup.find_all('a'):
+        if link['href'].startswith('/'):
             return True
-    except requests.exceptions.RequestException:
-        return True
-    
-    # Check the server's SSL certificate
-    try:
-        cert = requests.get(url + "/.well-known/security.txt").json()["cert[41D[K
-"/.well-known/security.txt").json()["cert"]
-        if not re.match("^[A-Z0-9]{40}$", cert):
+        elif link['href'].startswith('mailto:'):
             return True
-    except (KeyError, ValueError, requests.exceptions.RequestException):
-        pass
-    
-    # Check the URL for known phishing patterns
-    if any(re.search(pattern, url) for pattern in PHISHING_PATTERNS):
-        return True
-    
+        elif link['href'].startswith('#'):
+            return True
+        elif link['href'].endswith('.php'):
+            return True
+
+    for img in soup.find_all('img'):
+        if img['src'].startswith('/'):
+            return True
+        elif img['src'].startswith('data:'):
+            return True
+
+    for form in soup.find_all('form'):
+        action = form.get('action')
+        if not action:
+            continue
+        if action.startswith('/'):
+            return True
+        elif action.endswith('.php'):
+            return True
+
+    # If none of the indicators are found, assume that the URL is safe
     return False
 
-def mitigate_phishing_attack(url):
-    # Redirect to a custom error page
-    return "Redirecting to error page...", 302, {"Location": "/error"}
+def mitigate_phishing(url):
+    # Check if the URL is a phishing site using the is_phishing function
+    if not is_phishing(url):
+        return url
 
-PHISHING_PATTERNS = [
-    r"^https?://.*[.]google.com/",
-    r"^https?://.*[.]gstatic.com/",
-    r"^https?://.*[.]gmail.com/",
-    r"^https?://.*[.]googleusercontent.com/",
-]
+    # If the URL is a phishing site, generate a new URL that is safe
+    parts = urlparse.urlsplit(url)
+    scheme = parts.scheme
+    netloc = parts.netloc
+    path = '/' + base64.b64encode(os.urandom(10)).decode()
+    query = parts.query
+    fragment = parts.fragment
+    return urlunparse((scheme, netloc, path, '', query, fragment))
