@@ -1,78 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-04 15:02:06.162021
+# Generated 2026-07-04 16:06:48.000075
 
-import json
-import logging
 import os
+import socket
 import subprocess
-import sys
-from pathlib import Path
-
-# Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')[13D[K
-%(message)s')
-logger = logging.getLogger(__name__)
-
-# Define the list of suspicious files and directories to check for
-suspicious_files = [
-    'C:\\Windows\\System32\\ransom.exe',
-    'C:\\Program Files\\ransomware\\ransom.exe',
-    'C:\\Users\\Public\\Desktop\\ransom.lnk'
-]
-
-# Define the list of suspicious registry keys to check for
-suspicious_registry = [
-    'HKLM\Software\Microsoft\Windows\CurrentVersion\Run\Ransomware',
-    'HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Ransomware'
-]
-
-# Define the list of suspicious network connections to check for
-suspicious_connections = [
-    '192.168.0.1',
-    '10.0.0.1'
-]
 
 def detect_ransomware():
-    """
-    Detect ransomware by checking for suspicious files, registry keys, and [K
-network connections.
-    """
-    # Check for suspicious files
-    for file in suspicious_files:
-        if os.path.exists(file):
-            logger.info('Suspicious file found: %s', file)
-            return True
-
-    # Check for suspicious registry keys
-    for key in suspicious_registry:
-        if subprocess.run(['reg query ' + key], shell=True, stdout=subproce[15D[K
-stdout=subprocess.PIPE).stdout == b'':
-            logger.info('Suspicious registry key found: %s', key)
-            return True
-
-    # Check for suspicious network connections
-    for connection in suspicious_connections:
-        if subprocess.run(['netstat -aon | findstr ' + connection], shell=T[7D[K
-shell=True, stdout=subprocess.PIPE).stdout == b'':
-            logger.info('Suspicious network connection found: %s', connecti[8D[K
-connection)
-            return True
+    # Check if the system is running Windows
+    if not (os.name == 'nt'):
+        return False
+    
+    # Check if the system has a network connection
+    try:
+        socket.gethostbyname('google.com')
+    except:
+        return False
+    
+    # Run a command to check for ransomware infection
+    output = subprocess.check_output(['reg', 'query', 'HKLM\\SOFTWARE\\Micr[21D[K
+'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon', '/v', 'S[2D[K
+'Shell'])
+    if 'C:\\WINDOWS\\system32\\ransom.exe' in str(output):
+        return True
     else:
         return False
 
 def mitigate_ransomware():
-    """
-    Mitigate ransomware by killing the process and deleting all files in th[2D[K
-the C:\Users\Public\Desktop directory.
-    """
-    # Kill the process
-    subprocess.run(['taskkill /F /IM "ransom.exe"'], shell=True)
-
-    # Delete all files in the C:\Users\Public\Desktop directory
-    for file in Path('C:\\Users\\Public\\Desktop').iterdir():
-        os.remove(file)
-
-if __name__ == '__main__':
+    # Check if the system is infected with ransomware
     if detect_ransomware():
-        mitigate_ransomware()
+        # Remove the ransomware payload from the registry
+        subprocess.call(['reg', 'delete', 'HKLM\\SOFTWARE\\Microsoft\\Windo[33D[K
+'HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon', '/v', 'S[2D[K
+'Shell'])
+        # Restart the system to remove the malicious process
+        subprocess.call(['shutdown', '/r', '/t', '0'])
+    else:
+        pass

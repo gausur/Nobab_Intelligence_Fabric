@@ -1,72 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-04 15:03:45.487844
+# Generated 2026-07-04 16:05:24.437168
 
 import re
-import smtplib
-from email.message import EmailMessage
+import requests
 
-# Define the regex pattern for validating emails
-EMAIL_REGEX = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+# Define the list of email addresses that are allowed to send phishing link[4D[K
+links
+allowed_emails = ["johndoe@example.com", "janedoe@example.com"]
 
-def validate_email(email):
-    # Use the regex pattern to validate the email address
-    return re.match(EMAIL_REGEX, email) is not None
+# Define the pattern for a phishing link
+phishing_link_pattern = r"(https?:\/\/)(?:[^@\n]+@)?(?:www\.)?([^.\n]+\.[^.[51D[K
+r"(https?:\/\/)(?:[^@\n]+@)?(?:www\.)?([^.\n]+\.[^.\n]+)/?"
 
-def send_email(sender, recipient, subject, body):
-    # Create a new EmailMessage object
-    msg = EmailMessage()
+def is_phishing_link(url):
+    # Check if the URL matches the phishing link pattern
+    return re.match(phishing_link_pattern, url)
 
-    # Set the sender and recipient of the message
-    msg["From"] = sender
-    msg["To"] = recipient
+def get_email_from_url(url):
+    # Extract the email address from the URL using a regular expression
+    match = re.search(r"([^@\n]+@[^.\n]+\.[^.\n]+)", url)
+    if match:
+        return match.group(1)
+    else:
+        return None
 
-    # Set the subject and body of the message
-    msg["Subject"] = subject
-    msg.set_content(body)
+def mitigate_phishing_attack(url, allowed_emails):
+    # Check if the URL is a phishing link and the email address is not in t[1D[K
+the list of allowed emails
+    if is_phishing_link(url) and get_email_from_url(url) not in allowed_ema[11D[K
+allowed_emails:
+        # Mitigate the phishing attack by displaying an error message and r[1D[K
+returning None
+        print("Phishing attack detected!")
+        return None
+    else:
+        # Return the original URL if it is not a phishing link or the email[5D[K
+email address is in the list of allowed emails
+        return url
 
-    # Send the email using smtplib
-    with smtplib.SMTP("smtp.example.com") as server:
-        server.send_message(msg)
+# Test the function with some sample URLs
+url1 = "https://www.example.com"
+url2 = "http://www.phishing-site.com/login"
+url3 = "mailto:johndoe@example.com"
 
-def detect_phishing(email):
-    # Check if the email is valid
-    if not validate_email(email):
-        return False
-
-    # Extract the domain name from the email address
-    domain = email.split("@")[1]
-
-    # Check if the domain name is a known phishing domain
-    if domain in PHISHING_DOMAINS:
-        return True
-
-    # Check if the email contains any known phishing URLs
-    for url in URL_BLACKLIST:
-        if url in email:
-            return True
-
-    # If none of the above conditions are met, it's not a phishing email
-    return False
-
-def mitigate_phishing(email):
-    # If the email is determined to be a phishing email, reject it
-    if detect_phishing(email):
-        raise ValueError("Phishing attack detected")
-
-# List of known phishing domains
-PHISHING_DOMAINS = ["example.com", "fake-domain.org"]
-
-# List of known phishing URLs
-URL_BLACKLIST = ["http://www.phishingwebsite.com/login", "https://fake-webs[18D[K
-"https://fake-website.org/login"]
-
-if __name__ == "__main__":
-    # Test the script by sending a valid and a phishing email
-    send_email("valid@example.com", "valid@example.com", "Subject", "Body")[7D[K
-"Body")
-    try:
-        send_email("phishing@example.com", "valid@example.com", "Subject", [K
-"Body")
-    except ValueError as e:
-        print(e)
+print(mitigate_phishing_attack(url1, allowed_emails)) # Output: https://www[11D[K
+https://www.example.com
+print(mitigate_phishing_attack(url2, allowed_emails)) # Output: Phishing at[2D[K
+attack detected! (None)
+print(mitigate_phishing_attack(url3, allowed_emails)) # Output: Phishing at[2D[K
+attack detected! (None)
