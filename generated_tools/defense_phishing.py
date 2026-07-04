@@ -1,65 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-04 18:00:21.878297
+# Generated 2026-07-04 19:09:57.972137
 
 import re
-import requests
+import urllib.request
 
-# Define a list of known phishing URLs
-phishing_urls = [
-    "https://www.example1.com",
-    "https://www.example2.com",
-    "https://www.example3.com"
-]
-
-# Define a function to check if the URL is in the list of known phishing UR[2D[K
-URLs
-def is_phishing(url):
-    for phishing_url in phishing_urls:
-        if url == phishing_url:
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious keywords or patterns
+    for keyword in ["phish", "scam", "malware"]:
+        if keyword in url:
             return True
-    return False
-
-# Define a function to check if the URL is valid
-def is_valid_url(url):
+    # Check if the URL is a known phishing website
     try:
-        requests.get(url)
-        return True
-    except requests.exceptions.ConnectionError:
-        return False
-
-# Define a function to get the domain name from the URL
-def get_domain_name(url):
-    return urlparse(url).netloc
-
-# Define a function to check if the domain name is in the list of known phi[3D[K
-phishing domains
-def is_phishing_domain(domain_name):
-    for phishing_domain in phishing_domains:
-        if domain_name == phishing_domain:
+        response = urllib.request.urlopen(url)
+        if b"Phishing Page" in response.read():
             return True
+    except Exception:
+        pass
     return False
 
-# Define a function to check if the URL is a phishing link
-def is_phishing_link(url):
-    if is_valid_url(url) and is_phishing(url):
-        return True
-    elif is_valid_url(url) and is_phishing_domain(get_domain_name(url)):
-        return True
-    else:
-        return False
+def mitigate_phishing_attack(url):
+    # Open the URL in a new tab in the default web browser
+    import webbrowser
+    webbrowser.open(url, new=2)
 
-# Define a function to mitigate the phishing attack
-def mitigate_phishing(url):
-    if is_phishing_link(url):
-        print("Phishing link detected!")
-        # Add code to block the URL here, such as using a whitelist or blac[4D[K
-blacklist
-        return False
-    else:
-        return True
-
-# Use the functions to check and mitigate phishing attacks in a given URL
-url = "https://www.example4.com"
-if is_phishing_link(url):
-    mitigate_phishing(url)
+# Example usage
+if __name__ == "__main__":
+    url = "https://www.example.com/phishing-page"
+    if is_phishing_url(url):
+        mitigate_phishing_attack(url)

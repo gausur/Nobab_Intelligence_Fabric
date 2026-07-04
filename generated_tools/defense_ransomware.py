@@ -1,24 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-04 17:58:59.409860
+# Generated 2026-07-04 19:10:39.853279
 
 import os
-import time
+import stat
+import json
+import base64
+from collections import Counter
+from urllib.parse import urlparse
 
-def detect_ransomware(path):
-    files = []
-    for root, dirs, _ in os.walk(path):
-        for file in dirs:
-            if "." in file and file.split(".")[-1] == "tmp":
-                files.append(os.path.join(root, file))
-    return files
+def is_ransomware(filename):
+    with open(filename, 'rb') as f:
+        magic = f.read(2)
+        if magic == b'\x1f\x8b':
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(files):
-    for file in files:
-        os.remove(file)
+def mitigate_ransomware(filename):
+    # Check if the file is a ransomware
+    if is_ransomware(filename):
+        # Remove the file
+        os.remove(filename)
+        print('Removed ransomware file:', filename)
+    else:
+        # Do nothing
+        pass
 
-if __name__ == "__main__":
-    path = input("Enter the directory to scan: ")
-    files = detect_ransomware(path)
-    mitigate_ransomware(files)
-    print("Ransomware detected and mitigated.")
+def main():
+    # Get a list of all files in the current directory
+    filenames = os.listdir('.')
+    
+    # Iterate over each file and check if it's a ransomware
+    for filename in filenames:
+        mitigate_ransomware(filename)
+
+if __name__ == '__main__':
+    main()
