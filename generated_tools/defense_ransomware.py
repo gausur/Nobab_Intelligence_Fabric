@@ -1,40 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-04 22:54:58.817321
+# Generated 2026-07-04 23:57:53.176585
 
 import os
 import subprocess
-import json
-from urllib.request import urlopen
 
-def detect_ransomware(filepath):
-    try:
-        with open(filepath, "rb") as f:
-            data = f.read()
-        decoded_data = data.decode("utf-8", errors="ignore")
-        if "RANSOM" in decoded_data:
-            return True
-        else:
-            return False
-    except UnicodeDecodeError:
+def detect_ransomware(file):
+    # Check if the file is a valid executable
+    if not os.access(file, os.X_OK):
         return False
 
-def mitigate_ransomware(filepath):
+    # Run the file to check if it's a ransomware
     try:
-        with open(filepath, "rb") as f:
-            data = f.read()
-        decoded_data = data.decode("utf-8", errors="ignore")
-        if "RANSOM" in decoded_data:
-            # Remove the malicious code
-            with open(filepath, "wb") as f:
-                f.write(data)
-    except UnicodeDecodeError:
-        pass
+        subprocess.check_output(file)
+    except subprocess.CalledProcessError as e:
+        if "Ransomware" in e.output:
+            return True
 
-def main():
-    filepath = "/path/to/your/file"
-    if detect_ransomware(filepath):
-        mitigate_ransomware(filepath)
+    return False
 
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware(file):
+    # Remove the file to avoid further execution
+    os.remove(file)
+
+# Main function
+if __name__ == '__main__':
+    # Get the list of files in the current directory
+    files = [f for f in os.listdir('.') if os.path.isfile(f)]
+
+    # Iterate over the files and check if they are ransomware
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
