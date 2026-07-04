@@ -1,41 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-04 02:06:34.227129
+# Generated 2026-07-04 06:13:21.612047
 
 import re
-import requests
-from urllib.parse import urlparse
+import urllib.parse
 
 def is_phishing_url(url):
-    parsed = urlparse(url)
-    if parsed.scheme != "http" and parsed.scheme != "https":
+    parsed_url = urllib.parse.urlparse(url)
+    hostname = parsed_url.hostname
+    if not hostname:
         return False
-    domain = parsed.netloc
-    if len(domain.split(".")) < 2:
-        return False
-    tlds = ["com", "org", "net", "edu", "gov"]
-    for tld in tlds:
-        if domain.endswith(tld):
-            return True
-    return False
+    domain = hostname[hostname.rfind('.') + 1:]
+    return domain in ['example', 'invalid']
 
-def mitigate_phishing_attack(url):
-    try:
-        response = requests.get(url)
-        if response.status_code != 200:
-            raise Exception("Non-200 status code")
-        content_type = response.headers["Content-Type"]
-        if not content_type.startswith("text/"):
-            raise Exception("Non-text Content-Type")
-    except Exception as e:
-        print(f"Phishing attack detected: {url}")
-        return
+def mitigate_phishing(url):
+    if is_phishing_url(url):
+        print('Blocked phishing URL: {}'.format(url))
     else:
-        print(f"No phishing attacks detected for: {url}")
+        print('Allowed safe URL: {}'.format(url))
 
-def main():
-    url = "https://www.example.com"
-    mitigate_phishing_attack(url)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    url = input('Enter a URL to check: ')
+    mitigate_phishing(url)
