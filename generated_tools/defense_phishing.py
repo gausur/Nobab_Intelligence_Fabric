@@ -1,52 +1,65 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-04 16:05:24.437168
+# Generated 2026-07-04 18:00:21.878297
 
 import re
 import requests
 
-# Define the list of email addresses that are allowed to send phishing link[4D[K
-links
-allowed_emails = ["johndoe@example.com", "janedoe@example.com"]
+# Define a list of known phishing URLs
+phishing_urls = [
+    "https://www.example1.com",
+    "https://www.example2.com",
+    "https://www.example3.com"
+]
 
-# Define the pattern for a phishing link
-phishing_link_pattern = r"(https?:\/\/)(?:[^@\n]+@)?(?:www\.)?([^.\n]+\.[^.[51D[K
-r"(https?:\/\/)(?:[^@\n]+@)?(?:www\.)?([^.\n]+\.[^.\n]+)/?"
+# Define a function to check if the URL is in the list of known phishing UR[2D[K
+URLs
+def is_phishing(url):
+    for phishing_url in phishing_urls:
+        if url == phishing_url:
+            return True
+    return False
 
+# Define a function to check if the URL is valid
+def is_valid_url(url):
+    try:
+        requests.get(url)
+        return True
+    except requests.exceptions.ConnectionError:
+        return False
+
+# Define a function to get the domain name from the URL
+def get_domain_name(url):
+    return urlparse(url).netloc
+
+# Define a function to check if the domain name is in the list of known phi[3D[K
+phishing domains
+def is_phishing_domain(domain_name):
+    for phishing_domain in phishing_domains:
+        if domain_name == phishing_domain:
+            return True
+    return False
+
+# Define a function to check if the URL is a phishing link
 def is_phishing_link(url):
-    # Check if the URL matches the phishing link pattern
-    return re.match(phishing_link_pattern, url)
-
-def get_email_from_url(url):
-    # Extract the email address from the URL using a regular expression
-    match = re.search(r"([^@\n]+@[^.\n]+\.[^.\n]+)", url)
-    if match:
-        return match.group(1)
+    if is_valid_url(url) and is_phishing(url):
+        return True
+    elif is_valid_url(url) and is_phishing_domain(get_domain_name(url)):
+        return True
     else:
-        return None
+        return False
 
-def mitigate_phishing_attack(url, allowed_emails):
-    # Check if the URL is a phishing link and the email address is not in t[1D[K
-the list of allowed emails
-    if is_phishing_link(url) and get_email_from_url(url) not in allowed_ema[11D[K
-allowed_emails:
-        # Mitigate the phishing attack by displaying an error message and r[1D[K
-returning None
-        print("Phishing attack detected!")
-        return None
+# Define a function to mitigate the phishing attack
+def mitigate_phishing(url):
+    if is_phishing_link(url):
+        print("Phishing link detected!")
+        # Add code to block the URL here, such as using a whitelist or blac[4D[K
+blacklist
+        return False
     else:
-        # Return the original URL if it is not a phishing link or the email[5D[K
-email address is in the list of allowed emails
-        return url
+        return True
 
-# Test the function with some sample URLs
-url1 = "https://www.example.com"
-url2 = "http://www.phishing-site.com/login"
-url3 = "mailto:johndoe@example.com"
-
-print(mitigate_phishing_attack(url1, allowed_emails)) # Output: https://www[11D[K
-https://www.example.com
-print(mitigate_phishing_attack(url2, allowed_emails)) # Output: Phishing at[2D[K
-attack detected! (None)
-print(mitigate_phishing_attack(url3, allowed_emails)) # Output: Phishing at[2D[K
-attack detected! (None)
+# Use the functions to check and mitigate phishing attacks in a given URL
+url = "https://www.example4.com"
+if is_phishing_link(url):
+    mitigate_phishing(url)
