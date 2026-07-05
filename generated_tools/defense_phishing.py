@@ -1,54 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-05 21:56:35.906932
+# Generated 2026-07-05 22:57:10.693815
 
 import re
-import urllib.parse
-from typing import List, Dict, Tuple
+import requests
+from urllib.parse import urlparse
 
-def parse_url(url: str) -> Tuple[str, str]:
-    parsed = urllib.parse.urlparse(url)
-    hostname = parsed.hostname or ""
-    path = parsed.path or ""
-    return (hostname, path)
-
-def check_phishing(url: str) -> bool:
-    hostname, path = parse_url(url)
-    if not hostname or not path:
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    if not parsed.netloc:
         return False
-    if "://" in hostname:
-        # Check for scheme-relative URLs
-        hostname = hostname.split("://")[1]
-    if any(hostname.endswith(suffix) for suffix in PHISHING_SUFFIXES):
+    if ".".join(parsed.netloc.split(".")[-2:]) == "com":
         return True
-    if path.startswith("/"):
-        # Strip leading slash from path
-        path = path[1:]
-    if any(path == pattern for pattern in PHISHING_PATTERNS):
+    else:
+        return False
+
+def is_phishing_request(request):
+    if request.method != "GET":
+        return False
+    if not request.headers.get("User-Agent"):
+        return False
+    if re.search(r"http://", request.headers["Referer"]):
         return True
-    return False
+    else:
+        return False
 
-def get_phishing_urls(url: str) -> List[str]:
-    hostname, _ = parse_url(url)
-    phishing_urls = []
-    for suffix in PHISHING_SUFFIXES:
-        if hostname.endswith(suffix):
-            phishing_urls.append(hostname[:-len(suffix)] + suffix)
-    return phishing_urls
-
-def mitigate_phishing(url: str) -> None:
-    # Implement your mitigation strategy here
+def mitigate_phishing(request, response):
+    # Do something here to mitigate the phishing attack, e.g., redirect to [K
+a warning page or block the request
     pass
 
-PHISHING_SUFFIXES = [".com", ".org", ".net"]
-PHISHING_PATTERNS = ["/login", "/signin", "/register"]
-
 def main():
-    url = "https://www.example.com/login"
-    if check_phishing(url):
-        phishing_urls = get_phishing_urls(url)
-        for phishing_url in phishing_urls:
-            mitigate_phishing(phishing_url)
+    while True:
+        request = requests.get("http://example.com")
+        if is_phishing_request(request):
+            mitigate_phishing(request, response)
+        else:
+            # Proceed with the original request
+            pass
 
 if __name__ == "__main__":
     main()
