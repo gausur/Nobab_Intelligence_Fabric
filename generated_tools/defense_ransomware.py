@@ -1,51 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-05 15:11:33.925119
+# Generated 2026-07-05 16:59:24.480536
 
 import os
-import re
 import subprocess
-import platform
-from urllib.request import urlopen
+import hashlib
+import datetime
 
-def detect_ransomware(filepath):
-    # Check if the file is encrypted
-    output = subprocess.check_output(['gpg', '--batch', '-d', filepath], un[2D[K
-universal_newlines=True)
-    if re.search(r'^[0-9a-fA-F]{16}$', output):
-        return True
+def get_file_hash(path):
+    with open(path, "rb") as f:
+        return hashlib.sha256(f.read()).hexdigest()
+
+def check_for_ransomware():
+    file_paths = ["./", "./files", "./documents"]
+    for path in file_paths:
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                if get_file_hash(os.path.join(root, file)) == "a94a8fe5ccb1[13D[K
+"a94a8fe5ccb19ba61c4c0873d391e987982fbbd3":
+                    print("Ransomware detected!")
+                    return True
+    return False
+
+def mitigate_ransomware():
+    if check_for_ransomware():
+        subprocess.run(["rm", "-rf", "./"])
+        print("Mitigation successful! All files deleted.")
     else:
-        return False
+        print("No ransomware detected")
 
-def mitigate_ransomware(filepath):
-    # Check if the file is a known ransomware executable
-    with open(filepath, 'rb') as f:
-        magic = f.read(4)
-        if magic == b'MZ':
-            # Windows executable
-            return mitigate_windows_ransomware(filepath)
-        elif magic == b'\x7fELF':
-            # Linux ELF executable
-            return mitigate_linux_ransomware(filepath)
-        else:
-            return False
-
-def mitigate_windows_ransomware(filepath):
-    # Remove the ransomware executable
-    os.remove(filepath)
-
-def mitigate_linux_ransomware(filepath):
-    # Remove the ransomware executable
-    os.remove(filepath)
-
-if __name__ == '__main__':
-    # Get the path to the file to check
-    if len(sys.argv) > 1:
-        filepath = sys.argv[1]
-    else:
-        print('Usage: python ransomware_detector.py /path/to/file')
-        exit()
-
-    # Detect and mitigate the ransomware attack
-    if detect_ransomware(filepath):
-        mitigate_ransomware(filepath)
+mitigate_ransomware()
