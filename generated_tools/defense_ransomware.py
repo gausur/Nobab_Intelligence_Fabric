@@ -1,30 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-05 06:36:46.630185
+# Generated 2026-07-05 09:38:38.459690
 
 import os
-import stat
+import json
+import shutil
+from collections import defaultdict
 
-def is_ransomware(file):
-    # Check if file is a regular file
-    if not stat.S_ISREG(os.stat(file).st_mode):
-        return False
-    
-    # Check if file has the ransomware signature
-    with open(file, 'rb') as f:
-        data = f.read()
-        if b'RANSOMWARE_SIGNATURE' in data:
+def get_file_information(path):
+    file = open(path, 'r')
+    contents = file.read()
+    file.close()
+    return contents
+
+def check_for_ransomware(directory):
+    files = os.listdir(directory)
+    for file in files:
+        path = os.path.join(directory, file)
+        if not os.path.isfile(path):
+            continue
+        contents = get_file_information(path)
+        if "ransomware" in contents:
+            print("Ransomware detected!")
             return True
     return False
 
-def mitigate_ransomware(file):
-    # Restore original file
-    with open(file, 'wb') as f:
-        f.write(data)
-
-# Check if ransomware is present in the current directory and subdirectorie[13D[K
-subdirectories
-for root, dirs, files in os.walk('.'):
+def mitigate_ransomware(directory):
+    files = os.listdir(directory)
     for file in files:
-        if is_ransomware(file):
-            mitigate_ransomware(os.path.join(root, file))
+        path = os.path.join(directory, file)
+        if not os.path.isfile(path):
+            continue
+        contents = get_file_information(path)
+        if "ransomware" in contents:
+            print("Mitigating ransomware...")
+            shutil.copy2(path, path + "_backup")
+            os.remove(path)
+
+if __name__ == '__main__':
+    directory = "path/to/directory"
+    if check_for_ransomware(directory):
+        mitigate_ransomware(directory)
