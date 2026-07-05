@@ -1,43 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-05 09:38:38.459690
+# Generated 2026-07-05 11:27:34.630197
 
 import os
 import json
-import shutil
-from collections import defaultdict
+import base64
+import hashlib
+import subprocess
 
-def get_file_information(path):
-    file = open(path, 'r')
-    contents = file.read()
-    file.close()
-    return contents
+# Define the directories and files to check for malicious activity
+directories = ["/path/to/directories"]
+files = ["/path/to/files"]
 
-def check_for_ransomware(directory):
-    files = os.listdir(directory)
-    for file in files:
-        path = os.path.join(directory, file)
-        if not os.path.isfile(path):
-            continue
-        contents = get_file_information(path)
-        if "ransomware" in contents:
-            print("Ransomware detected!")
-            return True
-    return False
+# Check if any of the directories or files have been modified recently
+for directory in directories:
+    if os.path.exists(directory):
+        modification_time = os.stat(directory).st_mtime
+        current_time = time.time()
+        if (current_time - modification_time) < 60 * 60 * 24: # 24 hours in[2D[K
+in seconds
+            print("Modification detected in directory {}".format(directory)[21D[K
+{}".format(directory))
 
-def mitigate_ransomware(directory):
-    files = os.listdir(directory)
-    for file in files:
-        path = os.path.join(directory, file)
-        if not os.path.isfile(path):
-            continue
-        contents = get_file_information(path)
-        if "ransomware" in contents:
-            print("Mitigating ransomware...")
-            shutil.copy2(path, path + "_backup")
-            os.remove(path)
+for file in files:
+    if os.path.exists(file):
+        modification_time = os.stat(file).st_mtime
+        current_time = time.time()
+        if (current_time - modification_time) < 60 * 60 * 24: # 24 hours in[2D[K
+in seconds
+            print("Modification detected in file {}".format(file))
 
-if __name__ == '__main__':
-    directory = "path/to/directory"
-    if check_for_ransomware(directory):
-        mitigate_ransomware(directory)
+# Check if any of the files have been encrypted using a known ransomware en[2D[K
+encryption pattern
+for file in files:
+    with open(file, "r") as f:
+        contents = f.read()
+        if "RANSOMWARE_ENCRYPTION_PATTERN" in contents:
+            print("Encryption detected in file {}".format(file))
+
+# Check if any of the files have been modified using a known ransomware too[3D[K
+tool
+for file in files:
+    with open(file, "r") as f:
+        contents = f.read()
+        if "RANSOMWARE_MODIFICATION_TOOL" in contents:
+            print("Modification detected in file {}".format(file))
+
+# If any malicious activity is detected, attempt to mitigate the attack
+if modification_time < 60 * 60 * 24 or "RANSOMWARE_ENCRYPTION_PATTERN" in c[1D[K
+contents or "RANSOMWARE_MODIFICATION_TOOL" in contents:
+    print("Attack detected, attempting to mitigate...")
+    subprocess.run(["/path/to/mitigation/script"])
