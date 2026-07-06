@@ -1,40 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-06 00:00:46.996556
+# Generated 2026-07-06 03:42:29.002684
 
 import re
+from urllib.parse import urlparse
 
-def is_phishing_attempt(url):
-    # Check if the URL is from a known phishing domain
-    if urlparse(url).netloc in PHISHING_DOMAINS:
-        return True
-    
-    # Check if the URL contains known phishing keywords
-    for keyword in PHISHING_KEYWORDS:
-        if re.search(keyword, url):
-            return True
-    
-    # Check if the URL is from a known legitimate domain
-    if urlparse(url).netloc in LEGITIMATE_DOMAINS:
+def is_phishing(url):
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
         return False
     
-    # If none of the above conditions are met, consider it a phishing attem[5D[K
-attempt
-    return True
-
-def mitigate_phishing_attempt(url):
-    # Redirect to a safe URL if it is a phishing attempt
-    if is_phishing_attempt(url):
-        return "https://example.com/safe"
+    # Check for suspicious keywords in the URL path
+    if re.search(r"(?i)\b(phishing|scam|malware|ransomware|virus)\b", url):[5D[K
+url):
+        return True
     
-    # If not a phishing attempt, return the original URL
-    return url
+    # Check for suspicious keywords in the query string
+    if re.search(r"(?i)\b(login|password|credentials|sensitive)\b", parsed_[7D[K
+parsed_url.query):
+        return True
+    
+    return False
 
-# Set of known phishing domains
-PHISHING_DOMAINS = ["phishing.com", "fakebank.net"]
-
-# Set of known phishing keywords
-PHISHING_KEYWORDS = ["login", "signup", "click here"]
-
-# Set of known legitimate domains
-LEGITIMATE_DOMAINS = ["example.com", "google.com"]
+def mitigate_phishing(url):
+    # Redirect to a safe page
+    print("Redirecting to a safe page...")
+    import webbrowser
+    webbrowser.open("https://example.com")
