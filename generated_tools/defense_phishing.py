@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-06 03:42:29.002684
+# Generated 2026-07-06 08:12:58.582661
 
 import re
+import json
 from urllib.parse import urlparse
 
-def is_phishing(url):
-    parsed_url = urlparse(url)
-    if not parsed_url.scheme or not parsed_url.netloc:
+class PhishingDetector:
+    def __init__(self, url):
+        self.url = url
+        self.parsed_url = urlparse(url)
+    
+    def is_phishing_site(self):
+        if not self.parsed_url.scheme == "http" or "https":
+            return True
+        
+        if not self.parsed_url.netloc.endswith("com"):
+            return True
+        
+        if not self.parsed_url.path.startswith("/login"):
+            return True
+        
         return False
     
-    # Check for suspicious keywords in the URL path
-    if re.search(r"(?i)\b(phishing|scam|malware|ransomware|virus)\b", url):[5D[K
-url):
-        return True
-    
-    # Check for suspicious keywords in the query string
-    if re.search(r"(?i)\b(login|password|credentials|sensitive)\b", parsed_[7D[K
-parsed_url.query):
-        return True
-    
-    return False
-
-def mitigate_phishing(url):
-    # Redirect to a safe page
-    print("Redirecting to a safe page...")
-    import webbrowser
-    webbrowser.open("https://example.com")
+    def mitigate_phishing(self):
+        if self.is_phishing_site():
+            raise ValueError("Phishing site detected")
