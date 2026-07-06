@@ -1,40 +1,62 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-06 16:18:43.418360
+# Generated 2026-07-06 18:54:25.664331
 
 import os
-import time
-import socket
-import hashlib
+import re
+import subprocess
+import json
+from datetime import datetime
 
-def check_for_ransomware():
-    # Check if the device is running a supported operating system
-    if not (os.name == 'posix' and hasattr(socket, 'getaddrinfo')):
-        return False
-    
-    # Check for ransomware by scanning the file system for known ransomware[10D[K
-ransomware files and patterns
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            if file.endswith('.ransom'):
-                with open(os.path.join(root, file), 'rb') as f:
-                    data = f.read()
-                    hash = hashlib.sha256(data).hexdigest()
-                    if hash == '8934b0ab71e34a762d41382bfdd9ee2f':
-                        print('Ransomware detected!')
-                        return True
-    
-    # If no ransomware is detected, continue with the normal system operati[7D[K
-operation
-    return False
+def get_ransomware_attacks():
+    # Use the "sudo journalctl -u rsyslog" command to retrieve the log entr[4D[K
+entries from the system's journald service
+    output = subprocess.check_output(["sudo", "journalctl", "-u", "rsyslog"[9D[K
+"rsyslog"])
 
-def mitigate_ransomware():
-    # If a ransomware attack is detected, notify the user and take appropri[8D[K
-appropriate action
-    print('Ransomware detected!')
-    time.sleep(5)  # wait for 5 seconds to allow the user to respond
-    os.system('poweroff')  # shut down the system immediately
+    # Parse the output and extract any ransomware attack logs
+    attacks = []
+    for line in output.splitlines():
+        match = re.search(r"(?:.*?ransomware|ransomware|RANSOMWARE):", line[4D[K
+line)
+        if match:
+            attacks.append(line)
 
-if __name__ == '__main__':
-    if check_for_ransomware():
-        mitigate_ransomware()
+    return attacks
+
+def get_system_info():
+    # Use the "uname -a" command to retrieve system information
+    output = subprocess.check_output(["uname", "-a"])
+    os_name, os_version, machine = output.decode().split()
+    return {
+        "os": {"name": os_name, "version": os_version},
+        "machine": machine
+    }
+
+def get_attack_details(attack):
+    # Parse the attack log to extract details such as the file system locat[5D[K
+location and the affected files
+    match = re.search(r"(?:.*?ransomware|ransomware|RANSOMWARE): (?:.*?)\s\[10D[K
+(?:.*?)\s\((?:.*?)\s(?:.*?)\s(?:.*?)\)", attack)
+    if match:
+        return {
+            "file_system": match.group(1),
+            "affected_files": match.group(2).split(",")
+        }
+
+def send_notification(attack):
+    # Send a notification to the system administrator about the ransomware [K
+attack
+    message = f"Ransomware attack detected on {datetime.now()}. The followi[7D[K
+following file systems and files were affected: {get_attack_details(attack)[27D[K
+{get_attack_details(attack)}"
+    subprocess.check_call(["echo", message, "/dev/tty"])
+
+def main():
+    attacks = get_ransomware_attacks()
+    if len(attacks) > 0:
+        for attack in attacks:
+            send_notification(attack)
+
+if __name__ == "__main__":
+    main()
