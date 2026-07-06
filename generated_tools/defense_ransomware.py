@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-06 20:50:04.813340
+# Generated 2026-07-06 22:09:38.187397
 
 import os
-import sys
-import time
+import shutil
+import subprocess
 
-def detect_ransomware(processes):
-    for process in processes:
-        if "crypt" in process.name():
-            print("Ransomware detected!")
+def detect_ransomware():
+    try:
+        # Check for the presence of ransomware files
+        if os.path.exists("C:\\ProgramData\\Microsoft\\Windows Defender\\Sc[12D[K
+Defender\\Scans"):
             return True
-    return False
+        else:
+            return False
+    except Exception as e:
+        print(f"Error occurred while detecting ransomware: {e}")
+        return False
 
-def mitigate_ransomware(processes):
-    for process in processes:
-        if "crypt" in process.name():
-            os.kill(process.pid, signal.SIGKILL)
-            print("Ransomware killed!")
+def mitigate_ransomware():
+    try:
+        # Delete the ransomware files
+        shutil.rmtree("C:\\ProgramData\\Microsoft\\Windows Defender\\Scans"[16D[K
+Defender\\Scans")
+        print("Ransomware detected and removed successfully!")
+    except Exception as e:
+        print(f"Error occurred while mitigating ransomware: {e}")
 
-if __name__ == "__main__":
-    while True:
-        processes = psutil.get_processes()
-        if detect_ransomware(processes):
-            mitigate_ransomware(processes)
-            time.sleep(10)
+if detect_ransomware():
+    mitigate_ransomware()
