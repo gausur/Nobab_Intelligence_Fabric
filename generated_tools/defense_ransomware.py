@@ -1,31 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-06 22:09:38.187397
+# Generated 2026-07-07 00:02:31.116708
 
 import os
-import shutil
+import sys
 import subprocess
 
-def detect_ransomware():
-    try:
-        # Check for the presence of ransomware files
-        if os.path.exists("C:\\ProgramData\\Microsoft\\Windows Defender\\Sc[12D[K
-Defender\\Scans"):
-            return True
-        else:
-            return False
-    except Exception as e:
-        print(f"Error occurred while detecting ransomware: {e}")
+def detect_ransomware(file):
+    # Check if the file is a valid executable
+    if not os.path.isfile(file) or not os.access(file, os.X_OK):
         return False
 
-def mitigate_ransomware():
-    try:
-        # Delete the ransomware files
-        shutil.rmtree("C:\\ProgramData\\Microsoft\\Windows Defender\\Scans"[16D[K
-Defender\\Scans")
-        print("Ransomware detected and removed successfully!")
-    except Exception as e:
-        print(f"Error occurred while mitigating ransomware: {e}")
+    # Get the file's permissions and check if it is writable
+    mode = os.stat(file).st_mode & (os.R_OK | os.W_OK)
+    if mode != (os.R_OK | os.W_OK):
+        return False
 
-if detect_ransomware():
-    mitigate_ransomware()
+    # Check if the file is a shared library or an ELF executable
+    if not (file.endswith(".so") or file.endswith(".exe")):
+        return False
+
+    # Check if the file has been modified in the past 24 hours
+    mod_time = os.path.getmtime(file)
+    current_time = time.time()
+    if (current_time - mod_time) > 86400:
+        return False
+
+    # Check if the file has been opened by any process
+    open_files = subprocess.check_output(["lsof", "-p", str(os.getpid())]).[19D[K
+str(os.getpid())]).decode("utf-8")
+    if file not in open_files:
+        return False
+
+    # If all checks pass, the file is likely a ransomware
+    return True
+
+def mitigate_ransomware(file):
+    # Delete the file
+    os.remove(file)
+
+# Iterate over all files in the system and check if any are ransomware
+for root, dirs, files in os.walk("/"):
+    for file in files:
+        if detect_ransomware(os.path.join(root, file)):
+            mitigate_ransomware(file)
