@@ -1,58 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-07 16:27:17.335205
+# Generated 2026-07-07 18:59:44.405939
 
 import os
-import sys
-import time
-from threading import Thread
-from multiprocessing import Process, Queue
-import requests
-import json
+import stat
 import datetime
+import shutil
 
-class RansomwareDetector:
-    def __init__(self):
-        self.processes = []
-        self.queue = Queue()
-        self.lock = False
-    
-    def start(self):
-        self.create_processes()
-        while True:
-            try:
-                time.sleep(1)
-                if self.lock:
-                    continue
-                else:
-                    break
-            except KeyboardInterrupt:
-                print("Caught keyboard interrupt, terminating processes..."[13D[K
-processes...")
-                self.terminate_processes()
-    
-    def create_processes(self):
-        for _ in range(3):
-            p = Process(target=self.detect_ransomware)
-            p.start()
-            self.processes.append(p)
-    
-    def detect_ransomware(self):
-        while True:
-            try:
-                data = requests.get("https://api.myip.com").json()
-                if data["city"] == "San Francisco" and data["country"] == "[1D[K
-"USA":
-                    self.lock = True
-                    print("Ransomware detected!")
-                    break
-            except Exception:
-                continue
-    
-    def terminate_processes(self):
-        for p in self.processes:
-            p.terminate()
+def is_ransomware(filepath):
+    """Check if the file is a ransomware"""
+    with open(filepath, "rb") as f:
+        data = f.read()
+        return b"RANSOMWARE" in data
+
+def get_files(directory, pattern=None):
+    """Get all files in the directory and its subdirectories"""
+    for root, dirs, files in os.walk(directory):
+        if pattern:
+            files = [f for f in files if pattern.match(f)]
+        yield from (os.path.join(root, f) for f in files)
+
+def mitigate_ransomware(filepaths):
+    """Mitigate ransomware by deleting the affected files"""
+    for filepath in filepaths:
+        os.remove(filepath)
 
 if __name__ == "__main__":
-    rd = RansomwareDetector()
-    rd.start()
+    # Get all files in the current directory and its subdirectories that ma[2D[K
+match the pattern
+    filepaths = list(get_files("."))
+    
+    # Check if any of the files are ransomware
+    for filepath in filepaths:
+        if is_ransomware(filepath):
+            mitigate_ransomware([filepath])
