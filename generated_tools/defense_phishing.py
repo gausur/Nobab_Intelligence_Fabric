@@ -1,37 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-07 07:32:38.959975
+# Generated 2026-07-07 10:50:03.827630
 
 import re
-import smtplib
-from email.message import EmailMessage
+import socket
+from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    # Check if the URL is a valid email address
-    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ur[2D[K
-url):
+    parsed_url = urlparse(url)
+    hostname = parsed_url.netloc
+    domain = parsed_url.hostname
+    if not hostname or not domain:
         return False
-    
-    # Check if the URL is a valid email address for a phishing site
     try:
-        with smtplib.SMTP("localhost") as server:
-            server.sendmail(url, "test@example.com", "Subject: Test Email")[7D[K
-Email")
-            return True
-    except smtplib.SMTPException:
-        return False
+        socket.gethostbyname(hostname)
+    except socket.gaierror:
+        # Host does not exist, likely phishing
+        return True
+    if not re.match(r"^[\w\.]+", hostname):
+        # Hostname contains invalid characters, likely phishing
+        return True
+    if not re.match(r"^\w+\.\w+$", domain):
+        # Domain is invalid, likely phishing
+        return True
+    if hostname.endswith("." + domain):
+        # Hostname ends with the domain, likely phishing
+        return True
+    return False
 
-def mitigate_phishing_attack(email):
-    # Check if the email contains a phishing URL
-    if is_phishing_url(email["href"]):
+def mitigate_phishing(url):
+    if is_phishing_url(url):
         print("Phishing attack detected!")
-        # TODO: Add appropriate mitigation here, such as blocking the email[5D[K
-email or reporting it to the authorities.
+    else:
+        print("No phishing attack detected.")
 
-# Parse the email message and extract the URL
-message = EmailMessage()
-message.parse(open("phishing_email.eml", "r"))
-url = message["href"]
-
-# Check if the URL is a phishing attack and mitigate it if necessary
-mitigate_phishing_attack(url)
+if __name__ == "__main__":
+    mitigate_phishing("https://www.example.com")
