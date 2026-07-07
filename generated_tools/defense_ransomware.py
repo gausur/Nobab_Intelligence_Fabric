@@ -1,36 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-07 18:59:44.405939
+# Generated 2026-07-07 20:49:07.137057
 
 import os
-import stat
-import datetime
-import shutil
+import sys
+import json
+from pathlib import Path
 
-def is_ransomware(filepath):
-    """Check if the file is a ransomware"""
-    with open(filepath, "rb") as f:
-        data = f.read()
-        return b"RANSOMWARE" in data
+def detect_ransomware(path):
+    # Check if the file is a valid executable
+    try:
+        output = subprocess.check_output(['file', '-b', '-i', path])
+        if "ELF" in output and "executable" in output:
+            return True
+        else:
+            return False
+    except subprocess.CalledProcessError:
+        return False
 
-def get_files(directory, pattern=None):
-    """Get all files in the directory and its subdirectories"""
-    for root, dirs, files in os.walk(directory):
-        if pattern:
-            files = [f for f in files if pattern.match(f)]
-        yield from (os.path.join(root, f) for f in files)
+def mitigate_ransomware(path):
+    # Remove the ransomware file
+    try:
+        os.remove(path)
+    except FileNotFoundError:
+        pass
 
-def mitigate_ransomware(filepaths):
-    """Mitigate ransomware by deleting the affected files"""
-    for filepath in filepaths:
-        os.remove(filepath)
+# Parse command line arguments
+args = sys.argv[1:]
+if len(args) < 2:
+    print("Usage: python mitigate_ransomware.py <path>")
+    sys.exit(1)
 
-if __name__ == "__main__":
-    # Get all files in the current directory and its subdirectories that ma[2D[K
-match the pattern
-    filepaths = list(get_files("."))
-    
-    # Check if any of the files are ransomware
-    for filepath in filepaths:
-        if is_ransomware(filepath):
-            mitigate_ransomware([filepath])
+path = args[0]
+if not os.path.isfile(path):
+    print("Error: Path is not a file.")
+    sys.exit(1)
+
+# Check if the file is a ransomware
+if detect_ransomware(path):
+    mitigate_ransomware(path)
+    print("Ransomware detected and removed!")
+else:
+    print("No ransomware detected.")

@@ -1,55 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-07 18:57:52.718746
+# Generated 2026-07-07 20:48:13.606948
 
 import re
-import socket
-from urllib.parse import urlparse
+import requests
+from bs4 import BeautifulSoup
 
-def is_phishing(url):
-    """
-    Detect if the URL is a phishing attack by checking for common red flags[5D[K
-flags such as 
-    suspicious query parameters, invalid URLs, or non-standard ports.
-    """
-    parsed = urlparse(url)
-    if not parsed:
+def detect_phishing(url):
+    # Fetch the URL and parse the HTML content
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # Check if the URL is a phishing site
+    if not re.search(r'^https?://', url):
+        return False
+
+    # Check for suspicious keywords in the HTML content
+    if soup.find('script'):
         return True
-
-    # Check for suspicious query parameters
-    params = parsed.query.split("&")
-    for param in params:
-        key, value = param.split("=")
-        if key == "url" or key == "location":
-            return True
-
-    # Check for invalid URLs
-    if not parsed.scheme or not parsed.netloc:
+    elif soup.find('iframe'):
         return True
-
-    # Check for non-standard ports
-    if parsed.port and parsed.port not in [80, 443]:
+    elif soup.find('a') and soup.find('a').get('href'):
         return True
-
-    # Check for common phishing tlds
-    tld = parsed.netloc.split(".")[-1]
-    if tld in ["ru", "xyz", "online"]:
-        return True
-
-    return False
+    else:
+        return False
 
 def mitigate_phishing(url):
-    """
-    Mitigate a phishing attack by opening the URL in a new tab of the defau[5D[K
-default browser.
-    """
-    if is_phishing(url):
-        import webbrowser
-        webbrowser.open(url, new=2)
+    # Redirect the user to a safe URL
+    return 'https://example.com'
 
-def main():
-    url = "https://www.example.com"
-    mitigate_phishing(url)
-
-if __name__ == "__main__":
-    main()
+# Example usage
+url = 'http://phishing.site/login'
+if detect_phishing(url):
+    print('Phishing site detected!')
+else:
+    print('Safe site')
