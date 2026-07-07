@@ -1,37 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-07 20:48:13.606948
+# Generated 2026-07-07 22:07:43.040246
 
 import re
 import requests
-from bs4 import BeautifulSoup
 
-def detect_phishing(url):
-    # Fetch the URL and parse the HTML content
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-
-    # Check if the URL is a phishing site
-    if not re.search(r'^https?://', url):
-        return False
-
-    # Check for suspicious keywords in the HTML content
-    if soup.find('script'):
-        return True
-    elif soup.find('iframe'):
-        return True
-    elif soup.find('a') and soup.find('a').get('href'):
+def is_phishing(url):
+    # Check if the URL matches the pattern of a phishing website
+    if re.search(r"(^https?://)(www\.)?(fake|test|example)\.", url, flags=r[7D[K
+flags=re.IGNORECASE):
         return True
     else:
         return False
 
 def mitigate_phishing(url):
-    # Redirect the user to a safe URL
-    return 'https://example.com'
-
-# Example usage
-url = 'http://phishing.site/login'
-if detect_phishing(url):
-    print('Phishing site detected!')
-else:
-    print('Safe site')
+    # Check if the URL is a known phishing website
+    if is_phishing(url):
+        # Redirect to a safe website
+        requests.get("https://www.example.com")
+    else:
+        # Proceed with the original request
+        pass
