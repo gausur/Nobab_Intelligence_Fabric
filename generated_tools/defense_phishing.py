@@ -1,38 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-07 10:50:03.827630
+# Generated 2026-07-07 13:15:00.443377
 
 import re
-import socket
 from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    parsed_url = urlparse(url)
-    hostname = parsed_url.netloc
-    domain = parsed_url.hostname
-    if not hostname or not domain:
+    # Check if the URL is valid and has a scheme
+    if not url or not re.match(r'^https?://', url):
         return False
-    try:
-        socket.gethostbyname(hostname)
-    except socket.gaierror:
-        # Host does not exist, likely phishing
-        return True
-    if not re.match(r"^[\w\.]+", hostname):
-        # Hostname contains invalid characters, likely phishing
-        return True
-    if not re.match(r"^\w+\.\w+$", domain):
-        # Domain is invalid, likely phishing
-        return True
-    if hostname.endswith("." + domain):
-        # Hostname ends with the domain, likely phishing
-        return True
-    return False
 
-def mitigate_phishing(url):
+    # Parse the URL to get the domain name
+    parsed_url = urlparse(url)
+    domain_name = parsed_url.netloc
+
+    # Check if the domain name is a known phishing domain
+    with open('phishing_domains.txt', 'r') as f:
+        for line in f:
+            if domain_name == line.strip():
+                return True
+
+    # If the URL is not from a known phishing domain, check if it contains [K
+suspicious keywords
+    keywords = ['login', 'signin', 'password', 'phishing']
+    for keyword in keywords:
+        if keyword in url:
+            return False
+
+    # If none of the above conditions are met, assume the URL is safe
+    return True
+
+def main():
+    # Take user input as a URL
+    url = input('Enter a URL: ')
+
+    # Check if the URL is a phishing site
     if is_phishing_url(url):
-        print("Phishing attack detected!")
+        print('The URL appears to be a phishing site. Please do not enter a[1D[K
+any personal information or click on any links from this website.')
     else:
-        print("No phishing attack detected.")
+        print('The URL appears to be safe.')
 
-if __name__ == "__main__":
-    mitigate_phishing("https://www.example.com")
+if __name__ == '__main__':
+    main()
