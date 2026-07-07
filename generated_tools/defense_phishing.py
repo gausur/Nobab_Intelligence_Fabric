@@ -1,25 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-06 12:39:24.701803
+# Generated 2026-07-07 07:32:38.959975
 
 import re
-import sys
-from urllib.parse import urlparse
+import smtplib
+from email.message import EmailMessage
 
 def is_phishing_url(url):
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc
-    return not (domain.endswith("google.com") or domain.endswith("gmail.com[26D[K
-domain.endswith("gmail.com"))
+    # Check if the URL is a valid email address
+    if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", ur[2D[K
+url):
+        return False
+    
+    # Check if the URL is a valid email address for a phishing site
+    try:
+        with smtplib.SMTP("localhost") as server:
+            server.sendmail(url, "test@example.com", "Subject: Test Email")[7D[K
+Email")
+            return True
+    except smtplib.SMTPException:
+        return False
 
-def mitigate_phishing_attacks():
-    # Check if the user has clicked on a phishing link
-    if is_phishing_url(sys.argv[1]):
-        print("This is a phishing website!")
-        sys.exit(1)
-    else:
-        print("Everything looks good.")
-        sys.exit(0)
+def mitigate_phishing_attack(email):
+    # Check if the email contains a phishing URL
+    if is_phishing_url(email["href"]):
+        print("Phishing attack detected!")
+        # TODO: Add appropriate mitigation here, such as blocking the email[5D[K
+email or reporting it to the authorities.
 
-if __name__ == "__main__":
-    mitigate_phishing_attacks()
+# Parse the email message and extract the URL
+message = EmailMessage()
+message.parse(open("phishing_email.eml", "r"))
+url = message["href"]
+
+# Check if the URL is a phishing attack and mitigate it if necessary
+mitigate_phishing_attack(url)
