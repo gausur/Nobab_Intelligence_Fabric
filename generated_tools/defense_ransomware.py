@@ -1,42 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-08 12:17:36.673631
+# Generated 2026-07-08 15:15:01.394918
 
 import os
-import hashlib
-import json
-import base64
-from datetime import datetime
+import socket
+import subprocess
 
-def scan_for_ransomware(path):
-    with open(path, "rb") as f:
-        file_bytes = f.read()
-        # Use a secure hashing algorithm to verify the file's integrity
-        hash = hashlib.sha256(file_bytes).hexdigest()
-        if hash == "0123456789abcdef":
-            return True
-        else:
-            return False
+def detect_ransomware(file):
+    # Check if file is encrypted
+    if not file.endswith(".enc"):
+        return False
+    
+    # Get the size of the file in bytes
+    file_size = os.path.getsize(file)
+    
+    # Check if the file size is a multiple of 16
+    if file_size % 16 != 0:
+        return True
+    
+    # Open the file and read its contents
+    with open(file, "rb") as f:
+        data = f.read()
+        
+    # Check if the first 16 bytes of the file contain the string "RANSOM"
+    if b"RANSOM" in data[:16]:
+        return True
+    
+    # Check if the last 16 bytes of the file contain the string "RANSOM"
+    if b"RANSOM" in data[-16:]:
+        return True
+    
+    return False
 
-def mitigate_ransomware(path):
-    with open(path, "rb") as f:
-        file_bytes = f.read()
-        # Use a secure hashing algorithm to verify the file's integrity
-        hash = hashlib.sha256(file_bytes).hexdigest()
-        if hash == "0123456789abcdef":
-            with open(path, "wb") as f:
-                # Empty out the file
-                f.write(b"")
-    return True
-
-def main():
-    # Get a list of all files in the current directory and its subdirectori[12D[K
-subdirectories
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            path = os.path.join(root, file)
-            if scan_for_ransomware(path):
-                mitigate_ransomware(path)
-
+def mitigate_ransomware(file):
+    # Delete the file
+    os.remove(file)
+    
+    # Notify the user that the file has been deleted
+    print("The ransomware attack has been mitigated.")
+    
 if __name__ == "__main__":
-    main()
+    # Get the path to the file to check
+    file = sys.argv[1]
+    
+    # Check if the file is a valid file
+    if not os.path.isfile(file):
+        print("Invalid file.")
+        exit()
+        
+    # Detect and mitigate the ransomware attack
+    if detect_ransomware(file):
+        mitigate_ransomware(file)
