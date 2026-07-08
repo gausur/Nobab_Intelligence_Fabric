@@ -1,53 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-08 15:15:01.394918
+# Generated 2026-07-08 17:22:54.903432
 
 import os
-import socket
-import subprocess
+import json
+import base64
 
 def detect_ransomware(file):
-    # Check if file is encrypted
-    if not file.endswith(".enc"):
-        return False
-    
-    # Get the size of the file in bytes
-    file_size = os.path.getsize(file)
-    
-    # Check if the file size is a multiple of 16
-    if file_size % 16 != 0:
-        return True
-    
-    # Open the file and read its contents
-    with open(file, "rb") as f:
+    with open(file, 'rb') as f:
         data = f.read()
-        
-    # Check if the first 16 bytes of the file contain the string "RANSOM"
-    if b"RANSOM" in data[:16]:
-        return True
-    
-    # Check if the last 16 bytes of the file contain the string "RANSOM"
-    if b"RANSOM" in data[-16:]:
-        return True
-    
+        decoded_data = base64.b64decode(data)
+        if b'PAYLOAD' in decoded_data:
+            print('Ransomware detected!')
+            return True
     return False
 
 def mitigate_ransomware(file):
-    # Delete the file
-    os.remove(file)
-    
-    # Notify the user that the file has been deleted
-    print("The ransomware attack has been mitigated.")
-    
-if __name__ == "__main__":
-    # Get the path to the file to check
-    file = sys.argv[1]
-    
-    # Check if the file is a valid file
-    if not os.path.isfile(file):
-        print("Invalid file.")
-        exit()
-        
-    # Detect and mitigate the ransomware attack
+    with open(file, 'rb') as f:
+        data = f.read()
+        decoded_data = base64.b64decode(data)
+        if b'PAYLOAD' in decoded_data:
+            print('Mitigating ransomware...')
+            # Remove the PAYLOAD from the file
+            new_data = data[:decoded_data.index(b'PAYLOAD')] + data[decoded[12D[K
+data[decoded_data.index(b'PAYLOAD') + len(b'PAYLOAD'):]
+            with open(file, 'wb') as f:
+                f.write(new_data)
+    return True
+
+def main():
+    file = '/path/to/file'
     if detect_ransomware(file):
         mitigate_ransomware(file)
+
+if __name__ == '__main__':
+    main()
