@@ -1,40 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-08 17:24:18.423163
+# Generated 2026-07-08 19:12:20.149901
 
 import re
-from urllib.parse import urlparse
+import requests
 
-def is_phishing_url(url):
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc
-    if "gmail" in domain or "hotmail" in domain or "yahoo" in domain:
-        return True
+def detect_phishing(url):
+    """
+    Detects if the given URL is a phishing website by checking its SSL cert[4D[K
+certificate
+    and comparing it with known phishing sites.
+    :param url: The URL to check
+    :return: True if the URL is a phishing site, False otherwise
+    """
+    # Check the SSL certificate
+    try:
+        cert = requests.get(url, verify=True).cert
+        valid_until = datetime.strptime(cert['validity']['notAfter'], '%Y-%[5D[K
+'%Y-%m-%d %H:%M:%SZ')
+        if valid_until < datetime.now():
+            return False
+    except:
+        # SSL certificate is not valid or there was an error retrieving it
+        pass
+    
+    # Check the URL against a list of known phishing sites
+    try:
+        with open('phishing_sites.txt', 'r') as f:
+            for line in f:
+                pattern = re.compile(line.strip())
+                if re.search(pattern, url):
+                    return True
+    except:
+        # Error reading the file or pattern not found
+        pass
+    
+    return False
+
+def mitigate_phishing(url):
+    """
+    Mitigates a phishing attack by redirecting the user to a secure website[7D[K
+website.
+    :param url: The URL of the phishing site
+    :return: A secure website URL
+    """
+    # Check if the URL is a phishing site
+    if detect_phishing(url):
+        # Redirect the user to a secure website
+        return 'https://www.example.com'
     else:
-        return False
-
-def mitigate_phishing_attack(email):
-    if is_phishing_url(email["from"]):
-        print("Phishing email detected!")
-        # Send an alert to IT department or admin
-        # Call a function to block the sender's IP address
-        # Delete the email from inbox
-
-def main():
-    # Set up email server and login credentials
-    server = smtplib.SMTP("smtp.gmail.com", 587)
-    server.starttls()
-    server.login(username, password)
-
-    # Fetch emails from inbox
-    messages = imapclient.IMAPClient(server)
-    messages.search(["ALL"])
-
-    for message_id in messages:
-        message = messages[message_id]
-        email = message["EMAIL"]
-        if is_phishing_url(email):
-            mitigate_phishing_attack(email)
-
-if __name__ == "__main__":
-    main()
+        # The URL is not a phishing site, so do nothing
+        pass
