@@ -1,50 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-08 22:06:43.404055
+# Generated 2026-07-09 00:04:09.967392
 
 import re
 import smtplib
-from email import message_from_string
+from email.parser import Parser
+from email.header import decode_header
+from email.utils import getaddresses
 
-def is_phishing(email):
-    if not isinstance(email, str):
-        raise ValueError("email must be a string")
-
-    # Check for obvious phishing attempts
-    if "://" in email or "<script>" in email:
+def detect_phishing(email):
+    """
+    Detect phishing attacks in an email using regex and the Sender header.
+    
+    Args:
+        email (str): The email message to be analyzed.
+    
+    Returns:
+        bool: True if the email is a phishing attack, False otherwise.
+    """
+    # Regex to detect suspicious keywords in the email body
+    pattern = r"(https?:\/\/)?(www\.)?(paypal|amazon|walmart|bank|credit)\b[61D[K
+r"(https?:\/\/)?(www\.)?(paypal|amazon|walmart|bank|credit)\b"
+    
+    # Check if the email contains any of the suspicious keywords
+    if re.search(pattern, email):
         return True
-
-    # Check for common phishing patterns
-    if re.search(r"\bphishing\b", email, re.IGNORECASE):
+    
+    # Get the Sender header from the email
+    sender = Parser().parse_header(email).get("From")
+    
+    # Extract the address and name from the Sender header
+    address, name = decode_header(sender)
+    
+    # Check if the address is a valid email address
+    try:
+        address = getaddresses([address])[0]
+    except Exception as e:
+        return False
+    
+    # Check if the domain of the Sender header is in the whitelist
+    domain = address.split("@")[1]
+    if domain not in ["gmail.com", "yahoo.com", "hotmail.com"]:
         return True
-
-    # Check for suspicious emails from unknown senders
-    if not email["From"] in ["support@example.com", "sales@example.com"]:
+    
+    # Check if the email contains any spammy keywords
+    pattern = r"(spam|virus|phishing|scam)"
+    if re.search(pattern, email):
         return True
-
-    # Check for spammy subjects
-    if re.search(r"\bspam\b", email["Subject"], re.IGNORECASE):
-        return True
-
-    # Check for suspicious links
-    if re.search(r"[a-zA-Z0-9]{32}", email["Body"]):
-        return True
-
+    
     return False
-
-def mitigate_phishing(email):
-    # Parse the email message
-    msg = message_from_string(email)
-
-    # Check for phishing attempts
-    if is_phishing(msg.get_payload()):
-        # Take appropriate action, such as blocking the sender or reporting[9D[K
-reporting the incident to the recipient's IT department
-        pass
-
-# Read email from stdin
-raw_email = sys.stdin.read()
-
-# Parse and check for phishing attempts
-msg = message_from_string(raw_email)
-mitigate_phishing(msg.get_payload())
