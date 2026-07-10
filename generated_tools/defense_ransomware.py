@@ -1,39 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-10 06:36:34.259199
+# Generated 2026-07-10 10:18:07.691280
 
 import os
-import re
-import subprocess
+import shutil
 
-def detect_ransomware(file):
-    """Detects ransomware in a file using a regex pattern"""
-    with open(file, 'rb') as f:
+def detect_ransomware(path):
+    # Check if the file is encrypted
+    if not os.path.isfile(path) or not os.access(path, os.R_OK):
+        return False
+    
+    with open(path, "rb") as f:
         data = f.read()
-        pattern = re.compile(b'[a-zA-Z0-9_]+', flags=re.IGNORECASE)
-        if pattern.search(data):
-            return True
-        else:
-            return False
+    
+    # Look for known ransomware patterns in the file contents
+    if b"PAYPALISHIRING" in data or b"RANSOMWARE" in data:
+        return True
+    
+    return False
 
-def mitigate_ransomware(file):
-    """Removes ransomware infection from a file"""
-    with open(file, 'rb') as f:
-        data = f.read()
-        pattern = re.compile(b'[a-zA-Z0-9_]+', flags=re.IGNORECASE)
-        replacement = b''
-        result = re.sub(pattern, replacement, data)
-        with open(file, 'wb') as f:
-            f.write(result)
+def mitigate_ransomware(path):
+    # Remove the encrypted files
+    os.remove(path)
+    
+    # Copy a backup file to the original location
+    shutil.copy("backup.txt", path)
 
-def main():
-    """Main function"""
-    file_path = '/path/to/file'
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-        print('Ransomware detected and removed')
-    else:
-        print('No ransomware detected')
-
-if __name__ == '__main__':
-    main()
+# Get the current directory and all its subdirectories
+for root, dirs, files in os.walk("."):
+    for file in files:
+        file_path = os.path.join(root, file)
+        
+        # Check if the file is encrypted
+        if detect_ransomware(file_path):
+            mitigate_ransomware(file_path)

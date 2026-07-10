@@ -1,59 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-10 06:37:27.549928
+# Generated 2026-07-10 10:19:09.450833
 
 import re
-import urllib.request
+import smtplib
 from email.message import EmailMessage
-from email.headerregistry import Address
 
 def is_phishing(email):
-    if not email:
+    # Check if the email has a valid domain
+    if not email.split("@")[1].strip():
         return False
     
-    msg = EmailMessage()
-    try:
-        msg.set_content(email)
-    except ValueError:
-        return False
+    # Check if the email has a suspicious domain
+    if email.split("@")[1] in ["example.com", "fakeemail.net"]:
+        return True
     
-    for header in ("From", "To", "Subject"):
-        value = msg.get(header, None)
-        if not value or not isinstance(value, str):
-            continue
-        
-        if re.search(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", value):
-            return False
+    # Check if the email has a suspicious subject
+    if re.search(r"Fake Email | Phishing Attack", email.subject):
+        return True
     
-    return True
+    # Check if the email has a suspicious message body
+    if re.search(r"\bphish\b|\bscam\b|\bfake\b", email.body):
+        return True
+    
+    return False
 
 def mitigate_phishing(email):
-    if not email:
-        return None
+    # Send a notification to the user's admin
+    smtplib.sendmail("admin@example.com", email.from_, "Phishing attack det[3D[K
+detected")
     
-    msg = EmailMessage()
-    try:
-        msg.set_content(email)
-    except ValueError:
-        return None
-    
-    for header in ("From", "To", "Subject"):
-        value = msg.get(header, None)
-        if not value or not isinstance(value, str):
-            continue
-        
-        if re.search(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", value):
-            return None
-    
-    msg["From"] = Address("noreply@example.com")
-    msg["To"] = Address("admin@example.com")
-    msg["Subject"] = "Phishing Attempt Detected"
-    msg.set_content(f"""
-        Phishing attempt detected from {msg["From"]}.\n
-        Please do not click on any links or provide any personal informatio[10D[K
-information.\n
-        If you believe this is a mistake, please contact us at noreply@exam[12D[K
-noreply@example.com
-    """)
-    
-    return msg
+    # Block the email from being delivered
+    return False
+
+# Test the function
+emails = [
+    EmailMessage("Fake Email", "This is a fake email"),
+    EmailMessage("Real Email", "This is a real email from example.com"),
+    EmailMessage("Phishing Attack", "This is a phishing attack"),
+]
+
+for email in emails:
+    if is_phishing(email):
+        mitigate_phishing(email)
