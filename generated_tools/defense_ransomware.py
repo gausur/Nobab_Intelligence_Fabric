@@ -1,56 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-10 20:17:54.309061
+# Generated 2026-07-10 21:56:57.204154
 
 import os
-import sys
+import re
+import shutil
 import subprocess
 
-def detect_ransomware(path):
-    # Check if the path is a directory or file
-    if os.path.isdir(path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                # Check if the file has the ransomware signature
-                with open(os.path.join(root, file), 'rb') as f:
-                    data = f.read()
-                    if b'ransomware' in data:
-                        return True
-    elif os.path.isfile(path):
-        # Check if the file has the ransomware signature
-        with open(path, 'rb') as f:
-            data = f.read()
-            if b'ransomware' in data:
-                return True
-    else:
-        # Path is not a directory or file
-        return False
+def detect_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+        if b"EKOZI" in data or b"AES256" in data:
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(path):
-    # Check if the path is a directory or file
-    if os.path.isdir(path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                # Remove the ransomware signature from the file
-                with open(os.path.join(root, file), 'rb') as f:
-                    data = f.read()
-                    if b'ransomware' in data:
-                        new_data = data.replace(b'ransomware', b'')
-                        with open(os.path.join(root, file), 'wb') as f:
-                            f.write(new_data)
-    elif os.path.isfile(path):
-        # Remove the ransomware signature from the file
-        with open(path, 'rb') as f:
-            data = f.read()
-            if b'ransomware' in data:
-                new_data = data.replace(b'ransomware', b'')
-                with open(path, 'wb') as f:
-                    f.write(new_data)
-    else:
-        # Path is not a directory or file
-        return False
+def mitigate_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+        if detect_ransomware(file):
+            # Remove the ransomware code from the file
+            data = re.sub(b"EKOZI", b"", data)
+            data = re.sub(b"AES256", b"", data)
+            with open(file, "wb") as f:
+                f.write(data)
+    # Restore the file from backup
+    shutil.copy(f"{file}.backup", file)
 
-if __name__ == '__main__':
-    path = sys.argv[1]
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+# Get a list of all files in the current directory
+files = os.listdir()
+for file in files:
+    if detect_ransomware(file):
+        mitigate_ransomware(file)
