@@ -1,39 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-10 21:55:43.998748
+# Generated 2026-07-10 22:54:28.092128
 
 import re
-import socket
-import ssl
+import urllib.parse
 
-def detect_phishing(url):
-    # Check if the URL is valid
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious characters
+    if not re.match(r'^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', url[3D[K
+url):
+        return False
+    
+    # Check if the URL is an email address
+    if re.match(r'^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', url):
+        return True
+    
+    # Check if the URL is an IP address
     try:
-        urllib.parse.urlparse(url)
+        ipaddress.ip_address(url)
+        return False
     except ValueError:
-        return False
-    
-    # Check if the URL is HTTPS
-    if not url.startswith("https://"):
-        return False
-    
-    # Get the domain of the URL
-    domain = url.split("://")[1].split("/")[0]
-    
-    # Try to connect to the domain and check the SSL certificate
-    try:
-        sock = socket.create_connection((domain, 443), 2)
-        ssl_sock = ssl.wrap_socket(sock)
-        cert = ssl_sock.getpeercert()
-        
-        # Check if the domain is in the common name or subject alternative [K
-names
-        cn = cert["subject"][b"CN"][0]
-        sans = cert["extensions"][b"subjectAltName"].split(",")
-        if domain == cn or domain in sans:
-            return True
-    except (ConnectionError, ssl.SSLError):
         pass
     
-    # If the URL is not a phishing website, return False
+    # Check if the URL is a subdomain of a known phishing site
+    for domain in KNOWN_PHISHING_DOMAINS:
+        if url.endswith(f'.{domain}'):
+            return True
+    
+    # No matches found, return False
     return False
+
+def mitigate_phishing_attack(url):
+    # Redirect the user to a safe URL
+    redirect_url = 'https://www.example.com'
+    print(f'Redirecting user to {redirect_url}')
+
+# List of known phishing domains
+KNOWN_PHISHING_DOMAINS = ['phish.net', 'phish.org', 'phish.com']

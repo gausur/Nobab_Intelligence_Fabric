@@ -1,34 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-10 21:56:57.204154
+# Generated 2026-07-10 22:55:24.280889
 
 import os
 import re
-import shutil
 import subprocess
+from typing import List, Dict
 
-def detect_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        if b"EKOZI" in data or b"AES256" in data:
+def is_ransomware(filepath: str) -> bool:
+    with open(filepath, "rb") as f:
+        contents = f.read()
+        if b"RANSOMWARE" in contents:
             return True
-        else:
-            return False
+    return False
 
-def mitigate_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        if detect_ransomware(file):
-            # Remove the ransomware code from the file
-            data = re.sub(b"EKOZI", b"", data)
-            data = re.sub(b"AES256", b"", data)
-            with open(file, "wb") as f:
-                f.write(data)
-    # Restore the file from backup
-    shutil.copy(f"{file}.backup", file)
+def get_infected_files(directory: str) -> List[str]:
+    files = []
+    for root, dirs, _ in os.walk(directory):
+        for file in dirs + files:
+            filepath = os.path.join(root, file)
+            if is_ransomware(filepath):
+                files.append(filepath)
+    return files
 
-# Get a list of all files in the current directory
-files = os.listdir()
-for file in files:
-    if detect_ransomware(file):
-        mitigate_ransomware(file)
+def encrypt_files(infected_files: List[str]) -> None:
+    for file in infected_files:
+        subprocess.run(["encrypt", file], shell=True)
+
+def main():
+    directory = "/path/to/directory"
+    infected_files = get_infected_files(directory)
+    if len(infected_files) > 0:
+        print("Detected ransomware attack in files:")
+        for file in infected_files:
+            print("\t", file)
+        encrypt_files(infected_files)
+    else:
+        print("No ransomware detected.")
+
+if __name__ == "__main__":
+    main()
