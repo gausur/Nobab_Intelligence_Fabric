@@ -1,39 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-10 22:54:28.092128
+# Generated 2026-07-10 23:53:23.134379
 
 import re
-import urllib.parse
+import socket
 
-def is_phishing_url(url):
-    # Check if the URL contains any suspicious characters
-    if not re.match(r'^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', url[3D[K
-url):
+def detect_phishing(url):
+    # Check if the URL is valid
+    if not url or not re.match(r'^https?://', url):
         return False
     
-    # Check if the URL is an email address
-    if re.match(r'^[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', url):
-        return True
+    # Get the hostname from the URL
+    hostname = urlparse(url).hostname
     
-    # Check if the URL is an IP address
+    # Check if the hostname is an IP address
     try:
-        ipaddress.ip_address(url)
-        return False
+        ipaddress.ip_address(hostname)
     except ValueError:
         pass
     
-    # Check if the URL is a subdomain of a known phishing site
-    for domain in KNOWN_PHISHING_DOMAINS:
-        if url.endswith(f'.{domain}'):
-            return True
+    # Check if the hostname is a valid domain name
+    if not re.match(r'^[a-zA-Z0-9.-]+$', hostname):
+        return False
     
-    # No matches found, return False
+    # Get the SSL/TLS certificate for the hostname
+    try:
+        socket.create_connection((hostname, 443))
+    except socket.error as e:
+        if e.errno == errno.ECONNREFUSED:
+            return False
+    
+    # Check if the SSL/TLS certificate is valid and signed by a trusted CA
+    try:
+        ssl.get_server_certificate((hostname, 443))
+    except ssl.SSLError as e:
+        if e.errno == errno.EOF:
+            return False
+    
+    # Check if the hostname is in the list of known phishing sites
+    if hostname in KNOWN_PHISHING_SITES:
+        return True
+    
     return False
 
-def mitigate_phishing_attack(url):
-    # Redirect the user to a safe URL
-    redirect_url = 'https://www.example.com'
-    print(f'Redirecting user to {redirect_url}')
+def mitigate_phishing(url):
+    # Redirect to a safe URL
+    if detect_phishing(url):
+        print('Redirecting to safe URL...')
+        webbrowser.open('https://www.google.com/', new=2)
+        return True
+    
+    # Display an error message and exit the program
+    else:
+        print('Error: The provided URL is not a valid phishing site.')
+        sys.exit(1)
 
-# List of known phishing domains
-KNOWN_PHISHING_DOMAINS = ['phish.net', 'phish.org', 'phish.com']
+if __name__ == '__main__':
+    mitigate_phishing(sys.argv[1])
