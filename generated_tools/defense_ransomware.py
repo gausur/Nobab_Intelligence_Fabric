@@ -1,36 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-10 10:18:07.691280
+# Generated 2026-07-10 13:09:36.010234
 
 import os
-import shutil
+import re
+import subprocess
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.isfile(path) or not os.access(path, os.R_OK):
-        return False
-    
-    with open(path, "rb") as f:
-        data = f.read()
-    
-    # Look for known ransomware patterns in the file contents
-    if b"PAYPALISHIRING" in data or b"RANSOMWARE" in data:
+def detect_ransomware():
+    # Get list of running processes
+    proc = subprocess.check_output(['ps', 'aux'])
+    # Filter for ransomware processes
+    filtered_proc = [line.split()[1] for line in proc.decode('utf-8').split[26D[K
+proc.decode('utf-8').splitlines() if re.search(r'^ransomware$', line)]
+    if len(filtered_proc) > 0:
         return True
-    
-    return False
+    else:
+        return False
 
-def mitigate_ransomware(path):
-    # Remove the encrypted files
-    os.remove(path)
-    
-    # Copy a backup file to the original location
-    shutil.copy("backup.txt", path)
+def mitigate_ransomware():
+    # Get list of running processes
+    proc = subprocess.check_output(['ps', 'aux'])
+    # Filter for ransomware processes
+    filtered_proc = [line.split()[1] for line in proc.decode('utf-8').split[26D[K
+proc.decode('utf-8').splitlines() if re.search(r'^ransomware$', line)]
+    # Kill all running ransomware processes
+    for p in filtered_proc:
+        subprocess.check_output(['kill', '-9', p])
 
-# Get the current directory and all its subdirectories
-for root, dirs, files in os.walk("."):
-    for file in files:
-        file_path = os.path.join(root, file)
-        
-        # Check if the file is encrypted
-        if detect_ransomware(file_path):
-            mitigate_ransomware(file_path)
+if detect_ransomware():
+    mitigate_ransomware()
