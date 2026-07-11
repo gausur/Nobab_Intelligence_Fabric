@@ -1,65 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-11 07:14:02.610236
+# Generated 2026-07-11 09:21:04.238420
 
 import re
-import requests
-from bs4 import BeautifulSoup
+import smtplib
+from email import message_from_bytes
 
-def detect_phishing(url):
-    # Check if the URL is valid
+def is_phishing_email(email):
+    """Check if the email contains a suspicious link."""
     try:
-        r = requests.get(url)
-        soup = BeautifulSoup(r.content, "html.parser")
-    except requests.exceptions.RequestException as e:
-        print("Invalid URL:", e)
-        return
-    
-    # Check for suspicious HTTP headers
-    if r.headers["Content-Type"] != "text/html":
-        print("Suspicious Content-Type header detected.")
-        return
-    if r.headers["Server"] != "Apache/2.4.7 (Ubuntu) Server at example.com [K
-Port 80":
-        print("Suspicious Server header detected.")
-        return
-    
-    # Check for suspicious HTML tags and attributes
-    tags = soup.find_all(["script", "iframe", "link", "a"])
-    for tag in tags:
-        if tag.name == "script":
-            if tag.attrs.get("src"):
-                print("Suspicious script tag with src attribute detected.")[11D[K
-detected.")
-            elif tag.text.strip():
-                print("Suspicious script tag with non-empty text content de[2D[K
-detected.")
-        elif tag.name == "iframe":
-            if tag.attrs.get("src"):
-                print("Suspicious iframe tag with src attribute detected.")[11D[K
-detected.")
-            elif tag.text.strip():
-                print("Suspicious iframe tag with non-empty text content de[2D[K
-detected.")
-        elif tag.name == "link":
-            if tag.attrs.get("href"):
-                print("Suspicious link tag with href attribute detected.")
-            elif tag.text.strip():
-                print("Suspicious link tag with non-empty text content dete[4D[K
-detected.")
-        else:
-            print("Suspicious {} tag detected.".format(tag.name))
-    
-    # Check for suspicious URLs in the HTML content
-    urls = soup.find_all("a")
-    for url in urls:
-        if not re.match(r"https?://[^\s]+", url["href"]):
-            print("Suspicious URL detected.")
-    
-    # Check for suspicious HTTP status codes
-    if r.status_code != 200:
-        print("Suspicious HTTP status code detected: {}.".format(r.status_c[22D[K
-{}.".format(r.status_code))
+        msg = message_from_bytes(email)
+        for part in msg.walk():
+            if part.get_content_type() == 'text/html':
+                body = part.get_payload(decode=True)
+                if re.search('(?i)(https?://)?\w+\.(phishing|scam)\.[a-z]',[56D[K
+re.search('(?i)(https?://)?\w+\.(phishing|scam)\.[a-z]', body):
+                    return True
+            elif part.get_content_type() == 'application/x-msdownload':
+                # If the email contains a suspicious attachment, it is like[4D[K
+likely a phishing attack.
+                return True
+        return False
+    except Exception:
+        # If there was an error parsing the email, assume it is a phishing [K
+attack.
+        return True
 
-# Example usage:
-detect_phishing("https://www.example.com")
+def send_email(recipient, subject, body):
+    """Send an email to the recipient."""
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = 'phishing@example.com'
+    msg['To'] = recipient
+    server = smtplib.SMTP('smtp.example.com')
+    try:
+        server.sendmail('phishing@example.com', recipient, msg.as_string())[16D[K
+msg.as_string())
+    finally:
+        server.quit()
+
+def main():
+    """Main function."""
+    while True:
+        # Wait for a new email to arrive
+        email = email.fetch(num=1)[0][1]
+        if is_phishing_email(email):
+            send_email('phishing@example.com', 'Phishing Attack Detected!',[11D[K
+Detected!', 'A phishing attack has been detected. Please be cautious of any[3D[K
+any suspicious links or attachments.')
+
+if __name__ == '__main__':
+    main()
