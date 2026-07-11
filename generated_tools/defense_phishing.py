@@ -1,31 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-11 01:52:32.190823
+# Generated 2026-07-11 04:58:28.339405
 
 import re
-import sys
+import urllib.parse
+from typing import List
 
-def is_phishing_url(url):
-    pattern = r"^https?://" + "|".join([
-        "www",
-        "mail",
-        "google",
-        "facebook",
-        "linkedin",
-        "twitter",
-        "youtube",
-        "instagram",
-        "pinterest",
-    ]) + "\.com$"
-    return re.search(pattern, url) is not None
+def extract_domain(url: str) -> str:
+    """Extracts the domain from a URL"""
+    parsed = urllib.parse.urlparse(url)
+    return parsed.netloc
 
-def mitigate_phishing_attack(url):
-    if is_phishing_url(url):
-        print("Phishing attack detected:", url)
-        sys.exit(1)
-    else:
-        print("No phishing attacks detected.")
-        sys.exit(0)
+def is_phishing_domain(domains: List[str]) -> bool:
+    """Checks if a domain is on a phishing list"""
+    # TODO: implement your own logic to check for phishing domains
+    return False
+
+def detect_phishing_attacks(urls: List[str]) -> List[str]:
+    """Detects and mitigates phishing attacks in a list of URLs"""
+    detected_urls = []
+    for url in urls:
+        domain = extract_domain(url)
+        if is_phishing_domain(domain):
+            # TODO: implement your own logic to mitigate the attack
+            print("Phishing attack detected!")
+        else:
+            detected_urls.append(url)
+    return detected_urls
 
 if __name__ == "__main__":
-    mitigate_phishing_attack(sys.argv[1])
+    urls = ["https://example.com", "https://phishing.com"]
+    detected_urls = detect_phishing_attacks(urls)
+    print(detected_urls)
