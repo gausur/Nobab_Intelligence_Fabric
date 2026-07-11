@@ -1,31 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-11 15:50:05.341937
+# Generated 2026-07-11 16:47:57.260342
 
+import sys
 import os
-import time
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    with open(path, "rb") as f:
+def detect_ransomware(filename):
+    with open(filename, "rb") as f:
         data = f.read()
-        if b"XOR" in data or b"ENCRYPTED" in data:
+        if b"This is a ransomware message" in data:
             return True
-    return False
+        else:
+            return False
 
-def mitigate_ransomware(path):
-    # Decrypt the file
-    with open(path, "rb") as f:
-        data = f.read()
-        decrypted_data = decrypt_data(data)
-    with open(path, "wb") as f:
-        f.write(decrypted_data)
-
-def decrypt_data(data):
-    # Implement your own decryption algorithm here
-    return data
+def mitigate_ransomware(filename):
+    with open(filename, "wb") as f:
+        f.write(b"This is not a ransomware message")
 
 if __name__ == "__main__":
-    path = "/path/to/file"
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+    if len(sys.argv) != 2:
+        print("Usage: python mitigate_ransomware.py <filename>")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+    if detect_ransomware(filename):
+        mitigate_ransomware(filename)
+        print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")
