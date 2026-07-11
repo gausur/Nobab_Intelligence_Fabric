@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-11 04:59:51.883411
+# Generated 2026-07-11 07:12:28.072730
 
 import os
-import hashlib
 import time
+import json
 
-# Define a list of known ransomware files
-known_ransomware = ['locky.exe', 'not_a_malware.exe']
+def main():
+    # Initialize variables
+    file_types = ["txt", "docx", "xlsx", "pptx", "pdf"]
+    file_extensions = []
+    ransomware_files = []
+    timestamp = int(time.time())
 
-# Set up a loop to continuously monitor the system for ransomware activity
-while True:
-    # Sleep for 5 seconds before checking again
-    time.sleep(5)
-    
-    # Check if any of the known ransomware files are present on the system
-    for file in known_ransomware:
-        if os.path.exists(file):
-            # If a ransomware file is found, stop the loop and alert the us[2D[K
-user
-            print('Ransomware detected!')
-            break
-    
-    # If no ransomware files are found, continue monitoring the system
-    else:
-        continue
+    # Get list of all files in the current directory
+    for root, dirs, files in os.walk("."):
+        for f in files:
+            file_name, file_extension = os.path.splitext(f)
+            if file_extension.lower() in file_types:
+                file_extensions.append(file_extension[1:])
 
-# Once the ransomware has been detected, mitigate it by cleaning the infect[6D[K
-infected system and reporting to the appropriate authorities
+    # Check for ransomware files
+    for extension in file_extensions:
+        if not os.path.isfile(f"{extension}.ransomware"):
+            continue
+        with open(f"{extension}.ransomware", "r") as f:
+            data = json.load(f)
+            if data["timestamp"] < timestamp:
+                ransomware_files.append(f"{extension}.ransomware")
+
+    # Remove ransomware files
+    for file in ransomware_files:
+        os.remove(file)
+
+if __name__ == "__main__":
+    main()
