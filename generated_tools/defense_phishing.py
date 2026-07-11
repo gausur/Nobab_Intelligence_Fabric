@@ -1,37 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-11 17:49:43.031100
+# Generated 2026-07-11 18:51:25.997989
 
 import re
+import ssl
+import socket
+from urllib import request, error
 
-def is_phishing_url(url):
-    # Check if the URL matches any known phishing domains
-    if any(domain in url for domain in PHISHING_DOMAINS):
-        return True
-    # Check if the URL contains any suspicious keywords or patterns
-    for keyword in SUSPICIOUS_KEYWORDS:
-        if keyword in url:
-            return True
-    return False
+def is_phishing(url):
+    # Check if the URL is valid
+    try:
+        request.urlopen(url)
+    except error.URLError:
+        return False
 
-def mitigate_phishing(url, browser):
-    # Open the URL in a new tab
-    browser.new_tab()
-    # Set the URL to be opened
-    browser.set_url(url)
-    # Wait for the page to load
-    browser.wait_for_page_load()
-    # Check if the URL is still valid and not phishing
-    if is_phishing_url(browser.current_url):
-        # Close the tab
-        browser.close_tab()
-        # Open a new tab to avoid further manipulation
-        browser.new_tab()
-    else:
-        # Move the focus to the newly opened tab
-        browser.move_focus(1)
-        # Print a warning message
-        print("This URL may be phishing, please be cautious.")
+    # Check for common phishing patterns
+    pattern = re.compile("[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+    if not pattern.match(url):
+        return False
 
-PHISHING_DOMAINS = ["example1.com", "example2.com"]
-SUSPICIOUS_KEYWORDS = ["free", "discount", "coupon"]
+    # Check for SSL certificates
+    try:
+        ssl.get_server_certificate((socket.gethostbyname(url), 443))
+    except ssl.SSLError:
+        return False
+
+    return True
+
+def mitigate_phishing(url):
+    # Redirect to a safe URL
+    request.urlopen("https://example.com")
+
+if __name__ == "__main__":
+    url = input("Enter the URL: ")
+    if is_phishing(url):
+        mitigate_phishing(url)

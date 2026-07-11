@@ -1,32 +1,55 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-11 17:48:30.510210
+# Generated 2026-07-11 18:49:42.389779
 
 import os
-import sys
-import stat
+import shutil
+import subprocess
 
-def detect_ransomware(filepath):
-    file = open(filepath, "rb")
-    data = file.read()
-    file.close()
-    if b'RANSOMWARE' in data:
+def detect_ransomware(path):
+    # Check if the file or directory is a symlink
+    if os.path.islink(path):
         return True
-    else:
+    
+    # Check if the file or directory has an executable bit set
+    mode = os.stat(path).st_mode
+    if stat.S_IXUSR & mode:
+        return True
+    
+    # Check if the file is a regular file
+    if not os.path.isfile(path):
         return False
-
-def mitigate_ransomware(filepath):
+    
+    # Check if the file has the ransomware flag set
     try:
-        os.remove(filepath)
-    except FileNotFoundError:
+        with open(path, 'rb') as f:
+            data = f.read()
+            if b'RANSOMWARE' in data:
+                return True
+    except IOError:
         pass
-    else:
-        print("Removed ransomware file")
+    
+    # Check if the file has a suspicious extension
+    ext = os.path.splitext(path)[1]
+    if ext in ('.exe', '.dll', '.sys', '.scr'):
+        return True
+    
+    return False
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python ransomware_detector.py <filepath>")
-        sys.exit()
-    filepath = sys.argv[1]
-    if detect_ransomware(filepath):
-        mitigate_ransomware(filepath)
+def mitigate_ransomware(path):
+    # Remove the file or directory
+    try:
+        shutil.rmtree(path)
+    except OSError:
+        pass
+
+if __name__ == '__main__':
+    # Get the list of files and directories to check
+    paths = []
+    for root, dirs, files in os.walk('/'):
+        paths += [os.path.join(root, f) for f in files]
+    
+    # Check each file and directory
+    for path in paths:
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
