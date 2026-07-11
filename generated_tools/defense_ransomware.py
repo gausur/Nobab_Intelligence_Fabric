@@ -1,39 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-11 22:41:55.324994
+# Generated 2026-07-11 23:47:45.010809
 
 import os
-import sys
-import time
+import stat
 
-def detect_ransomware(file):
-    # Check if the file is a valid image file
-    if not file.endswith((".jpg", ".jpeg", ".png")):
+def is_ransomware(filepath):
+    try:
+        file = open(filepath, 'rb')
+        contents = file.read()
+        file.close()
+        return "ransomware" in contents.decode("utf-8")
+    except FileNotFoundError:
         return False
 
-    # Check if the file has been modified recently
-    mod_time = os.path.getmtime(file)
-    if time.time() - mod_time > 300:
-        return True
+def mitigate_ransomware(filepath):
+    try:
+        os.chmod(filepath, stat.S_IRUSR | stat.S_IWUSR)
+        file = open(filepath, 'w')
+        file.write("")
+        file.close()
+    except FileNotFoundError:
+        pass
 
-    return False
-
-def mitigate_ransomware(file):
-    # Check if the file is a valid image file
-    if not file.endswith((".jpg", ".jpeg", ".png")):
-        return
-
-    # Check if the file has been modified recently
-    mod_time = os.path.getmtime(file)
-    if time.time() - mod_time > 300:
-        # Remove the file
-        os.remove(file)
-        print("Ransomware detected and mitigated:", file)
+def scan_directory(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            is_ransomware(os.path.join(root, file))
 
 def main():
-    for file in os.listdir("."):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+    scan_directory("/path/to/directory")
 
 if __name__ == "__main__":
     main()
