@@ -1,37 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-11 21:43:23.950407
+# Generated 2026-07-11 22:41:55.324994
 
 import os
-import json
+import sys
 import time
 
-def check_for_ransomware(directory):
-    files = os.listdir(directory)
-    for file in files:
-        if not file.endswith('.exe'):
-            continue
-        with open(os.path.join(directory, file), 'rb') as f:
-            data = f.read()
-            if b'Ransomware' in data:
-                print('Possible ransomware detected!')
-                mitigate_ransomware(directory)
-                break
+def detect_ransomware(file):
+    # Check if the file is a valid image file
+    if not file.endswith((".jpg", ".jpeg", ".png")):
+        return False
 
-def mitigate_ransomware(directory):
-    files = os.listdir(directory)
-    for file in files:
-        if not file.endswith('.exe'):
-            continue
-        with open(os.path.join(directory, file), 'rb') as f:
-            data = f.read()
-            # Remove the ransomware code
-            data = data.replace(b'Ransomware', b'')
-            # Write the modified data back to the file
-            with open(os.path.join(directory, file), 'wb') as f:
-                f.write(data)
+    # Check if the file has been modified recently
+    mod_time = os.path.getmtime(file)
+    if time.time() - mod_time > 300:
+        return True
 
-# Start the script in a loop, checking for ransomware every 5 minutes
-while True:
-    check_for_ransomware('/home/user/Downloads')
-    time.sleep(300)
+    return False
+
+def mitigate_ransomware(file):
+    # Check if the file is a valid image file
+    if not file.endswith((".jpg", ".jpeg", ".png")):
+        return
+
+    # Check if the file has been modified recently
+    mod_time = os.path.getmtime(file)
+    if time.time() - mod_time > 300:
+        # Remove the file
+        os.remove(file)
+        print("Ransomware detected and mitigated:", file)
+
+def main():
+    for file in os.listdir("."):
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+
+if __name__ == "__main__":
+    main()
