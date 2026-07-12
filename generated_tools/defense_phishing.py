@@ -1,41 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-12 08:05:41.557985
+# Generated 2026-07-12 20:07:11.159056
 
 import re
+import smtplib
+from email.message import EmailMessage
 from urllib.parse import urlparse
-from http.client import HTTPConnection
 
 def is_phishing_url(url):
-    # Check if the URL is a phishing site by analyzing its domain name and [K
-HTTP status code
     parsed_url = urlparse(url)
-    domain_name = parsed_url.netloc
-    conn = HTTPConnection(domain_name, timeout=5)
-    try:
-        conn.request("HEAD", "/")
-        response = conn.getresponse()
-        if response.status != 200:
-            return True
-    except Exception as e:
-        print(f"Failed to connect to {domain_name}: {e}")
+    if parsed_url.scheme not in ["http", "https"]:
         return False
-    finally:
-        conn.close()
-    return False
-
-def detect_phishing_attacks(url):
-    # Check if the URL is a phishing site by analyzing its domain name and [K
-HTTP status code
-    if is_phishing_url(url):
-        print(f"Phishing attack detected: {url}")
+    if parsed_url.netloc.endswith(".com"):
+        return True
     else:
-        print(f"No phishing attack detected: {url}")
+        return False
+
+def is_phishing_email(message):
+    if message["From"].startswith("john.doe@example.com"):
+        return True
+    else:
+        return False
+
+def mitigate_phishing_attack(message, sender, recipient):
+    # Mark the email as spam
+    message["X-Spam-Flag"] = "True"
+    # Reject the email
+    smtplib.SMTP("localhost").sendmail(sender, recipient, message.as_string[17D[K
+message.as_string())
+    # Log the attack
+    print("Phishing attack detected:", message.as_string())
 
 def main():
-    # Prompt the user to enter a URL
-    url = input("Enter a URL: ")
-    detect_phishing_attacks(url)
+    # Read email from stdin
+    raw_email = sys.stdin.read()
+    # Parse the email
+    message = EmailMessage()
+    message.set_payload(raw_email)
+    # Check for phishing URLs and emails
+    if is_phishing_url(message["From"]):
+        mitigate_phishing_attack(message, "john.doe@example.com", "jane.smi[9D[K
+"jane.smith@example.com")
+    elif is_phishing_email(message):
+        mitigate_phishing_attack(message, "john.doe@example.com", "jane.smi[9D[K
+"jane.smith@example.com")
 
 if __name__ == "__main__":
     main()
