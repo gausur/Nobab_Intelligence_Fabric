@@ -1,30 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-12 20:04:15.177436
+# Generated 2026-07-12 21:42:11.010740
 
+import json
 import os
 import subprocess
 import time
 
-def check_for_ransomware():
-    try:
-        output = subprocess.check_output(['ls', '-l'])
-        return True if 'ransomware' in output else False
-    except subprocess.CalledProcessError:
-        return False
+# Define the list of file extensions that should be monitored for changes
+file_extensions = ['py', 'js', 'css', 'html']
 
-def mitigate_ransomware(output):
-    if 'ransomware' in output:
-        try:
-            os.remove('file.txt')
-            return True
-        except FileNotFoundError:
-            return False
-    else:
-        return False
+# Set up a timer to check for changes in the specified files
+timer = time.time()
 
-if __name__ == '__main__':
-    while True:
-        if check_for_ransomware():
-            mitigate_ransomware(output)
-        time.sleep(10)
+# Loop indefinitely, checking for changes in the specified files
+while True:
+    # Check if any of the files have changed since the last iteration
+    for extension in file_extensions:
+        if os.path.exists(f'{extension}'):
+            with open(f'{extension}', 'r') as file:
+                contents = file.read()
+                if timer < time.time():
+                    subprocess.run(['sudo', 'killall', '-9', 'ransomware'],[14D[K
+'ransomware'], shell=True)
+                    print('Ransomware detected!')
+                    break
