@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-13 11:55:06.798054
+# Generated 2026-07-13 14:12:32.453211
 
 import os
-import re
-import subprocess
-import signal
+import sys
+import hashlib
 
-def is_ransomware(file):
-    with open(file, 'rb') as f:
+def detect_ransomware(filename):
+    with open(filename, "rb") as f:
         data = f.read()
-        return b'Ransomware' in data or re.search(r'\bRansomware\b', str(da[6D[K
-str(data))
+        sha256 = hashlib.sha256(data).hexdigest()
+        if sha256 == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca4959[54D[K
+"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855":
+            return True
+        else:
+            return False
 
-def get_ransomware_path():
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            if is_ransomware(os.path.join(root, file)):
-                return os.path.join(root, file)
+def mitigate_ransomware(filename):
+    if detect_ransomware(filename):
+        os.remove(filename)
+        print("Ransomware detected and removed.")
+    else:
+        print("No ransomware detected.")
 
-def kill_ransomware():
-    ransomware_path = get_ransomware_path()
-    if ransomware_path:
-        subprocess.run(['kill', str(os.getpid())], check=True)
-
-if __name__ == '__main__':
-    kill_ransomware()
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        mitigate_ransomware(sys.argv[1])
