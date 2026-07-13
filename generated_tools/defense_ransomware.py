@@ -1,38 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-13 21:49:16.880343
+# Generated 2026-07-13 22:48:30.500508
 
-import socket
 import os
-import re
-import hashlib
+import subprocess
+import time
 
-def check_for_ransomware(filename):
-    with open(filename, "rb") as f:
-        contents = f.read()
-        if b"RANSOMWARE" in contents:
-            print("Ransomware detected!")
+def detect_ransomware():
+    # Check if the system is running Linux or Windows
+    if os.name == 'nt':
+        # Run a system command to check for the presence of ransomware
+        output = subprocess.check_output('powershell -Command Get-Process |[1D[K
+| Select-String "ransomware"', shell=True)
+        if len(output) > 0:
             return True
-    return False
-
-def decrypt_file(filename):
-    with open(filename, "rb") as f:
-        contents = f.read()
-        if b"RANSOMWARE" in contents:
-            print("Decrypting file...")
-            # Use a secure encryption algorithm to decrypt the contents of [K
-the file
-            # ...
-            return True
-    return False
-
-def main():
-    filename = "ransomware.txt"
-    if check_for_ransomware(filename):
-        decrypt_file(filename)
-        print("File successfully decrypted!")
     else:
-        print("No ransomware detected.")
+        # Run a system command to check for the presence of ransomware
+        output = subprocess.check_output('ls -la /proc/*/cmdline | grep "ra[3D[K
+"ransomware"', shell=True)
+        if len(output) > 0:
+            return True
+    return False
 
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware():
+    # Restart the system to clear any ransomware infections
+    subprocess.check_call('shutdown /r /t 30', shell=True)
+
+if detect_ransomware():
+    mitigate_ransomware()
+else:
+    print("No ransomware detected")
