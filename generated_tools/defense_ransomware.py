@@ -1,32 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-13 22:48:30.500508
+# Generated 2026-07-13 23:48:44.797692
 
 import os
-import subprocess
+import hashlib
 import time
+from datetime import datetime, timedelta
 
-def detect_ransomware():
-    # Check if the system is running Linux or Windows
-    if os.name == 'nt':
-        # Run a system command to check for the presence of ransomware
-        output = subprocess.check_output('powershell -Command Get-Process |[1D[K
-| Select-String "ransomware"', shell=True)
-        if len(output) > 0:
+# Define the list of allowed file extensions
+ALLOWED_EXTENSIONS = ['txt', 'csv', 'json']
+
+# Define the list of known ransomware algorithms
+RANSOMWARE_ALGORITHMS = ['AES-128', 'AES-256']
+
+def is_ransomware(file):
+    # Check if the file extension is allowed
+    if not file.endswith(ALLOWED_EXTENSIONS):
+        return False
+    
+    # Open the file and read its contents
+    with open(file, 'rb') as f:
+        data = f.read()
+        
+    # Check if the file contains any known ransomware algorithms
+    for algo in RANSOMWARE_ALGORITHMS:
+        if algo in data:
             return True
-    else:
-        # Run a system command to check for the presence of ransomware
-        output = subprocess.check_output('ls -la /proc/*/cmdline | grep "ra[3D[K
-"ransomware"', shell=True)
-        if len(output) > 0:
-            return True
+    
     return False
 
-def mitigate_ransomware():
-    # Restart the system to clear any ransomware infections
-    subprocess.check_call('shutdown /r /t 30', shell=True)
+def mitigate(file):
+    # Remove the file
+    os.remove(file)
+    
+    # Notify the user that the file has been removed
+    print(f'File {file} has been removed due to ransomware attack')
 
-if detect_ransomware():
-    mitigate_ransomware()
-else:
-    print("No ransomware detected")
+# Main function
+def main():
+    # Get the current time
+    now = datetime.now()
+    
+    # Iterate through all files in the current directory
+    for file in os.listdir('.'):
+        # Check if the file is a ransomware attack
+        if is_ransomware(file):
+            mitigate(file)
+        
+    # Sleep for 1 hour
+    time.sleep(3600)
+    
+if __name__ == '__main__':
+    main()
