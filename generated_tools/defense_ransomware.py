@@ -1,42 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-15 04:44:53.584393
+# Generated 2026-07-15 07:09:07.027335
 
 import os
-import re
-import subprocess
+import sys
+import time
 
-def detect_ransomware(file_path):
-    # Check if the file exists
-    if not os.path.exists(file_path):
-        return False
-    
-    # Open the file and read its contents
-    with open(file_path, "rb") as f:
-        data = f.read()
-    
-    # Search for known ransomware strings in the file
-    for string in ["RANSOMWARE", "PAY", "DECRYPT", "KEY"]:
-        if re.search(string, data):
+def detect_ransomware(file):
+    with open(file, "r") as f:
+        contents = f.read()
+        if "RANSOMWARE" in contents:
             return True
-    
-    # If no ransomware strings are found, return False
     return False
 
-def mitigate_ransomware(file_path):
-    # Check if the file exists
-    if not os.path.exists(file_path):
-        return False
-    
-    # Open the file and read its contents
-    with open(file_path, "rb") as f:
-        data = f.read()
-    
-    # Remove any ransomware strings from the file
-    for string in ["RANSOMWARE", "PAY", "DECRYPT", "KEY"]:
-        if re.search(string, data):
-            data = re.sub(string, "", data)
-    
-    # Write the modified contents back to the file
-    with open(file_path, "wb") as f:
-        f.write(data)
+def mitigate_ransomware(file):
+    os.remove(file)
+    print("Removed ransomware file")
+    sys.exit(1)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python mitigate_ransomware.py FILE")
+        sys.exit(1)
+
+    file = sys.argv[1]
+    if detect_ransomware(file):
+        mitigate_ransomware(file)
