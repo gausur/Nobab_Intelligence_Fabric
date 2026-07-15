@@ -1,57 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-15 15:24:53.872747
+# Generated 2026-07-15 17:10:39.313003
 
 import os
-import sys
-import time
-import json
+import shutil
+import hashlib
 from pathlib import Path
-from typing import List, Tuple
 
-def is_ransomware(filename: str) -> bool:
-    """
-    Check if the given filename matches the pattern of a ransomware executa[7D[K
-executable.
-    :param filename: The name of the file to check.
-    :return: True if the filename matches the pattern, False otherwise.
-    """
-    return filename.lower().endswith(('.exe', '.dll')) and 'ransom' in file[4D[K
-filename.lower()
+# Define the list of files and directories to exclude from the scan
+exclude_list = ['.git', '.vscode', 'node_modules']
 
-def get_file_info(path: str) -> Tuple[str, int]:
-    """
-    Get information about a file at the given path.
-    :param path: The path of the file to check.
-    :return: A tuple containing the file name and size in bytes.
-    """
-    return Path(path).name, os.path.getsize(path)
+# Define the list of files with known ransomware signatures
+ransomware_signatures = ['encrypted_file.txt', 'ransomware.exe']
 
-def get_files_to_check() -> List[str]:
-    """
-    Get a list of files to check for ransomware activity.
-    :return: A list of file paths.
-    """
-    return [f for f in sys.argv if is_ransomware(f)]
+# Define the directory to scan
+scan_directory = Path('/path/to/directory')
 
-def check_for_ransomware() -> None:
-    """
-    Check all files in the system for ransomware activity.
-    :return: None.
-    """
-    for file in get_files_to_check():
-        name, size = get_file_info(file)
-        print(f'{name}: {size} bytes')
-
-def mitigate_ransomware() -> None:
-    """
-    Mitigate ransomware activity by deleting all files that match the ranso[5D[K
-ransomware pattern.
-    :return: None.
-    """
-    for file in get_files_to_check():
-        os.remove(file)
-
-if __name__ == '__main__':
-    check_for_ransomware()
-    mitigate_ransomware()
+# Iterate over all files and directories in the scan directory
+for root, dirs, files in os.walk(scan_directory):
+    # Exclude the specified directories and files from the scan
+    for excluded_dir in exclude_list:
+        if excluded_dir in dirs:
+            dirs.remove(excluded_dir)
+    for excluded_file in exclude_list:
+        if excluded_file in files:
+            files.remove(excluded_file)
+    
+    # Iterate over the remaining files and directories
+    for file in files:
+        # Calculate the SHA256 hash of each file
+        filepath = os.path.join(root, file)
+        with open(filepath, 'rb') as f:
+            data = f.read()
+        sha256_hash = hashlib.sha256(data).hexdigest()
+        
+        # Check if the file has a known ransomware signature
+        for ransomware_signature in ransomware_signatures:
+            if ransomware_signature == sha256_hash:
+                print(f'Detected ransomware in {filepath}')
+                
+                # Mitigate the attack by restoring the file from a backup
+                backup_filepath = f'{filepath}.bak'
+                if os.path.exists(backup_filepath):
+                    shutil.copy(backup_filepath, filepath)
+                    print(f'Restored {filepath} from backup')
+                else:
+                    print(f'No backup available for {filepath}, please rest[4D[K
+restore manually')
