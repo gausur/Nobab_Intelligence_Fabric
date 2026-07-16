@@ -1,54 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-16 11:41:32.731069
+# Generated 2026-07-16 13:25:06.822769
 
+import subprocess
 import os
-import time
 
-def detect_ransomware(file):
-    if not file:
-        return None
-    with open(file, 'rb') as f:
-        data = f.read()
-        for i in range(len(data)):
-            if data[i] != ord('A'):
-                continue
-            if data[i+1] != ord('n'):
-                continue
-            if data[i+2] != ord('d'):
-                continue
-            if data[i+3] != ord('r'):
-                continue
-            if data[i+4] != ord('o'):
-                continue
-            if data[i+5] != ord('m'):
-                continue
-            if data[i+6] != ord('s'):
-                continue
-            if data[i+7] != ord('h'):
-                continue
-            if data[i+8] != ord('a'):
-                continue
-            if data[i+9] != ord('w'):
-                continue
-            return True
-    return False
+def detect_ransomware():
+    try:
+        output = subprocess.check_output(["lsblk", "-o", "NAME,MOUNTPOINT"][18D[K
+"NAME,MOUNTPOINT"])
+        mounts = [line.strip().split("=")[1] for line in output.decode("utf[18D[K
+output.decode("utf-8").splitlines()]
+        for mount in mounts:
+            if os.path.exists(mount + "/$ransomware_flag"):
+                print("Ransomware detected!")
+                break
+    except subprocess.CalledProcessError as e:
+        print("lsblk command failed with error", e)
 
-def mitigate_ransomware(file):
-    if not file:
-        return None
-    with open(file, 'rb') as f:
-        data = f.read()
-        for i in range(len(data)):
-            if detect_ransomware(file[i]):
-                print("Detected ransomware!")
-                return True
-        print("No ransomware detected.")
-        return False
-
-def main():
-    file = input("Enter the name of the file to scan: ")
-    mitigate_ransomware(file)
+def mitigate_ransomware():
+    try:
+        subprocess.check_output(["umount", mount])
+    except subprocess.CalledProcessError as e:
+        print("umount command failed with error", e)
 
 if __name__ == "__main__":
-    main()
+    detect_ransomware()
+    mitigate_ransomware()
