@@ -1,37 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-16 10:01:48.485752
+# Generated 2026-07-16 11:41:32.731069
 
 import os
-import sys
-import subprocess
+import time
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    try:
-        output = subprocess.check_output(["ransomware-detection-tool"])
-        if "Ransomware detected" in output:
-            print("Ransomware detected!")
+def detect_ransomware(file):
+    if not file:
+        return None
+    with open(file, 'rb') as f:
+        data = f.read()
+        for i in range(len(data)):
+            if data[i] != ord('A'):
+                continue
+            if data[i+1] != ord('n'):
+                continue
+            if data[i+2] != ord('d'):
+                continue
+            if data[i+3] != ord('r'):
+                continue
+            if data[i+4] != ord('o'):
+                continue
+            if data[i+5] != ord('m'):
+                continue
+            if data[i+6] != ord('s'):
+                continue
+            if data[i+7] != ord('h'):
+                continue
+            if data[i+8] != ord('a'):
+                continue
+            if data[i+9] != ord('w'):
+                continue
             return True
-        else:
-            return False
-    except Exception as e:
-        # If the detection tool is not available, fall back to a different [K
-method
-        print(f"Error running ransomware detection tool: {e}")
+    return False
+
+def mitigate_ransomware(file):
+    if not file:
+        return None
+    with open(file, 'rb') as f:
+        data = f.read()
+        for i in range(len(data)):
+            if detect_ransomware(file[i]):
+                print("Detected ransomware!")
+                return True
+        print("No ransomware detected.")
         return False
 
-def mitigate_ransomware():
-    # Use the backup data to restore the system
-    try:
-        subprocess.check_call(["restore-data-from-backup"])
-        print("Data restored from backup")
-    except Exception as e:
-        print(f"Error restoring data from backup: {e}")
-        return False
+def main():
+    file = input("Enter the name of the file to scan: ")
+    mitigate_ransomware(file)
 
-if detect_ransomware():
-    mitigate_ransomware()
-else:
-    # If the system is not infected with ransomware, exit the script
-    sys.exit(0)
+if __name__ == "__main__":
+    main()
