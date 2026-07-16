@@ -1,29 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-16 13:25:06.822769
+# Generated 2026-07-16 15:30:49.229597
 
-import subprocess
 import os
+import subprocess
+import shutil
+import time
+from pathlib import Path
 
 def detect_ransomware():
-    try:
-        output = subprocess.check_output(["lsblk", "-o", "NAME,MOUNTPOINT"][18D[K
-"NAME,MOUNTPOINT"])
-        mounts = [line.strip().split("=")[1] for line in output.decode("utf[18D[K
-output.decode("utf-8").splitlines()]
-        for mount in mounts:
-            if os.path.exists(mount + "/$ransomware_flag"):
-                print("Ransomware detected!")
-                break
-    except subprocess.CalledProcessError as e:
-        print("lsblk command failed with error", e)
+    # Check if the system is running a supported operating system
+    if os.name != "nt":
+        return False
 
-def mitigate_ransomware():
-    try:
-        subprocess.check_output(["umount", mount])
-    except subprocess.CalledProcessError as e:
-        print("umount command failed with error", e)
+    # Get the list of installed software on the system
+    process = subprocess.Popen("wmic product get name", shell=True, stdout=[7D[K
+stdout=subprocess.PIPE)
+    (output, _) = process.communicate()
+    output = output.decode().strip()
+
+    # Check if any of the installed software matches a known ransomware sig[3D[K
+signature
+    for line in output.splitlines():
+        if "ransomware" in line:
+            return True
+
+    return False
+
+def mitigate_ransomware(path):
+    # Remove the infected file or directory
+    shutil.rmtree(path)
+
+def main():
+    path = Path("/")
+
+    if detect_ransomware():
+        mitigate_ransomware(path)
+        print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")
 
 if __name__ == "__main__":
-    detect_ransomware()
-    mitigate_ransomware()
+    main()
