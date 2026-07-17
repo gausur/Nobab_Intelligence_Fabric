@@ -1,37 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-17 15:10:36.999472
+# Generated 2026-07-17 17:06:22.577170
 
+import json
 import os
-import sys
+import subprocess
 import time
-from datetime import datetime
+from pathlib import Path
 
-# Define the directories to monitor
-directories = ["C:\\", "D:\\"]
+def detect_ransomware(filename):
+    with open(filename, 'rb') as f:
+        data = f.read()
+        for pattern in RANSOMWARE_PATTERNS:
+            if pattern in data:
+                return True
+        return False
 
-# Define the file types to watch
-file_types = [".txt", ".docx", ".xlsx", ".pptx"]
+def mitigate_ransomware(filename):
+    with open(filename, 'rb') as f:
+        data = f.read()
+        for pattern in RANSOMWARE_PATTERNS:
+            if pattern in data:
+                print("Detected ransomware")
+                break
+        else:
+            return False
+    # Mitigate the ransomware by deleting the infected file
+    os.remove(filename)
+    return True
 
-# Set up a timer to check for changes every 5 minutes
-timer = time.time() + (60 * 5)
+def main():
+    path = Path('/path/to/watch')
+    for filename in path.glob('**/*'):
+        if detect_ransomware(filename):
+            mitigate_ransomware(filename)
+    time.sleep(60) # Check again after 1 minute
+    main()
 
-while True:
-    # Check if the timer has expired
-    if time.time() > timer:
-        # Reset the timer
-        timer = time.time() + (60 * 5)
-        
-        # Loop through each directory and file type
-        for directory in directories:
-            for file_type in file_types:
-                # Check if a new file has been added to the directory
-                if os.path.exists(f"{directory}{file_type}"):
-                    print(f"Ransomware detected! File {directory}{file_type[21D[K
-{directory}{file_type} was created.")
-                    
-                    # Mitigate the attack by deleting the file
-                    os.remove(f"{directory}{file_type}")
-                    
-                    # Notify the user of the attack and its mitigation
-                    print("Ransomware has been mitigated!")
+if __name__ == '__main__':
+    main()

@@ -1,34 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-17 15:08:52.631401
+# Generated 2026-07-17 17:07:06.137970
 
 import re
-import smtplib
-from email.parser import Parser
+import urllib.request
 
-class PhishingDetector:
-    def __init__(self, mailbox):
-        self.mailbox = mailbox
-    
-    def detect_phishing(self):
-        parser = Parser()
-        for msg in self.mailbox:
-            if not re.match(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,[56D[K
-re.match(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$", msg["From"]):[13D[K
-msg["From"]):
-                return True
-        return False
-    
-    def mitigate_phishing(self, msg):
-        if self.detect_phishing():
-            print("Phishing attack detected!")
-            smtplib.SMTP('smtp.gmail.com', 587).sendmail(msg["From"], msg["[5D[K
-msg["To"], "This is a phishing message.")
-        else:
-            print("No phishing attack detected.")
+# Define the list of domains that are considered safe for redirection
+safe_domains = ["example.com", "example2.com"]
 
-if __name__ == '__main__':
-    mailbox = [{"From": "someone@example.com", "To": "someoneelse@gmail.com[22D[K
-"someoneelse@gmail.com"}]
-    detector = PhishingDetector(mailbox)
-    detector.mitigate_phishing(mailbox[0])
+# Define a regular expression to match URLs with unsafe protocols
+unsafe_protocols = ["http://", "https://", "ftp://", "ftps://", "mailto:"]
+url_pattern = f"({'|'.join(unsafe_protocols)})([a-z0-9.-]+)"
+
+# Define a function to check if a URL is safe for redirection
+def is_safe_url(url):
+    return bool(re.match(url_pattern, url)) and (url.split(".")[-2:] in saf[3D[K
+safe_domains)
+
+# Get the URL from the user input
+url = input("Enter the URL: ")
+
+# Check if the URL is safe for redirection
+if not is_safe_url(url):
+    print("The URL you entered is unsafe. Please enter a valid URL.")
+else:
+    # Open the URL in the default browser
+    webbrowser.open(url)
