@@ -1,44 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-17 11:19:20.699570
+# Generated 2026-07-17 13:11:03.104706
 
 import re
-import smtplib
-from email.message import EmailMessage
+from urllib.parse import urlparse
 
-def is_phishing_email(email):
-    # Check if the email has a spammy sender
-    if "spammer@example.com" in email["From"]:
+def is_phishing(url):
+    # Check if the URL is an HTTPS URL
+    if not url.startswith("https"):
+        return False
+
+    # Parse the URL and extract the hostname
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+
+    # Check if the hostname ends with .com, .net, or .org
+    if not any(hostname.endswith(suffix) for suffix in [".com", ".net", ".o[3D[K
+".org"]):
+        return False
+
+    # Check if the URL contains a suspicious query string parameter
+    query_string = urlparse(url).query
+    parameters = dict(re.split("&|=", query_string))
+    if "email" in parameters:
         return True
-    
-    # Check if the email contains suspicious keywords
-    for keyword in ["phishing", "scam", " fraud"]:
-        if keyword in email.body:
-            return True
-    
-    # Check if the email is trying to trick the user into clicking a link
-    if "<a href='" in email.body and "</a>" in email.body:
+
+    # Check if the URL is from a known phishing domain
+    if hostname in ["phishingsite.com", "phishingdomain.net"]:
         return True
-    
+
     return False
 
-def mitigate_phishing_email(email):
-    # Remove any links from the email body
-    email.body = re.sub("<a href.*</a>", "", email.body)
-    
-    # Send an alert to the user
-    subject = "Phishing Attempt Detected"
-    message = f"A phishing attempt was detected in your email. Please be ca[2D[K
-cautious and report any suspicious activity."
-    send_email(subject, message)
-
-def send_email(subject, message):
-    # Send an email using the smtplib module
-    server = smtplib.SMTP("smtp.example.com")
-    msg = EmailMessage()
-    msg["Subject"] = subject
-    msg["From"] = "your-email@example.com"
-    msg["To"] = "user-email@example.com"
-    msg.set_content(message)
-    server.send_message(msg)
-    server.quit()
+def mitigate_phishing(url):
+    # Redirect the user to the homepage of the website
+    return f"{url}/"
