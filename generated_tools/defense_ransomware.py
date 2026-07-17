@@ -1,31 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-17 13:09:47.410370
+# Generated 2026-07-17 15:10:36.999472
 
 import os
-import subprocess
+import sys
+import time
+from datetime import datetime
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    output = subprocess.run(['file', path], stdout=subprocess.PIPE)
-    return b'encrypted' in output.stdout
+# Define the directories to monitor
+directories = ["C:\\", "D:\\"]
 
-def mitigate_ransomware(path):
-    # Decrypt the file using a decryption tool
-    subprocess.run(['decryption_tool', path])
+# Define the file types to watch
+file_types = [".txt", ".docx", ".xlsx", ".pptx"]
 
-# Main function to run the script
-def main():
-    # Get the current working directory
-    cwd = os.getcwd()
+# Set up a timer to check for changes every 5 minutes
+timer = time.time() + (60 * 5)
 
-    # Iterate through all files in the current directory
-    for root, dirs, files in os.walk(cwd):
-        for file in files:
-            # Check if the file is encrypted
-            if detect_ransomware(os.path.join(root, file)):
-                # Decrypt the file using a decryption tool
-                mitigate_ransomware(os.path.join(root, file))
-
-if __name__ == '__main__':
-    main()
+while True:
+    # Check if the timer has expired
+    if time.time() > timer:
+        # Reset the timer
+        timer = time.time() + (60 * 5)
+        
+        # Loop through each directory and file type
+        for directory in directories:
+            for file_type in file_types:
+                # Check if a new file has been added to the directory
+                if os.path.exists(f"{directory}{file_type}"):
+                    print(f"Ransomware detected! File {directory}{file_type[21D[K
+{directory}{file_type} was created.")
+                    
+                    # Mitigate the attack by deleting the file
+                    os.remove(f"{directory}{file_type}")
+                    
+                    # Notify the user of the attack and its mitigation
+                    print("Ransomware has been mitigated!")

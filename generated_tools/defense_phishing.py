@@ -1,36 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-17 13:11:03.104706
+# Generated 2026-07-17 15:08:52.631401
 
 import re
-from urllib.parse import urlparse
+import smtplib
+from email.parser import Parser
 
-def is_phishing(url):
-    # Check if the URL is an HTTPS URL
-    if not url.startswith("https"):
+class PhishingDetector:
+    def __init__(self, mailbox):
+        self.mailbox = mailbox
+    
+    def detect_phishing(self):
+        parser = Parser()
+        for msg in self.mailbox:
+            if not re.match(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,[56D[K
+re.match(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$", msg["From"]):[13D[K
+msg["From"]):
+                return True
         return False
+    
+    def mitigate_phishing(self, msg):
+        if self.detect_phishing():
+            print("Phishing attack detected!")
+            smtplib.SMTP('smtp.gmail.com', 587).sendmail(msg["From"], msg["[5D[K
+msg["To"], "This is a phishing message.")
+        else:
+            print("No phishing attack detected.")
 
-    # Parse the URL and extract the hostname
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
-
-    # Check if the hostname ends with .com, .net, or .org
-    if not any(hostname.endswith(suffix) for suffix in [".com", ".net", ".o[3D[K
-".org"]):
-        return False
-
-    # Check if the URL contains a suspicious query string parameter
-    query_string = urlparse(url).query
-    parameters = dict(re.split("&|=", query_string))
-    if "email" in parameters:
-        return True
-
-    # Check if the URL is from a known phishing domain
-    if hostname in ["phishingsite.com", "phishingdomain.net"]:
-        return True
-
-    return False
-
-def mitigate_phishing(url):
-    # Redirect the user to the homepage of the website
-    return f"{url}/"
+if __name__ == '__main__':
+    mailbox = [{"From": "someone@example.com", "To": "someoneelse@gmail.com[22D[K
+"someoneelse@gmail.com"}]
+    detector = PhishingDetector(mailbox)
+    detector.mitigate_phishing(mailbox[0])
