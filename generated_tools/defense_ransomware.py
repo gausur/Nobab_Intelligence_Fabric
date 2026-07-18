@@ -1,41 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-18 04:43:17.165580
+# Generated 2026-07-18 06:57:21.168801
 
 import os
-import shutil
-import subprocess
 import sys
-from pathlib import Path
+import hashlib
+import subprocess
 
-def detect_ransomware():
-    # Check if the file system is encrypted
-    fs_encrypted = subprocess.check_output(["lsblk", "-o", "NAME,FSTYPE"])
-    if "crypt" in fs_encrypted:
-        print("File system is encrypted")
+def detect_ransomware(filepath):
+    # Calculate the file's MD5 hash
+    md5 = hashlib.md5()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(128), b""):
+            md5.update(chunk)
+    file_hash = md5.hexdigest()
+
+    # Check if the file is known to be ransomware
+    if file_hash in RANSOMWARE_HASHES:
         return True
-    else:
-        print("File system is not encrypted")
-        return False
 
-def mitigate_ransomware():
-    # Check if the file system is mounted with the "noexec" option
-    fs_mounted = subprocess.check_output(["mount"])
-    for line in fs_mounted.splitlines():
-        if "noexec" in line:
-            print("File system is mounted with 'noexec'")
-            return True
-    else:
-        print("File system is not mounted with 'noexec'")
-        return False
+    # Check if the file has been modified
+    try:
+        subprocess.check_call(["md5sum", "-c", filepath])
+    except subprocess.CalledProcessError:
+        # The file has been modified, treat it as ransomware
+        return True
 
-def main():
-    # Check for ransomware
-    if detect_ransomware():
-        # Mitigate the ransomware attack
-        mitigate_ransomware()
-    else:
-        print("No ransomware detected")
+    return False
+
+def mitigate_ransomware(filepath):
+    # Remove the file
+    os.remove(filepath)
+
+    # If the file is a symbolic link, remove the link as well
+    if os.path.islink(filepath):
+        os.unlink(filepath)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python detect_ransomware.py <filepath>")
+        exit()
+
+    filepath = sys.argv[1]
+    if not os.path.exists(filepath):
+        print("File does not exist.")
+        exit()
+
+    if detect_ransomware(filepath):
+        mitigate_ransomware(filepath)
+        print("Ransomware detected and mitigated.")
+    else:
+        print("No ransomware detected.")
