@@ -1,50 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-18 13:00:49.201327
+# Generated 2026-07-18 14:19:59.241090
 
 import os
-import sys
-import time
+import shutil
+import subprocess
 
-def detect_ransomware(path):
-    # Check if the file or directory is encrypted
+def detect_ransomware():
     try:
-        with open(path, 'rb') as f:
-            data = f.read()
-            if b'RANSOMWARE' in data:
-                return True
-    except (IOError, OSError):
-        pass
-
-    # Check if the file or directory is a symbolic link
-    try:
-        if os.path.islink(path):
+        # Check if the system is running a ransomware attack
+        if "ransomware" in subprocess.check_output(["ps", "-A"]):
             return True
-    except (OSError, IOError):
-        pass
+        else:
+            return False
+    except subprocess.CalledProcessError:
+        return False
 
-    return False
-
-def mitigate_ransomware(path):
-    # Remove the file or directory
+def mitigate_ransomware():
     try:
-        os.remove(path)
-    except (IOError, OSError):
+        # Remove the ransomware files
+        shutil.rmtree("ransomware", ignore_errors=True)
+    except OSError:
         pass
+    else:
+        # Restart the system to remove the ransomware process
+        subprocess.check_call(["reboot"])
 
-# Main function
-def main():
-    # Get the current working directory
-    cwd = os.getcwd()
-
-    # Iterate through all files and directories in the current working dire[4D[K
-directory
-    for root, dirs, files in os.walk(cwd):
-        for file in files:
-            path = os.path.join(root, file)
-            if detect_ransomware(path):
-                mitigate_ransomware(path)
-
-# Start the main function
-if __name__ == '__main__':
-    main()
+if detect_ransomware():
+    mitigate_ransomware()
