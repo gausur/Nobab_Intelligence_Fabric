@@ -1,34 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-18 01:45:45.679441
+# Generated 2026-07-18 04:43:17.165580
 
 import os
-import re
-import json
-from urllib import request
+import shutil
+import subprocess
+import sys
+from pathlib import Path
 
-def detect_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        file_data = f.read()
-        match = re.search(b"[a-zA-Z0-9]{24}", file_data)
-        if match is not None:
+def detect_ransomware():
+    # Check if the file system is encrypted
+    fs_encrypted = subprocess.check_output(["lsblk", "-o", "NAME,FSTYPE"])
+    if "crypt" in fs_encrypted:
+        print("File system is encrypted")
+        return True
+    else:
+        print("File system is not encrypted")
+        return False
+
+def mitigate_ransomware():
+    # Check if the file system is mounted with the "noexec" option
+    fs_mounted = subprocess.check_output(["mount"])
+    for line in fs_mounted.splitlines():
+        if "noexec" in line:
+            print("File system is mounted with 'noexec'")
             return True
-        else:
-            return False
-
-def mitigate_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        file_data = f.read()
-        new_data = re.sub(b"[a-zA-Z0-9]{24}", b"", file_data)
-        with open(filepath, "wb") as f:
-            f.write(new_data)
+    else:
+        print("File system is not mounted with 'noexec'")
+        return False
 
 def main():
-    if detect_ransomware("file.txt"):
-        mitigate_ransomware("file.txt")
-        print("Ransomware detected and mitigated.")
+    # Check for ransomware
+    if detect_ransomware():
+        # Mitigate the ransomware attack
+        mitigate_ransomware()
     else:
-        print("No ransomware detected.")
+        print("No ransomware detected")
 
 if __name__ == "__main__":
     main()
