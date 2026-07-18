@@ -1,61 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-18 20:55:22.352907
+# Generated 2026-07-18 21:43:59.141919
 
 import re
-import requests
-from bs4 import BeautifulSoup
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import formataddr
 
-def is_phishing(url):
-    """Check if the given URL is a phishing website"""
-    # Check if the URL is valid
-    if not url or not requests.get(url).ok:
+def detect_phishing(email):
+    # Check if the email is a phishing attempt by looking for common patter[6D[K
+patterns
+    # in the sender's email address and the email content.
+    if re.search(r"@gmail\.com$", email["From"]) and "phish me out" in emai[4D[K
+email["Subject"]:
+        return True
+    elif re.search(r"@hotmail\.com$", email["From"]) and "dummy email" in e[1D[K
+email["Body"]:
+        return True
+    else:
         return False
 
-    # Get the HTML content of the page
-    html = requests.get(url).text
+def mitigate_phishing(email):
+    # Send a response to the sender indicating that their email is not a ph[2D[K
+phishing attempt.
+    msg = MIMEText("This is not a phishing attempt. Please proceed with cau[3D[K
+caution.")
+    msg["From"] = formataddr((email["From"], "no-reply@example.com"))
+    msg["To"] = email["From"]
+    msg["Subject"] = "Phishing Attempt Detected"
+    smtplib.sendmail("no-reply@example.com", email["From"], msg.as_string()[15D[K
+msg.as_string())
 
-    # Parse the HTML using BeautifulSoup
-    soup = BeautifulSoup(html, "lxml")
+def main():
+    # Read the email from stdin and parse it into a dictionary.
+    email = {"From": None, "To": None, "Subject": None, "Body": None}
+    for line in sys.stdin:
+        if not line:
+            break
+        key, value = line.strip().split(":", 1)
+        email[key] = value.decode()
 
-    # Check if the URL contains a known phishing pattern
-    for pattern in PHISHING_PATTERNS:
-        if re.search(pattern, url):
-            return True
+    # Detect and mitigate any phishing attempts.
+    if detect_phishing(email):
+        mitigate_phishing(email)
 
-    # Check if the page contains a known phishing string
-    for string in PHISHING_STRINGS:
-        if string in soup.text:
-            return True
-
-    # Check if the URL is from a known phishing domain
-    for domain in PHISHING_DOMAINS:
-        if url.startswith(domain):
-            return True
-
-    return False
-
-def mitigate_phishing(url):
-    """Mitigate phishing attacks by redirecting the user to a safe page"""
-    # Redirect the user to a safe page
-    return "https://www.example.com/safe-page"
-
-PHISHING_PATTERNS = [
-    r"youtu\.be",
-    r"instagram\.com",
-    r"facebook\.com",
-    r"twitter\.com"
-]
-
-PHISHING_STRINGS = [
-    "Free Money",
-    "Lose Weight",
-    "Get Rich Quick",
-    "Affordable Cars"
-]
-
-PHISHING_DOMAINS = [
-    "badsite.com",
-    "phishng.org",
-    "malicioussite.com"
-]
+if __name__ == "__main__":
+    main()
