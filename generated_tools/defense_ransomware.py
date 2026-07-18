@@ -1,44 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-18 11:48:37.062918
+# Generated 2026-07-18 13:00:49.201327
 
 import os
-import subprocess
-from pathlib import Path
+import sys
+import time
 
 def detect_ransomware(path):
-    # Check if the file is a directory or a regular file
-    if not (Path(path).is_dir() or Path(path).is_file()):
-        return False
-
-    # Check if the file has the necessary ransomware signatures
-    for signature in ["This file has been encrypted by", "The ransomware de[2D[K
-demands"]:
-        with open(path, "r") as f:
-            content = f.read()
-            if signature in content:
+    # Check if the file or directory is encrypted
+    try:
+        with open(path, 'rb') as f:
+            data = f.read()
+            if b'RANSOMWARE' in data:
                 return True
+    except (IOError, OSError):
+        pass
+
+    # Check if the file or directory is a symbolic link
+    try:
+        if os.path.islink(path):
+            return True
+    except (OSError, IOError):
+        pass
+
     return False
 
 def mitigate_ransomware(path):
-    # Check if the file is a directory or a regular file
-    if not (Path(path).is_dir() or Path(path).is_file()):
-        return
+    # Remove the file or directory
+    try:
+        os.remove(path)
+    except (IOError, OSError):
+        pass
 
-    # Remove the ransomware signature from the file
-    with open(path, "r") as f:
-        content = f.read().replace("This file has been encrypted by", "")
-            .replace("The ransomware demands", "")
-            .strip()
+# Main function
+def main():
+    # Get the current working directory
+    cwd = os.getcwd()
 
-    # Write the modified content to a new file
-    with open(f"{path}.modified", "w") as f:
-        f.write(content)
+    # Iterate through all files and directories in the current working dire[4D[K
+directory
+    for root, dirs, files in os.walk(cwd):
+        for file in files:
+            path = os.path.join(root, file)
+            if detect_ransomware(path):
+                mitigate_ransomware(path)
 
-# Recursively search for files in the specified directory and its subdirect[9D[K
-subdirectories
-for root, dirs, files in os.walk(os.getcwd()):
-    for file in files:
-        path = os.path.join(root, file)
-        if detect_ransomware(path):
-            mitigate_ransomware(path)
+# Start the main function
+if __name__ == '__main__':
+    main()
