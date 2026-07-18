@@ -1,27 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-18 14:20:59.685620
+# Generated 2026-07-18 15:47:58.907561
 
 import re
-from urllib.parse import urlparse
+import urllib.parse
+from email.message import EmailMessage
 
-def is_phishing(url):
-    # check if the URL contains any suspicious patterns
-    pattern = r"[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/\]\]]+"
-    if re.search(pattern, url):
-        return True
-    else:
+def is_phishing_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
         return False
+    hostname = parsed_url.hostname
+    domain = hostname[hostname.index(".") + 1:]
+    if domain in ["google", "gmail"]:
+        return True
+    return False
 
-def mitigate_phishing(url):
-    # check if the URL is a known phishing site
-    if is_phishing(url):
-        # block the request
-        return None
-    else:
-        # allow the request
-        return url
+def is_phishing_email(email):
+    msg = EmailMessage()
+    msg.set_content(email)
+    for part in msg.iter_parts():
+        if part["Content-Type"].startswith("text/html"):
+            html = part.get_payload(decode=True).decode("utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+            for link in soup.find_all("a", href=True):
+                if is_phishing_url(link["href"]):
+                    return True
+    return False
 
-# example usage
-url = "https://www.example.com"
-print(mitigate_phishing(url))
+def mitigate_phishing_attack(email):
+    msg = EmailMessage()
+    msg.set_content(email)
+    for part in msg.iter_parts():
+        if part["Content-Type"].startswith("text/html"):
+            html = part.get_payload(decode=True).decode("utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+            for link in soup.find_all("a", href=True):
+                if is_phishing_url(link["href"]):
+                    link["href"] = "#"
+    return msg.as_string()
