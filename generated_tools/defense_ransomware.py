@@ -1,72 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-18 21:46:55.847217
+# Generated 2026-07-18 22:42:49.091567
 
 import os
+import sys
+import re
 import subprocess
-from shutil import copyfile
+import json
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.isdir(path) and not os.path.exists(path):
-        with open(path, "rb") as f:
-            data = f.read()
-            if b"RANSOMWARE" in data:
-                return True
-    # Check if the directory is encrypted
-    elif os.path.isdir(path) and not os.path.exists(path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                with open(os.path.join(root, file), "rb") as f:
-                    data = f.read()
-                    if b"RANSOMWARE" in data:
-                        return True
-    # Check if the system is infected
+def detect_ransomware():
+    # Check if the system is vulnerable to ransomware attacks
+    try:
+        subprocess.check_output(["ransomware", "--detect"])
+    except subprocess.CalledProcessError as e:
+        return False
     else:
-        try:
-            output = subprocess.check_output(["ransomware", "--detect"])
-            if b"RANSOMWARE" in output:
-                return True
-        except FileNotFoundError:
-            pass
-    return False
+        return True
 
-def mitigate_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.isdir(path) and not os.path.exists(path):
-        with open(path, "rb") as f:
-            data = f.read()
-            if b"RANSOMWARE" in data:
-                copyfile(path, path + ".bak")
-                return True
-    # Check if the directory is encrypted
-    elif os.path.isdir(path) and not os.path.exists(path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                with open(os.path.join(root, file), "rb") as f:
-                    data = f.read()
-                    if b"RANSOMWARE" in data:
-                        copyfile(os.path.join(root, file), os.path.join(roo[16D[K
-os.path.join(root, file) + ".bak")
-                        return True
-    # Check if the system is infected
+def mitigate_ransomware():
+    # Mitigate the ransomware attack by restoring files and disconnecting t[1D[K
+the network
+    try:
+        subprocess.check_output(["ransomware", "--mitigate"])
+    except subprocess.CalledProcessError as e:
+        print("Failed to mitigate ransomware attack")
+        return False
     else:
-        try:
-            output = subprocess.check_output(["ransomware", "--mitigate"])
-            if b"RANSOMWARE" in output:
-                return True
-        except FileNotFoundError:
-            pass
-    return False
+        print("Successfully mitigated ransomware attack")
+        return True
 
 def main():
-    path = input("Enter the file or directory to detect and mitigate ransom[6D[K
-ransomware: ")
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
-        print("Ransomware detected and mitigated successfully!")
+    # Check if the system is vulnerable to ransomware attacks
+    if detect_ransomware():
+        # Mitigate the ransomware attack by restoring files and disconnecti[11D[K
+disconnecting the network
+        mitigate_ransomware()
     else:
-        print("No ransomware detected.")
+        print("System not vulnerable to ransomware attacks")
 
 if __name__ == "__main__":
     main()
