@@ -1,41 +1,65 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-18 15:47:58.907561
+# Generated 2026-07-18 16:48:01.137496
 
 import re
-import urllib.parse
-from email.message import EmailMessage
+import smtplib
+from email.parser import Parser
+from typing import List
 
-def is_phishing_url(url):
-    parsed_url = urllib.parse.urlparse(url)
-    if not parsed_url.scheme or not parsed_url.netloc:
+class PhishingDetector:
+    def __init__(self, whitelist: List[str]):
+        self.whitelist = whitelist
+    
+    def detect_phishing(self, message: str) -> bool:
+        try:
+            parser = Parser()
+            parsed = parser.parsestr(message)
+            sender = parsed["From"]
+            recipient = parsed["To"]
+            subject = parsed["Subject"]
+            body = parsed.get_payload()
+            
+            if sender in self.whitelist:
+                return False
+            if recipient not in self.whitelist:
+                return True
+            if re.search(r"http[s]?://\w+\.\w+", subject):
+                return True
+            if re.search(r"http[s]?://\w+\.\w+", body):
+                return True
+            if re.search(r"(?i)click here to confirm your account", body):
+                return True
+            if re.search(r"(?i)please click the link below", body):
+                return True
+        except:
+            pass
+        
         return False
-    hostname = parsed_url.hostname
-    domain = hostname[hostname.index(".") + 1:]
-    if domain in ["google", "gmail"]:
-        return True
-    return False
-
-def is_phishing_email(email):
-    msg = EmailMessage()
-    msg.set_content(email)
-    for part in msg.iter_parts():
-        if part["Content-Type"].startswith("text/html"):
-            html = part.get_payload(decode=True).decode("utf-8")
-            soup = BeautifulSoup(html, "html.parser")
-            for link in soup.find_all("a", href=True):
-                if is_phishing_url(link["href"]):
-                    return True
-    return False
-
-def mitigate_phishing_attack(email):
-    msg = EmailMessage()
-    msg.set_content(email)
-    for part in msg.iter_parts():
-        if part["Content-Type"].startswith("text/html"):
-            html = part.get_payload(decode=True).decode("utf-8")
-            soup = BeautifulSoup(html, "html.parser")
-            for link in soup.find_all("a", href=True):
-                if is_phishing_url(link["href"]):
-                    link["href"] = "#"
-    return msg.as_string()
+    
+    def mitigate_phishing(self, message: str) -> None:
+        try:
+            parser = Parser()
+            parsed = parser.parsestr(message)
+            sender = parsed["From"]
+            recipient = parsed["To"]
+            subject = parsed["Subject"]
+            body = parsed.get_payload()
+            
+            if sender in self.whitelist:
+                return
+            if recipient not in self.whitelist:
+                return
+            if re.search(r"http[s]?://\w+\.\w+", subject):
+                return
+            if re.search(r"http[s]?://\w+\.\w+", body):
+                return
+            if re.search(r"(?i)click here to confirm your account", body):
+                return
+            if re.search(r"(?i)please click the link below", body):
+                return
+        except:
+            pass
+        
+        smtplib.sendmail(sender, recipient, "This is a phishing attack. Do [K
+not click on any links or provide any personal information.", [])
