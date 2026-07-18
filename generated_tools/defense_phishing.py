@@ -1,46 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-18 18:53:36.329831
+# Generated 2026-07-18 20:03:30.933220
 
-import requests
-from bs4 import BeautifulSoup
+import re
+import urllib.parse
 
-def is_phishing(url):
-    # Check if the URL is valid
-    try:
-        response = requests.get(url)
-        if not response.ok:
-            return False
-    except Exception as e:
-        print(f"Failed to get {url}: {e}")
-        return False
-
-    # Parse HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, "html.parser")
-
-    # Check for common phishing patterns in the HTML content
-    if "javascript:" in str(soup):
-        print(f"{url} contains javascript:")
-        return True
-    elif "onclick=" in str(soup):
-        print(f"{url} contains onclick=")
-        return True
-    elif "alert(" in str(soup):
-        print(f"{url} contains alert(")
+def is_phishing_url(url):
+    """
+    Check if the URL is a phishing site by checking for common patterns.
+    Returns True if the URL is a phishing site, False otherwise.
+    """
+    pattern = r"(https?:\/\/)?(www\.)?[a-zA-Z0-9]+\.[a-zA-Z]{2,3}(:[0-9]+)?[61D[K
+r"(https?:\/\/)?(www\.)?[a-zA-Z0-9]+\.[a-zA-Z]{2,3}(:[0-9]+)?(\/.*)?"
+    match = re.match(pattern, url)
+    if match:
         return True
     else:
         return False
 
-def main():
-    # Get list of URLs from user input or a file
-    urls = ["https://example.com", "https://phishing-site.com"]
-
-    # Iterate over each URL and check for phishing patterns
-    for url in urls:
-        if is_phishing(url):
-            print(f"Phishing attack detected at {url}")
-        else:
-            print(f"{url} is safe")
-
-if __name__ == "__main__":
-    main()
+def mitigate_phishing_attacks(url):
+    """
+    Mitigate phishing attacks by redirecting the user to a safe URL.
+    """
+    safe_url = "https://www.example.com"
+    if is_phishing_url(url):
+        return urllib.parse.quote(safe_url, safe="")
+    else:
+        return url
