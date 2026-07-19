@@ -1,36 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-19 11:51:42.530205
+# Generated 2026-07-19 13:01:15.772721
 
 import os
-import sys
 import time
+from datetime import datetime
 
-# Define the directories to scan for ransomware infection
-directories = ["/path/to/directory1", "/path/to/directory2"]
+def detect_ransomware(file):
+    if "RANSOMWARE" in file:
+        return True
+    else:
+        return False
 
-# Define the file types to scan for ransomware infection
-file_types = [".txt", ".docx", ".pdf"]
+def mitigate_ransomware(file):
+    if detect_ransomware(file):
+        os.remove(file)
+        return "File removed."
+    else:
+        return "No ransomware detected."
 
-def scan_for_ransomware(directories, file_types):
-    for directory in directories:
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                if file.endswith(file_types):
-                    with open(os.path.join(root, file), "rb") as f:
-                        contents = f.read()
-                        if b"RANSOMWARE" in contents:
-                            print("Infected file found:", file)
-                            return True
-    return False
-
-def mitigate_ransomware(infected_file):
-    # Remove the infected file and restore from backups
-    os.remove(infected_file)
-
-if __name__ == "__main__":
-    while True:
-        if scan_for_ransomware(directories, file_types):
-            mitigate_ransomware(infected_file)
-            print("Ransomware detected and mitigated")
-        time.sleep(60) # sleep for 1 minute before scanning again
+if __name__ == '__main__':
+    start = time.time()
+    files = os.listdir()
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+    end = time.time()
+    print("Finished in", datetime.fromtimestamp(end - start))
