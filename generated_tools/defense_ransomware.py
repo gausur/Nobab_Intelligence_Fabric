@@ -1,48 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-19 08:05:36.395992
+# Generated 2026-07-19 10:21:34.021552
 
 import os
-import sys
-import json
-import time
-from subprocess import Popen, PIPE
+import hashlib
+import shutil
+
+def detect_ransomware(filepath):
+    with open(filepath, 'rb') as f:
+        data = f.read()
+        hash = hashlib.sha256(data).hexdigest()
+        if hash == '67893041f738b7c3d184bfb4800e191e':
+            return True
+    return False
+
+def mitigate_ransomware(filepath):
+    shutil.copy(filepath, '/tmp/backup')
+    with open(filepath, 'rb') as f:
+        data = f.read()
+        hash = hashlib.sha256(data).hexdigest()
+        if hash == '3a893041f738b7c3d184bfb4800e191e':
+            with open(filepath, 'wb') as f:
+                f.write(data)
+    return True
 
 def main():
-    # Get the list of running processes
-    process_list = get_running_processes()
-    
-    # Iterate over the process list and check for ransomware
-    for proc in process_list:
-        if is_ransomware(proc):
-            # Send a notification to the IT department
-            send_notification("Ransomware detected!", "Please investigate a[1D[K
-and remediate.")
-            
-            # Terminate the ransomware process
-            terminate_process(proc)
-            
-    # Wait for 5 minutes and then check again
-    time.sleep(300)
-    
-def get_running_processes():
-    # Get a list of all running processes
-    proc = Popen("ps aux", shell=True, stdout=PIPE)
-    output = proc.communicate()[0]
-    return output.decode().splitlines()
+    filepaths = [os.path.join('/home', f) for f in os.listdir('/home')]
+    for filepath in filepaths:
+        if detect_ransomware(filepath):
+            mitigate_ransomware(filepath)
 
-def is_ransomware(proc):
-    # Check if the process name contains "ransom" or "encrypt"
-    name = proc.strip().split()[12]
-    return ("ransom" in name) or ("encrypt" in name)
-
-def send_notification(title, message):
-    # Send a notification to the IT department using a shell command
-    Popen("notify-send {} {}".format(title, message), shell=True)
-
-def terminate_process(proc):
-    # Terminate the process using a shell command
-    Popen("kill -9 {}".format(proc.strip().split()[1]), shell=True)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
