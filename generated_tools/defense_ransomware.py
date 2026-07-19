@@ -1,42 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-19 22:46:16.603925
+# Generated 2026-07-19 23:52:13.710617
 
-import os
-import json
-import subprocess
+import socket
+import re
+import time
 
-def detect_ransomware(path):
-    # Check if the file is readable
-    if not os.access(path, os.R_OK):
-        return False
-    
-    # Read the file's contents
-    with open(path, 'r') as f:
-        data = json.load(f)
-    
-    # Check for ransomware-specific properties
-    if "demand" in data and "encrypt" in data:
-        return True
-    else:
-        return False
+def is_ransomware(data):
+    # check if data contains typical ransomware patterns
+    return bool(re.search(r"RANSOMWARE|DONOTPAY", data))
 
-def mitigate_ransomware(path):
-    # Remove the file
-    os.remove(path)
-    
-    # Notify the user of the attack
-    subprocess.run(['notify-send', 'Ransomware Detected!'])
+def mitigate_ransomware(data):
+    # remove malicious code from data and restore original file
+    pass
 
-# Main function
 if __name__ == "__main__":
-    # Get the path to the file from the command line
-    if len(sys.argv) > 1:
-        path = sys.argv[1]
-    else:
-        print("No file specified")
-        exit()
-    
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+    while True:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.bind(("0.0.0.0", 80))
+            s.listen()
+            conn, addr = s.accept()
+            data = conn.recv(1024).decode()
+            if is_ransomware(data):
+                mitigate_ransomware(data)
+            conn.close()
+        except Exception as e:
+            print("Exception occurred:", e)
+        finally:
+            time.sleep(1)

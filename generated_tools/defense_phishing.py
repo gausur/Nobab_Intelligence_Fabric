@@ -1,45 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-19 22:45:22.614859
+# Generated 2026-07-19 23:52:41.907476
 
 import re
-import socket
-from urllib.parse import urlparse
+import urllib.parse
 
 def is_phishing(url):
-    parsed_url = urlparse(url)
-    if parsed_url.scheme != "https":
-        return True
-    if not parsed_url.netloc:
-        return True
-    if not parsed_url.path:
-        return True
-    if re.search(r"\.co\.uk$", parsed_url.netloc):
-        return True
-    if re.search(r"\.(com|org|net)\b", parsed_url.netloc):
-        return True
-    if re.search(r"/login", parsed_url.path):
-        return True
-    if re.search(r"/register", parsed_url.path):
-        return True
-    if re.search(r"\.php$", parsed_url.path):
-        return True
-    if re.search(r"\?", parsed_url.path):
-        return True
-    return False
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    if "." not in domain:
+        return False
+    if domain[-1] == ".":
+        domain = domain[:-1]
+    if len(domain) < 2:
+        return False
+    return True
 
-def mitigate_phishing(url, hostname, port=None):
+def mitigate_phishing(url):
     if is_phishing(url):
-        try:
-            socket.connect((hostname, port))
-        except ConnectionRefusedError:
-            pass
-        else:
-            print("Phishing attack detected and mitigated")
+        # Mitigation code goes here
+        pass
+    else:
+        # Do nothing
+        pass
 
 if __name__ == "__main__":
-    url = input("Enter the URL to check for phishing attacks: ")
-    hostname = input("Enter the hostname of the server to connect to: ")
-    port = input("Enter the port number to connect to (leave blank for defa[4D[K
-default): ")
-    mitigate_phishing(url, hostname, port)
+    url = input("Enter URL to check: ")
+    mitigate_phishing(url)
