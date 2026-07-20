@@ -1,53 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-20 17:28:00.198437
+# Generated 2026-07-20 19:28:53.175127
 
 import re
-import smtplib
-from email.message import EmailMessage
+import requests
+from urllib.parse import urlparse
 
-class PhishingDetector:
-    def __init__(self, threshold=0.5):
-        self.threshold = threshold
-
-    def detect(self, message):
-        if not isinstance(message, EmailMessage):
-            raise ValueError("Invalid email message")
-        if not message.is_multipart():
+def is_phishing(url):
+    parsed_url = urlparse(url)
+    if parsed_url.scheme not in ["http", "https"]:
+        return False
+    try:
+        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0 (W[2D[K
+(Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome[6D[K
+Chrome/87.0.4280.88 Safari/537.36"})
+        content_type = response.headers["Content-Type"]
+        if "html" in content_type:
+            return True
+        else:
             return False
-        for part in message.walk():
-            ctype, pdict = part.get_content_type(), part.params
-            if ctype == "text/html" and self._check_suspicious(part):
-                return True
+    except requests.exceptions.RequestException:
         return False
 
-    def _check_suspicious(self, part):
-        body = part.get_payload()
-        if not body:
-            return False
-        for pattern in [r'[\w-]+@[\w-]+\.[\w.]+', r'http[s]?://[\w./?=&#-]+[25D[K
-r'http[s]?://[\w./?=&#-]+']:
-            if re.search(pattern, body):
-                return True
-        return False
-
-    def mitigate(self, message):
-        if not isinstance(message, EmailMessage):
-            raise ValueError("Invalid email message")
-        if self.detect(message):
-            return message.replace_header("Subject", "🚨 Phishing Attempt D[1D[K
-Detected 🚨")
-        return message
+def mitigate_phishing(url):
+    if is_phishing(url):
+        print("Phishing attempt detected!")
+    else:
+        print("No phishing attempts detected.")
 
 if __name__ == "__main__":
-    # Example usage:
-    email = EmailMessage()
-    email["From"] = "john.doe@example.com"
-    email["To"] = "jane.doe@example.com"
-    email["Subject"] = "Hello Jane, I'm just a friendly spammer 😊"
-    email.set_content("Please click on the link below to verify your accoun[6D[K
-account: <a href=\"http://example.com/verify\">Verify</a>")
-
-    detector = PhishingDetector()
-    mitigated_email = detector.mitigate(email)
-    print(mitigated_email)
+    url = input("Enter the URL to test for phishing: ")
+    mitigate_phishing(url)
