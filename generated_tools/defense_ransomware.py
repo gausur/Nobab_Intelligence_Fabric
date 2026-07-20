@@ -1,34 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-20 19:29:31.403844
+# Generated 2026-07-20 21:04:23.782499
 
 import os
-import sys
-import time
-from pathlib import Path
+import subprocess
 
-def main():
-    # Set up the detection mechanism
-    def check_for_ransomware(directory):
-        for file in directory.iterdir():
-            if file.name == "ransomware.txt":
-                print("Ransomware detected!")
-                return True
+def detect_ransomware(file):
+    """
+    Detects if the given file is a ransomware infection
+    """
+    # Check if the file is a valid executable
+    if not os.path.isfile(file):
         return False
-    
-    # Set up the mitigation mechanism
-    def remove_ransomware(directory):
-        for file in directory.iterdir():
-            if file.name == "ransomware.txt":
-                print("Removing ransomware from {}".format(file))
-                os.remove(file)
-    
-    # Set up the loop to check and mitigate every 5 seconds
-    while True:
-        time.sleep(5)
-        for directory in Path("/").iterdir():
-            if check_for_ransomware(directory):
-                remove_ransomware(directory)
-    
-if __name__ == "__main__":
-    main()
+
+    # Run the file and check if it outputs "Ransomware detected"
+    output = subprocess.check_output([file])
+    return b"Ransomware detected" in output
+
+def mitigate_ransomware(file, key):
+    """
+    Mitigates a ransomware infection by decrypting the file using the given[5D[K
+given key
+    """
+    # Check if the file is a valid executable
+    if not os.path.isfile(file):
+        return False
+
+    # Run the file and check if it outputs "Ransomware detected"
+    output = subprocess.check_output([file])
+
+    # Decrypt the file using the given key
+    with open(file, 'w') as f:
+        f.write(key)
+
+    return True
