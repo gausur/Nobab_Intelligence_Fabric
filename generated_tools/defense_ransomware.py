@@ -1,55 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-20 09:55:22.416008
+# Generated 2026-07-20 12:12:46.865695
 
-import json
 import os
-import re
-import subprocess
-import sys
+import hashlib
 
-def main():
-    # Load the configuration file
-    with open("config.json", "r") as f:
-        config = json.load(f)
+def detect_ransomware(filepath):
+    # Calculate the SHA256 hash of the file
+    with open(filepath, "rb") as f:
+        file_hash = hashlib.sha256(f.read()).hexdigest()
     
-    # Set up the directory to monitor
-    dir_to_monitor = config["dir_to_monitor"]
-    
-    # Set up the ransomware signatures
-    ransomware_signatures = config["ransomware_signatures"]
-    
-    # Create a watchdog for the directory
-    wd = subprocess.Popen(["watchdog", "--directory", dir_to_monitor], stdo[4D[K
-stdout=subprocess.PIPE)
-    
-    # Loop indefinitely, monitoring the directory and looking for ransomwar[9D[K
-ransomware activity
-    while True:
-        line = wd.stdout.readline()
-        
-        if not line:
-            break
-        
-        # If a file was modified, check it against the ransomware signature[9D[K
-signatures
-        match = re.match(r"^(?P<file_path>.+)\s+\[modified\]\s*$", line)
-        if match:
-            file_path = match.group("file_path")
-            
-            # Open the file and read its contents
-            with open(file_path, "r") as f:
-                contents = f.read()
-            
-            # Check each ransomware signature against the file's contents
-            for sig in ransomware_signatures:
-                if re.search(sig, contents):
-                    print(f"Ransomware detected! File path: {file_path}")
-                    
-                    # Mitigate the ransomware attack by deleting the file
-                    os.remove(file_path)
-                    
-                    break
+    # Check if the file's hash matches a known ransomware hash
+    if file_hash in RANSOMWARE_HASHES:
+        return True
+    else:
+        return False
 
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware(filepath):
+    # Overwrite the affected file with a blank one
+    with open(filepath, "wb"):
+        pass
+
+# List of known ransomware hashes
+RANSOMWARE_HASHES = [
+    "4d79205763c9f4e51a48ad85dcfe13bb",  # Viruses/ransomwaredll.c
+    "5b4af131a2c73f3edfd36bf99dcd87e8"   # Cryptolocker
+]

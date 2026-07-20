@@ -1,53 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-20 09:52:51.653242
+# Generated 2026-07-20 12:14:08.296800
 
 import re
 import smtplib
-from email.parser import Parser
-from email.header import decode_header
+from email.message import EmailMessage
 
-def check_email(email):
+def is_phishing(email):
     """
-    Check if the given email is a phishing attempt by analyzing its content[7D[K
-contents.
-    :param email: The email message to be checked.
-    :return: True if the email is a phishing attempt, False otherwise.
+    Check if the email is a phishing attack by analyzing its contents and s[1D[K
+sender's domain.
     """
-    # Extract the subject and body of the email
-    subject = decode_header(email.get("Subject"))[0][0]
-    body = email.get_payload()
-
-    # Check if the subject contains a suspicious keyword or pattern
-    if re.search(r"phishing|scam|fraud", subject, re.IGNORECASE):
+    # Check if the email is from a known spammy domain
+    if re.search("spammydomain1.com", email.sender.host) or re.search("spam[15D[K
+re.search("spammydomain2.com", email.sender.host):
         return True
-
-    # Check if the body contains a link to a suspicious domain
-    for link in re.findall(r"https?://\S+", body):
-        if re.search(r"\bgoogle\b|facebook|twitter|yahoo", link, re.IGNOREC[10D[K
-re.IGNORECASE):
-            return True
-
-    # Check if the email contains a suspicious attachment
-    for part in Parser().parsestr(body).walk():
-        if part.get_content_maintype() == "application" and part.get("name"[15D[K
-part.get("name") is not None:
-            return True
-
-    # If none of the above conditions are met, it's likely a legitimate ema[3D[K
-email
+    
+    # Check if the email contains a suspicious URL
+    if re.search("http://(suspicious|malicious).*", email.body):
+        return True
+    
+    # Check if the email has a malicious attachment
+    if len(email.attachments) > 0:
+        for attachment in email.attachments:
+            if re.search("http://(suspicious|malicious).*", attachment.name[15D[K
+attachment.name):
+                return True
+    
+    # If none of the above checks pass, it's likely a legitimate email
     return False
 
 def mitigate_phishing(email):
     """
-    Mitigate phishing attempts by alerting the user and blocking further co[2D[K
-communication.
-    :param email: The email message to be mitigated.
-    :return: None
+    Mitigate phishing attacks by blocking the email or sending a notificati[10D[K
+notification to the sender.
     """
-    # Alert the user that an attempt at phishing has been detected
-    print("Phishing attempt detected!")
+    if is_phishing(email):
+        # Block the email
+        smtplib.SMTP("localhost").sendmail(email.sender, "blocked@example.c[18D[K
+"blocked@example.com", email.body)
+    else:
+        # Send a notification to the sender
+        message = EmailMessage()
+        message["Subject"] = "Phishing Attack Detected"
+        message["From"] = email.sender
+        message["To"] = email.sender
+        message.set_content("Your email contains a phishing attack and has [K
+been blocked by our system.")
+        smtplib.SMTP("localhost").sendmail(message)
 
-    # Block further communication with the attacker
-    smtplib.SMTP().sendmail(email["From"], email["To"], "Phishing attempt d[1D[K
-detected. Further communication blocked.")
+def main():
+    # Read the email from stdin
+    email = EmailMessage()
+    email.from_string(sys.stdin.read())
+    
+    # Run the phishing detection and mitigation logic
+    if is_phishing(email):
+        mitigate_phishing(email)
