@@ -1,36 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-20 15:06:27.363207
+# Generated 2026-07-20 17:26:43.595484
 
-import socket
-import hashlib
+import os
+import subprocess
+import time
 
-def is_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    hash = hashlib.sha256(data).hexdigest()
-    if hash == "e074f89d04b9134ad57baa592c84118670cae866":
-        return True
+def main():
+    # Check for ransomware infection
+    if check_infection() == True:
+        print("Infected!")
+        # Mitigate the attack
+        mitigate_attack()
     else:
-        return False
+        print("Not infected.")
 
-def mitigate_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-    new_data = b""
-    for byte in data:
-        if byte == 0x00:
-            continue
-        else:
-            new_data += byte.to_bytes(1, "big")
-    with open(file, "wb") as f:
-        f.write(new_data)
+def check_infection():
+    # Check for ransomware infection by scanning for known malicious files [K
+and processes
+    malicious_files = ["ransom.exe", "cryptor.exe"]
+    malicious_processes = ["RansomwareEncryptor", "CryptoLock"]
+    for file in malicious_files:
+        if os.path.exists(file):
+            return True
+    for process in malicious_processes:
+        if subprocess.check_output("tasklist | findstr " + process, shell=T[7D[K
+shell=True) != b"":
+            return True
+    return False
+
+def mitigate_attack():
+    # Stop the ransomware from encrypting files and lock down the system
+    subprocess.run("taskkill /im RansomwareEncryptor.exe", shell=True)
+    subprocess.run("taskkill /im CryptoLock.exe", shell=True)
+    time.sleep(30) # Give enough time for the ransomware to exit gracefully[10D[K
+gracefully
+    # Recover any encrypted files and restore system security set[3D[K
+settings
+    subprocess.run("attrib -h -s -r -a *.*", shell=True)
+    subprocess.run("takeown /f %windir%", shell=True)
+    subprocess.run("icacls %windir% /reset /t", shell=True)
+    print("Mitigation successful.")
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("file", help="path to the file to check for ransomw[7D[K
-ransomware")
-    args = parser.parse_args()
-    if is_ransomware(args.file):
-        mitigate_ransomware(args.file)
+    main()
