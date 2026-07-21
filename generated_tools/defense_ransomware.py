@@ -1,35 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-21 05:14:52.306377
+# Generated 2026-07-21 08:16:27.246699
 
 import os
-import socket
 import subprocess
+import time
 
-def detect_ransomware(file):
-    # Check if the file is encrypted
-    with open(file, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            return True
-    return False
+def check_for_ransomware():
+    # Check if the system is infected with ransomware
+    proc = subprocess.run(["ls", "/"], stdout=subprocess.PIPE)
+    output = proc.stdout.decode("utf-8")
+    if "ransomware" in output:
+        return True
+    else:
+        return False
 
-def mitigate_ransomware(file):
-    # Check if the file is encrypted
-    if detect_ransomware(file):
-        # Decrypt the file using the command line tool
-        subprocess.run(["openssl", "aes-256-cbc", "-d", "-in", file, "-out"[6D[K
-"-out", f"{file}.decrypted"])
-        # Remove the encrypted file
-        os.remove(file)
-        # Rename the decrypted file to the original name
-        os.rename(f"{file}.decrypted", file)
+def decrypt_files():
+    # Decrypt all encrypted files
+    for file in os.listdir("/"):
+        if file.endswith(".enc"):
+            subprocess.run(["cp", file, file[:-4]])
 
-def main():
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            if detect_ransomware(os.path.join(root, file)):
-                mitigate_ransomware(os.path.join(root, file))
+def remove_ransomware():
+    # Remove the ransomware and its files
+    subprocess.run(["rm", "-rf", "/ransomware"])
 
-if __name__ == "__main__":
-    main()
+while True:
+    if check_for_ransomware():
+        decrypt_files()
+        remove_ransomware()
+        time.sleep(60)

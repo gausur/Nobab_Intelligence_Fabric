@@ -1,76 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-21 05:17:10.952326
+# Generated 2026-07-21 08:15:07.001722
 
 import re
-from email.parser import Parser
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing(email):
-    """
-    Detects if the given email is a phishing attempt.
+def is_phishing_url(url):
+    return url.startswith("http://") or url.startswith("https://") and not [K
+url.endswith(".com")
 
-    Args:
-        email (str): The email to check for phishing attempts.
+def mitigate_phishing_attack(email, recipient):
+    if is_phishing_url(email["Subject"]):
+        # Send a notification to the recipient
+        msg = EmailMessage()
+        msg["From"] = "Phishing Detection System <phishingsystem@example.co[26D[K
+<phishingsystem@example.com>"
+        msg["To"] = recipient
+        msg["Subject"] = "Phishing Attack Detected"
+        msg.set_content(f"A phishing attack was detected in the email sent [K
+to {recipient}. The URL {email['Subject']} appears to be a phishing site.")[7D[K
+site.")
+        with smtplib.SMTP("smtp.example.com") as server:
+            server.sendmail("phishingsystem@example.com", recipient, msg.as[6D[K
+msg.as_string())
 
-    Returns:
-        bool: True if the email is a phishing attempt, False otherwise.
-    """
-    # Check if the email contains any suspicious keywords or URLs
-    for keyword in PHISHING_KEYWORDS:
-        if re.search(keyword, email):
-            return True
-    for url in PHISHING_URLS:
-        if re.search(url, email):
-            return True
-    # Check if the email contains any suspicious attachments or links
-    attachment = Parser().parsestr(email).get_content()
-    if not attachment:
-        return False
-    for file in ATTACHMENTS:
-        if re.search(file, attachment):
-            return True
-    return False
+def detect_phishing_attack(email):
+    url = email["Subject"]
+    if is_phishing_url(url):
+        mitigate_phishing_attack(email, url)
 
-def mitigate_phishing(email):
-    """
-    Mitigates a phishing attack by filtering out the email.
-
-    Args:
-        email (str): The email to filter out.
-
-    Returns:
-        str: The filtered email.
-    """
-    # Remove any suspicious keywords or URLs from the email
-    for keyword in PHISHING_KEYWORDS:
-        email = re.sub(keyword, '', email)
-    for url in PHISHING_URLS:
-        email = re.sub(url, '', email)
-    # Remove any suspicious attachments or links from the email
-    attachment = Parser().parsestr(email).get_content()
-    if not attachment:
-        return ''
-    for file in ATTACHMENTS:
-        email = re.sub(file, '', email)
-    return email
-
-# List of suspicious keywords and URLs to filter out
-PHISHING_KEYWORDS = ['phishing', 'scam', 'fraud']
-PHISHING_URLS = ['https://www.example.com/']
-ATTACHMENTS = ['virus.exe', 'ransomware.docx']
-
-# Main function to detect and mitigate phishing attacks
 def main():
-    # Get the email from user input
-    email = input('Enter an email: ')
-    # Check if the email is a phishing attempt
-    if is_phishing(email):
-        print('Phishing attack detected!')
-        # Mitigate the phishing attack by filtering out the email
-        email = mitigate_phishing(email)
-        print('Mitigated email: ' + email)
-    else:
-        print('No phishing attacks detected.')
+    # Receive an email message from the SMTP server
+    email = smtplib.SMTP("smtp.example.com").recv()
+    detect_phishing_attack(email)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
