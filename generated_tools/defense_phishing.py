@@ -1,82 +1,76 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-21 01:53:49.347243
+# Generated 2026-07-21 05:17:10.952326
 
 import re
-import requests
-from bs4 import BeautifulSoup
+from email.parser import Parser
 
-def is_phishing(url):
-    # Check if the URL is valid
-    if not url.startswith('http'):
+def is_phishing(email):
+    """
+    Detects if the given email is a phishing attempt.
+
+    Args:
+        email (str): The email to check for phishing attempts.
+
+    Returns:
+        bool: True if the email is a phishing attempt, False otherwise.
+    """
+    # Check if the email contains any suspicious keywords or URLs
+    for keyword in PHISHING_KEYWORDS:
+        if re.search(keyword, email):
+            return True
+    for url in PHISHING_URLS:
+        if re.search(url, email):
+            return True
+    # Check if the email contains any suspicious attachments or links
+    attachment = Parser().parsestr(email).get_content()
+    if not attachment:
         return False
-    
-    # Send a HEAD request to get the response headers only
-    try:
-        resp = requests.head(url, allow_redirects=True)
-    except requests.exceptions.RequestException:
-        return False
-    
-    # Check if the response is valid
-    if not resp.ok or 'Content-Type' not in resp.headers:
-        return False
-    
-    # Get the content type of the page
-    content_type = resp.headers['Content-Type']
-    
-    # Check if the content type is a text/html document
-    if 'text/html' not in content_type:
-        return False
-    
-    # Send another HEAD request to get the final URL
-    try:
-        final_url = resp.headers['Location']
-    except KeyError:
-        final_url = url
-    
-    # Check if the final URL is a phishing site
-    if not is_phishing(final_url):
-        return False
-    
-    # Get the HTML of the page
-    try:
-        resp = requests.get(final_url)
-    except requests.exceptions.RequestException:
-        return False
-    
-    # Check if the response is valid
-    if not resp.ok or 'Content-Type' not in resp.headers:
-        return False
-    
-    # Get the HTML of the page
-    html = resp.text
-    
-    # Check for phishing patterns in the HTML
-    soup = BeautifulSoup(html, 'lxml')
-    
-    # Check if the page contains a form with an action attribute
-    form = soup.find('form', attrs={'action': re.compile(r'^https://.*\.com[29D[K
-re.compile(r'^https://.*\.com/.*$')})
-    if not form:
-        return False
-    
-    # Check if the form has a field with a name attribute
-    input_field = form.find('input', attrs={'name': re.compile(r'^username|[23D[K
-re.compile(r'^username|email$')})
-    if not input_field:
-        return False
-    
-    # Check if the page contains a link to a website other than the final U[1D[K
-URL
-    links = soup.find_all('a')
-    for link in links:
-        href = link.attrs['href']
-        if not href.startswith(final_url):
-            return False
-    
-    # Check if the page contains a meta tag with a refresh attribute
-    meta = soup.find('meta', attrs={'http-equiv': 'refresh'})
-    if meta:
-        return False
-    
-    return True
+    for file in ATTACHMENTS:
+        if re.search(file, attachment):
+            return True
+    return False
+
+def mitigate_phishing(email):
+    """
+    Mitigates a phishing attack by filtering out the email.
+
+    Args:
+        email (str): The email to filter out.
+
+    Returns:
+        str: The filtered email.
+    """
+    # Remove any suspicious keywords or URLs from the email
+    for keyword in PHISHING_KEYWORDS:
+        email = re.sub(keyword, '', email)
+    for url in PHISHING_URLS:
+        email = re.sub(url, '', email)
+    # Remove any suspicious attachments or links from the email
+    attachment = Parser().parsestr(email).get_content()
+    if not attachment:
+        return ''
+    for file in ATTACHMENTS:
+        email = re.sub(file, '', email)
+    return email
+
+# List of suspicious keywords and URLs to filter out
+PHISHING_KEYWORDS = ['phishing', 'scam', 'fraud']
+PHISHING_URLS = ['https://www.example.com/']
+ATTACHMENTS = ['virus.exe', 'ransomware.docx']
+
+# Main function to detect and mitigate phishing attacks
+def main():
+    # Get the email from user input
+    email = input('Enter an email: ')
+    # Check if the email is a phishing attempt
+    if is_phishing(email):
+        print('Phishing attack detected!')
+        # Mitigate the phishing attack by filtering out the email
+        email = mitigate_phishing(email)
+        print('Mitigated email: ' + email)
+    else:
+        print('No phishing attacks detected.')
+
+if __name__ == '__main__':
+    main()
