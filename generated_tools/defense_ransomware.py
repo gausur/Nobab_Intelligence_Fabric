@@ -1,34 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-22 16:20:36.619405
+# Generated 2026-07-22 18:05:23.034315
 
 import os
-import stat
-import shutil
-import logging
-from datetime import datetime
+import json
+import subprocess
 
-def detect_ransomware(filepath):
-    file_stats = os.stat(filepath)
-    if file_stats.st_mode & stat.S_IXUSR:
-        return True
-    else:
+def detect_ransomware(file_path):
+    # Check if the file is a valid JSON file
+    try:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+    except ValueError:
         return False
 
-def mitigate_ransomware(filepath):
-    try:
-        shutil.copyfile(filepath, f"{filepath}.bak")
-        os.remove(filepath)
-    except OSError as e:
-        logging.error(f"Failed to mitigate ransomware at {filepath}: {e}")
+    # Check if the JSON file contains the ransomware indicator key-value pa[2D[K
+pair
+    for k, v in data.items():
+        if k == 'ransomware_indicator' and v:
+            return True
 
-def main():
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                mitigate_ransomware(file_path)
-                logging.info(f"Mitigated ransomware at {file_path}")
+    return False
 
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware(file_path):
+    # Remove the file
+    subprocess.run(['rm', '-f', file_path], check=True)
+
+if __name__ == '__main__':
+    for filename in os.listdir('.'):
+        if detect_ransomware(filename):
+            mitigate_ransomware(filename)
