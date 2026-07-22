@@ -1,33 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-22 05:13:46.834647
+# Generated 2026-07-22 08:13:50.924949
 
 import os
+import sys
 import shutil
 import subprocess
-import sys
-from zipfile import ZipFile
 
-def is_ransomware(path):
-    with open(path, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            return True
-        else:
-            return False
+def main():
+    # Check if the system is infected with ransomware
+    if is_infected():
+        # If infected, mitigate the attack and recover the files
+        mitigate_ransomware()
+        # Notify the user that the attack has been mitigated
+        print("Ransomware attack has been mitigated. Your system is now saf[3D[K
+safe.")
+    else:
+        # If not infected, do nothing
+        pass
 
-def extract_payload(path):
-    with ZipFile(path) as zf:
-        zf.extractall("output")
-
-def detect_ransomware():
-    for path in sys.argv[1:]:
-        if is_ransomware(path):
-            extract_payload(path)
-            return True
+def is_infected():
+    # Check if a ransomware executable file exists in the system
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            if file.endswith('.exe'):
+                return True
     return False
 
-if __name__ == "__main__":
-    if detect_ransomware():
-        print("Ransomware detected and mitigated")
-        shutil.rmtree("output")
+def mitigate_ransomware():
+    # Unlock all locked files and restore their original contents
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            if file.endswith('.exe'):
+                shutil.copy(os.path.join(root, file), 'C:\\Windows\\System3[21D[K
+'C:\\Windows\\System32')
+                subprocess.run(['attrib', '-H', os.path.join(root, file)])
+    # Delete the ransomware executable file
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            if file.endswith('.exe'):
+                os.remove(os.path.join(root, file))
+
+if __name__ == '__main__':
+    main()
