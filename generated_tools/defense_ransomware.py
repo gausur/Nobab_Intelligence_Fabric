@@ -1,46 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-22 01:53:00.326522
+# Generated 2026-07-22 05:13:46.834647
 
 import os
-import re
-import time
-from subprocess import check_output
+import shutil
+import subprocess
+import sys
+from zipfile import ZipFile
+
+def is_ransomware(path):
+    with open(path, "rb") as f:
+        data = f.read()
+        if b"RANSOMWARE" in data:
+            return True
+        else:
+            return False
+
+def extract_payload(path):
+    with ZipFile(path) as zf:
+        zf.extractall("output")
 
 def detect_ransomware():
-    # Check if the system is running a version of Windows
-    if os.name == 'nt':
-        # Get the list of installed programs
-        installed_programs = check_output(['wmic', 'product', 'get', 'name'[6D[K
-'name']).decode().splitlines()
-        # Check if any ransomware programs are installed
-        for program in installed_programs:
-            if re.search(r'Ransomware.*', program, re.IGNORECASE):
-                return True
-    else:
-        return False
+    for path in sys.argv[1:]:
+        if is_ransomware(path):
+            extract_payload(path)
+            return True
+    return False
 
-def mitigate_ransomware():
-    # Check if the system is running a version of Windows
-    if os.name == 'nt':
-        # Get the list of installed programs
-        installed_programs = check_output(['wmic', 'product', 'get', 'name'[6D[K
-'name']).decode().splitlines()
-        # Check if any ransomware programs are installed
-        for program in installed_programs:
-            if re.search(r'Ransomware.*', program, re.IGNORECASE):
-                # Uninstall the ransomware program
-                check_output(['wmic', 'product', 'where', f'"name={program}[17D[K
-f'"name={program}"', 'call', 'uninstall'])
-        # Restart the computer to clear any remaining malicious files or re[2D[K
-registry entries
-        os.system('shutdown /r /f')
-    else:
-        return False
-
-def main():
+if __name__ == "__main__":
     if detect_ransomware():
-        mitigate_ransomware()
-
-if __name__ == '__main__':
-    main()
+        print("Ransomware detected and mitigated")
+        shutil.rmtree("output")
