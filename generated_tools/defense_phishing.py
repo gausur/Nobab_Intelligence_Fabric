@@ -1,33 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-23 20:55:44.357166
+# Generated 2026-07-23 22:00:46.570629
 
 import re
-import requests
-from urllib.parse import urlparse
+import smtplib
+from email.mime.text import MIMEText
+from email.utils import parseaddr
 
-def is_phishing_attack(url):
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
-    if not hostname:
+def send_email(to, subject, body):
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = to
+    server = smtplib.SMTP('smtp.example.com')
+    server.sendmail(to, [to], msg.as_string())
+    server.quit()
+
+def is_phishing_email(email):
+    if re.search(r'http://', email) or re.search(r'https://', email):
+        return True
+    else:
         return False
-    try:
-        ip_address = requests.get(f"https://{hostname}/ip").text
-        if ip_address == "127.0.0.1":
-            return True
-    except requests.exceptions.RequestException:
-        pass
-    return False
 
-def mitigate_phishing_attack(url):
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
-    if not hostname:
-        return url
-    try:
-        ip_address = requests.get(f"https://{hostname}/ip").text
-        if ip_address == "127.0.0.1":
-            return f"https://{parsed_url.netloc}{parsed_url.path}"
-    except requests.exceptions.RequestException:
-        pass
-    return url
+def phishing_mitigation(email, url):
+    send_email(email, 'Phishing Attempt Detected!', f'You have been targete[7D[K
+targeted by a phishing attack. Please visit {url} to verify your identity.'[10D[K
+identity.')
+
+def main():
+    email = input('Enter email: ')
+    if is_phishing_email(email):
+        url = input('Enter URL: ')
+        phishing_mitigation(email, url)
+    else:
+        print('Email not detected as a phishing attempt.')
+
+if __name__ == '__main__':
+    main()
