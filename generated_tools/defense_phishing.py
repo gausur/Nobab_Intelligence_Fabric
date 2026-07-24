@@ -1,50 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-24 11:01:01.788895
+# Generated 2026-07-24 12:15:57.321515
 
 import re
 import smtplib
-from email.message import EmailMessage
-from typing import Optional
 
-def is_phishing(email: str) -> bool:
-    """
-    Check if the given email is a phishing attempt.
-    
-    Args:
-        email (str): The email to check.
-    
-    Returns:
-        bool: True if the email is a phishing attempt, False otherwise.
-    """
-    # Check for common phishing patterns
-    if re.search(r'phish[ing]{0,2}@', email):
-        return True
-    if re.search(r'[\w]+\s{0,1}\(\)', email):
-        return True
-    if re.search(r'\w+@\w+\.\w+', email):
-        return True
-    
-    # Check for suspicious characters in the email address
-    if not re.match(r'^[\w.-]+@[\w-]+\.[a-zA-Z]{2,}$', email):
-        return True
-    
-    return False
+# Define the pattern for matching phishing URLs
+phishing_url_pattern = r"https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a[52D[K
+r"https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@r"https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[az]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
 
-def mitigate_phishing(email: str) -> Optional[str]:
-    """
-    Mitigate a phishing attempt by redirecting the user to a safe page.
+# Define the list of phishing URLs to block
+phishing_urls = [
+    "https://www.example1.com",
+    "https://www.example2.com"
+]
+
+# Set up an SMTP server for sending alerts
+smtp_server = smtplib.SMTP("localhost")
+
+# Define a function to check if the URL is phishing
+def is_phishing(url):
+    # Check if the URL matches the pattern
+    match = re.search(phishing_url_pattern, url)
+    if match:
+        # If it does, return True
+        return True
+    else:
+        # Otherwise, return False
+        return False
+
+# Define a function to send an alert email
+def send_alert(url):
+    # Set up the message text
+    msg = f"Phishing URL detected: {url}"
     
-    Args:
-        email (str): The email that triggered the phishing attempt.
-    
-    Returns:
-        Optional[str]: The URL of the safe page, or None if no mitigation w[1D[K
-was possible.
-    """
-    # Check if the email is a phishing attempt
-    if not is_phishing(email):
-        return None
-    
-    # Redirect the user to a safe page
-    return 'https://example.com/safe-page'
+    # Send the message using the SMTP server
+    smtp_server.sendmail("admin@example.com", "user@example.com", msg)
+
+# Iterate through the list of URLs and check if any are phishing
+for url in phishing_urls:
+    if is_phishing(url):
+        # If a phishing URL is found, send an alert email
+        send_alert(url)
