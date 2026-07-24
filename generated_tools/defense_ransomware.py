@@ -1,50 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-24 08:14:36.172176
+# Generated 2026-07-24 10:58:22.704909
 
-import sys
 import os
-import stat
-import json
-import shutil
-import subprocess
+import sys
+import time
 
-def main():
-    # Get the list of files and directories in the current directory
-    file_list = os.listdir()
+def detect_ransomware():
+    # Check if the system is running Windows
+    if not sys.platform.startswith("win"):
+        return False
     
-    # Iterate over each file and directory, checking if it is a ransomware [K
-infection
-    for file in file_list:
-        # Check if the file is a regular file or a directory
-        if not os.path.isfile(file) and not os.path.isdir(file):
-            continue
-        
-        # Check if the file has the ransomware infection signature
-        with open(file, "r") as f:
-            data = f.read()
-            if "RANSOMWARE_SIGNATURE" in data:
-                print("Infected file found:", file)
-                
-                # Remove the infected file or directory and its contents
-                shutil.rmtree(file, True)
-        
-        # Check if the directory is a ransomware infection
-        if os.path.isdir(file):
-            # Recursively check all files and directories within the direct[6D[K
-directory
-            for root, dirs, files in os.walk(file):
-                for name in files:
-                    file_path = os.path.join(root, name)
-                    with open(file_path, "r") as f:
-                        data = f.read()
-                        if "RANSOMWARE_SIGNATURE" in data:
-                            print("Infected file found:", file_path)
-                            
-                            # Remove the infected file or directory and its[3D[K
-its contents
-                            shutil.rmtree(file_path, True)
+    # Get a list of all running processes
+    process_list = os.popen("tasklist").readlines()
     
-    # Mitigate ransomware attacks by encrypting the system with a secure ke[2D[K
-key
-    subprocess.run(["encrypt", "--key=SECURE_KEY"])
+    # Search for ransomware-like processes
+    for line in process_list:
+        if "ransomware" in line.lower():
+            return True
+    
+    # If no ransomware found, return False
+    return False
+
+def mitigate_ransomware():
+    # Check if the system is running Windows
+    if not sys.platform.startswith("win"):
+        return False
+    
+    # Get a list of all running processes
+    process_list = os.popen("tasklist").readlines()
+    
+    # Search for ransomware-like processes
+    for line in process_list:
+        if "ransomware" in line.lower():
+            # Kill the process and its children
+            os.system("taskkill /pid %s /t /f" % line.split()[1])
+    
+    # If no ransomware found, return False
+    return False
+
+if detect_ransomware():
+    print("Ransomware detected!")
+    mitigate_ransomware()
+else:
+    print("No ransomware detected.")

@@ -1,61 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-24 08:12:57.649247
+# Generated 2026-07-24 11:01:01.788895
 
 import re
 import smtplib
 from email.message import EmailMessage
+from typing import Optional
 
-def is_phishing(email):
-    # Check if the sender's email address is valid
-    if not email['From'].endswith('@example.com'):
-        return False
+def is_phishing(email: str) -> bool:
+    """
+    Check if the given email is a phishing attempt.
     
-    # Check if the email has a malicious attachment
-    for part in email.iter_attachments():
-        if part.get_filename().lower().endswith(('.exe', '.zip', '.rar')):
-            return True
+    Args:
+        email (str): The email to check.
     
-    # Check if the email contains a suspicious link
-    for url in email.iter_urls():
-        if 'phishing' in url or 'malicious' in url:
-            return True
+    Returns:
+        bool: True if the email is a phishing attempt, False otherwise.
+    """
+    # Check for common phishing patterns
+    if re.search(r'phish[ing]{0,2}@', email):
+        return True
+    if re.search(r'[\w]+\s{0,1}\(\)', email):
+        return True
+    if re.search(r'\w+@\w+\.\w+', email):
+        return True
     
-    # Check if the email has a suspicious subject line
-    if any(word in email['Subject'] for word in ('scam', 'fraud')):
+    # Check for suspicious characters in the email address
+    if not re.match(r'^[\w.-]+@[\w-]+\.[a-zA-Z]{2,}$', email):
         return True
     
     return False
 
-def mitigate_phishing(email):
-    # Remove all attachments
-    for part in email.iter_attachments():
-        part.dispose()
+def mitigate_phishing(email: str) -> Optional[str]:
+    """
+    Mitigate a phishing attempt by redirecting the user to a safe page.
     
-    # Remove the email's subject line and body
-    email['Subject'] = 'Phishing Attempt Detected'
-    email.set_content('This email is a phishing attempt. Do not open any li[2D[K
-links or download attachments.')
+    Args:
+        email (str): The email that triggered the phishing attempt.
     
-    return email
-
-def send_email(email):
-    # Send the mitigated email to the recipient
-    smtp = smtplib.SMTP('smtp.example.com', 587)
-    smtp.ehlo()
-    smtp.starttls()
-    smtp.login('phishing@example.com', 'password')
-    smtp.send_message(email)
-    smtp.quit()
-
-def main():
-    # Read the email from stdin
-    email = EmailMessage()
-    email.parse(sys.stdin.read())
+    Returns:
+        Optional[str]: The URL of the safe page, or None if no mitigation w[1D[K
+was possible.
+    """
+    # Check if the email is a phishing attempt
+    if not is_phishing(email):
+        return None
     
-    # Detect and mitigate phishing attacks
-    if is_phishing(email):
-        mitigated_email = mitigate_phishing(email)
-        send_email(mitigated_email)
-    else:
-        print('No phishing attempt detected.')
+    # Redirect the user to a safe page
+    return 'https://example.com/safe-page'
