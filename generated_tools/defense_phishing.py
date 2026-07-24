@@ -1,55 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-24 14:49:25.925497
+# Generated 2026-07-24 18:16:18.714383
 
 import re
-import json
-import urllib.request
-import http.client
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing(url):
-    """
-    Detects if the URL is a phishing site based on its domain name.
-    """
-    try:
-        domain = url.split("://")[1].split("/")[0]
-        if re.search(r"\.{3}phishing\.com$", domain):
-            return True
-    except Exception as e:
-        print(f"Error while detecting phishing site: {e}")
-    return False
+class PhishingDetector:
+    def __init__(self, email):
+        self.email = email
+        self.is_phishing = False
+    
+    def detect(self):
+        if not self.email:
+            return None
+        if "http://" in self.email or "https://" in self.email:
+            self.is_phishing = True
+        return self.is_phishing
 
-def get_site_info(url):
-    """
-    Gets information about the website based on its URL.
-    """
-    try:
-        with urllib.request.urlopen(url) as response:
-            data = json.loads(response.read())
-            return {
-                "title": data["title"],
-                "description": data["description"]
-            }
-    except Exception as e:
-        print(f"Error while getting site information: {e}")
-        return None
-
-def mitigate_phishing(url, user_input):
-    """
-    Mitigates phishing attacks by checking if the URL is a phishing site an[2D[K
-and prompting the user to verify their input.
-    """
-    if is_phishing(url):
-        print("Warning: This URL may be a phishing site.")
-        print("Please enter your password to continue: ")
-        return getpass.getpass() == user_input
-    else:
-        return True
-
-def main():
-    url = input("Enter the URL you want to visit: ")
-    user_input = getpass.getpass("Enter your password: ")
-    mitigate_phishing(url, user_input)
-
-if __name__ == "__main__":
-    main()
+class PhishingMitigator:
+    def __init__(self, email):
+        self.email = email
+        self.message = EmailMessage()
+    
+    def mitigate(self):
+        if not self.email or not self.email.startswith("phishing@example.co[42D[K
+self.email.startswith("phishing@example.com"):
+            return None
+        self.message["From"] = "noreply@example.com"
+        self.message["To"] = self.email
+        self.message["Subject"] = "Phishing Attack Detected"
+        self.message["Body"] = "This is an automated response to inform you[3D[K
+you that a phishing attack has been detected.\nPlease do not click on any l[1D[K
+links or provide any personal information."
+        smtplib.sendmail("noreply@example.com", self.email, self.message.as[15D[K
+self.message.as_string())
