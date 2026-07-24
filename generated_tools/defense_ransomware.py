@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-24 18:17:03.881198
+# Generated 2026-07-24 20:14:42.333954
 
 import os
-import sys
+import json
 
-def detect_ransomware(directory):
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".exe"):
-                with open(os.path.join(root, file), "rb") as f:
-                    contents = f.read()
-                    if b"C:\Windows\System32\cmd.exe /c rd /s/q C:" in cont[4D[K
-contents:
-                        return True
+def detect_ransomware(file_path):
+    """
+    Detects if the given file path is a ransomware attack or not.
+    """
+    with open(file_path, "rb") as f:
+        data = f.read()
+        for i in range(len(data) - 10):
+            if data[i] == 0x41 and data[i + 1] == 0x53 and data[i + 2] == 0[1D[K
+0x43 and data[i + 3] == 0x46:
+                return True
     return False
 
-def mitigate_ransomware(directory):
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if detect_ransomware(root, file):
-                with open(os.path.join(root, file), "wb") as f:
-                    contents = f.read()
-                    if b"C:\Windows\System32\cmd.exe /c rd /s/q C:" in cont[4D[K
-contents:
-                        return True
-    return False
+def mitigate_ransomware(file_path):
+    """
+    Mitigates a ransomware attack by deleting the infected file.
+    """
+    os.remove(file_path)
+    print("The ransomware attack has been mitigated.")
+
+def main():
+    """
+    Main function to detect and mitigate ransomware attacks.
+    """
+    files = os.listdir(".")
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
 if __name__ == "__main__":
-    directory = sys.argv[1]
-    mitigate_ransomware(directory)
+    main()
