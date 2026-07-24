@@ -1,34 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-24 12:18:12.662564
+# Generated 2026-07-24 14:51:23.546354
 
 import os
-import json
-import subprocess
+import re
 
-def main():
-    # Detect ransomware by checking for known malicious file extensions
-    malicious_extensions = ['.exe', '.dll', '.bat']
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            if any(file.endswith(ext) for ext in malicious_extensions):
-                print(f'Malicious file detected: {root}/{file}')
-                # Mitigate the attack by removing the malicious file
-                os.remove(os.path.join(root, file))
-    # Check for suspicious processes using psutil
-    for proc in subprocess.check_output(['ps', 'aux']):
-        if any('ransomware' in line for line in proc.decode().splitlines())[27D[K
-proc.decode().splitlines()):
-            print(f'Suspicious process detected: {proc}')
-            # Mitigate the attack by terminating the suspicious process
-            subprocess.check_call(['kill', '-9', proc])
-    # Check for suspicious network connections using netstat
-    for line in subprocess.check_output(['netstat', '--listen']).decode().s[23D[K
-'--listen']).decode().splitlines():
-        if any('ransomware' in line for line in proc.decode().splitlines())[27D[K
-proc.decode().splitlines()):
-            print(f'Suspicious network connection detected: {line}')
-            # Mitigate the attack by closing the suspicious network connect[7D[K
-connection
-            subprocess.check_call(['netstat', '--close', line])
-    return 0
+def is_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+    return b"RANSOMWARE_KEY" in data or b"Encrypted" in data
+
+def mitigate(file):
+    if is_ransomware(file):
+        os.remove(file)
+        print("Ransomware detected and removed.")
+    else:
+        print("No ransomware detected.")
+
+if __name__ == "__main__":
+    files = os.listdir(".")
+    for file in files:
+        mitigate(file)
