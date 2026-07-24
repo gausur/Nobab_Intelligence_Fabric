@@ -1,49 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-24 22:02:11.575716
+# Generated 2026-07-24 23:00:48.531244
 
 import re
-import urllib.parse
+import smtplib
+from email.parser import Parser
 
-def is_phishing(url):
-    # Check if the URL is a valid HTTPS URL
-    if not url.startswith("https://"):
+def check_email(email):
+    # Check if the email is valid
+    if not re.match(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", email):
         return False
     
-    # Extract the hostname from the URL
-    parsed_url = urllib.parse.urlparse(url)
-    hostname = parsed_url.hostname
-    
-    # Check if the hostname is a valid domain name
-    try:
-        idna_codec.decode(hostname)
-    except UnicodeError:
+    # Check if the email is from a trusted domain
+    if not email.split("@")[1].lower() in ["example.com", "gmail.com", "yah[4D[K
+"yahoo.com"]:
         return False
     
-    # Check if the URL contains suspicious patterns
-    for pattern in SUSPICIOUS_PATTERNS:
-        if re.search(pattern, url):
-            return True
+    # Check if the email contains suspicious keywords
+    if any(word in email for word in ["phish", "scam", "fake"]):
+        return False
     
-    return False
+    # Check if the email is from a known spammer
+    if smtplib.SMTP("smtp.example.com").helo()[0] != 250:
+        return False
+    
+    return True
 
-def mitigate_phishing(url):
-    # Remove any suspicious patterns from the URL
-    for pattern in SUSPICIOUS_PATTERNS:
-        url = re.sub(pattern, "", url)
-    
-    # Normalize the URL and return it
-    return urllib.parse.urlunparse((parsed_url.scheme, parsed_url.netloc, p[1D[K
-parsed_url.path, parsed_url.params, parsed_url.query, parsed_url.fragment))[21D[K
-parsed_url.fragment))
+def main():
+    while True:
+        try:
+            email = input("Enter an email address: ")
+            if check_email(email):
+                print("The email is valid and from a trusted domain.")
+            else:
+                print("The email is not valid or from a suspicious domain."[8D[K
+domain.")
+        except KeyboardInterrupt:
+            break
 
 if __name__ == "__main__":
-    # Test the function with a few sample URLs
-    print(is_phishing("https://www.example.com"))  # False
-    print(is_phishing("http://www.example.com"))   # False
-    print(is_phishing("https://example.com"))      # True
-    print(is_phishing("https://example.com/path")) # True
-    
-    # Mitigate the phishing attacks
-    mitigated_url = mitigate_phishing("https://example.com")
-    print(mitigated_url)  # https://example.com
+    main()

@@ -1,31 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-24 22:00:33.366633
+# Generated 2026-07-24 23:02:22.095450
 
 import os
 import shutil
+import subprocess
+import time
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.isfile(path):
-        return False
-    with open(path, 'rb') as f:
-        contents = f.read()
-        if b'This is a ransomware' in contents:
-            return True
+def detect_ransomware():
+    # Check for common ransomware files
+    if os.path.exists("encrypted"):
+        return True
+    if os.path.exists("locked"):
+        return True
+    if os.path.exists("ransomware"):
+        return True
+    if os.path.exists("crypt"):
+        return True
+    # Check for common ransomware processes
+    process_list = subprocess.check_output(["ps", "aux"])
+    if "ransomware" in process_list:
+        return True
     return False
 
-def mitigate_ransomware(path):
-    # Remove the encrypted file and replace with a non-encrypted version
-    os.remove(path)
-    shutil.copyfile('non-encrypted-version', path)
-
-# Main function to detect and mitigate ransomware attacks
-def main():
-    # Get all files in the current directory
-    for file in os.listdir():
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-
-if __name__ == '__main__':
-    main()
+def mitigate_ransomware():
+    # Remove ransomware files
+    try:
+        os.remove("encrypted")
+    except OSError:
+        pass
+    try:
+        os.remove("locked")
+    except OSError:
+        pass
+    try:
+        os.remove("ransomware")
+    except OSError:
+        pass
+    try:
+        os.remove("crypt")
+    except OSError:
+        pass
+    # Kill ransomware processes
+    process_list = subprocess.check_output(["ps", "aux"])
+    for process in process_list.splitlines():
+        if "ransomware" in process:
+            subprocess.call(["kill", "-9", process])
+    # Restart the system
+    subprocess.call(["sudo", "reboot"])
