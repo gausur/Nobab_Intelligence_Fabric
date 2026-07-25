@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-25 20:11:13.753877
+# Generated 2026-07-25 21:48:41.923486
 
 import os
-import json
-import time
-from shutil import copyfile
+import re
+import subprocess
 
-def detect_ransomware(directory):
-    # Check if the directory contains any files with the "e1c4" prefix
-    for file in os.listdir(directory):
-        if "e1c4" in file:
-            return True
+def detect_ransomware(filepath):
+    """Detects if the given filepath is a ransomware infection"""
+    # Check if the file exists and is a regular file
+    if not os.path.exists(filepath) or not os.path.isfile(filepath):
+        return False
+    
+    # Get the file's MD5 hash
+    md5_hash = subprocess.check_output(['md5sum', filepath]).decode().split[25D[K
+filepath]).decode().split(' ')[0]
+    
+    # Check if the MD5 hash is in the known ransomware hashes list
+    with open('ransomware_hashes.txt') as f:
+        for line in f:
+            if md5_hash == line.strip():
+                return True
+    
     return False
 
-def mitigate_ransomware(directory, backups):
-    # Copy all files from the current directory to the backup directory
-    for file in os.listdir(directory):
-        copyfile(os.path.join(directory, file), os.path.join(backups, file)[5D[K
-file))
+def mitigate_ransomware(filepath):
+    """Mitigates the ransomware infection by deleting the infected file"""
+    os.remove(filepath)
 
-def main():
-    # Get the current working directory and create a backup directory
-    directory = os.getcwd()
-    backups = os.path.join(directory, "backup")
-    if not os.path.exists(backups):
-        os.makedirs(backups)
-
-    # Check for ransomware infection and mitigate it if necessary
-    if detect_ransomware(directory):
-        mitigate_ransomware(directory, backups)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    # Check if any of the given files are ransomware infections
+    for filepath in sys.argv[1:]:
+        if detect_ransomware(filepath):
+            mitigate_ransomware(filepath)
