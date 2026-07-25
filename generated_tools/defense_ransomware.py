@@ -1,36 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-25 17:54:08.071762
+# Generated 2026-07-25 18:56:59.600900
 
 import os
-import stat
-import hashlib
-import subprocess
+import json
+from subprocess import check_output
 
-def check_ransomware(path):
-    # Check if the file is a regular file
-    if not os.path.isfile(path):
-        return False
-
-    # Check if the file has the correct mode
-    st = os.stat(path)
-    if stat.S_IMODE(st.st_mode) != 0o644:
-        return False
-
-    # Check if the file contains a known ransomware signature
-    with open(path, "rb") as f:
+def is_ransomware(file):
+    with open(file, 'rb') as f:
         data = f.read()
-        hash = hashlib.sha256(data).hexdigest()
-        if hash in ("a94a8fe5ccb19ba61c4c0873d391e987982fbbd3", "9f86d08188[11D[K
-"9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"):
+        if b'RANSOMWARE' in data:
             return True
     return False
 
-def mitigate_ransomware(path):
-    # Remove the file
-    os.remove(path)
+def get_file_info(file):
+    info = {}
+    info['name'] = os.path.basename(file)
+    info['size'] = os.path.getsize(file)
+    info['ctime'] = os.path.getctime(file)
+    return info
 
-# Example usage:
-path = "/path/to/file.txt"
-if check_ransomware(path):
-    mitigate_ransomware(path)
+def mitigate_ransomware(file):
+    with open(file, 'rb') as f:
+        data = f.read()
+        if b'RANSOMWARE' in data:
+            # Remove the ransomware payload
+            data = data.replace(b'RANSOMWARE', b'')
+            with open(file, 'wb') as f:
+                f.write(data)
+    return True
+
+def main():
+    files = [f for f in os.listdir() if is_ransomware(f)]
+    for file in files:
+        info = get_file_info(file)
+        print('File: {} ({})'.format(info['name'], info['size']))
+        mitigate_ransomware(file)
+
+if __name__ == '__main__':
+    main()
