@@ -1,42 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-24 23:00:48.531244
+# Generated 2026-07-25 00:06:44.398154
 
 import re
-import smtplib
-from email.parser import Parser
+import sys
+from urllib.parse import urlparse
 
-def check_email(email):
-    # Check if the email is valid
-    if not re.match(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", email):
+def is_phishing_attempt(url):
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if domain in ["example.com", "gmail.com"]:
+        return True
+    else:
         return False
-    
-    # Check if the email is from a trusted domain
-    if not email.split("@")[1].lower() in ["example.com", "gmail.com", "yah[4D[K
-"yahoo.com"]:
-        return False
-    
-    # Check if the email contains suspicious keywords
-    if any(word in email for word in ["phish", "scam", "fake"]):
-        return False
-    
-    # Check if the email is from a known spammer
-    if smtplib.SMTP("smtp.example.com").helo()[0] != 250:
-        return False
-    
-    return True
 
-def main():
-    while True:
-        try:
-            email = input("Enter an email address: ")
-            if check_email(email):
-                print("The email is valid and from a trusted domain.")
-            else:
-                print("The email is not valid or from a suspicious domain."[8D[K
-domain.")
-        except KeyboardInterrupt:
-            break
+def mitigate_phishing_attempt(url):
+    # TODO: Implement mitigation logic here
+    print("Mitigating phishing attempt")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        url = sys.argv[1]
+        is_phishing = is_phishing_attempt(url)
+        if is_phishing:
+            mitigate_phishing_attempt(url)
