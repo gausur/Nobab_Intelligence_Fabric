@@ -1,39 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-26 20:06:40.247844
+# Generated 2026-07-26 21:53:00.062443
 
 import re
-import smtplib
-from email.parser import Parser
+import email
 
-def is_phishing_email(email):
-    # Check if the email contains a link to a malicious website
-    link = re.search(r'https?://\S+', email.get('body'))
-    if link:
-        url = link.group()
-        response = smtplib.SMTP_SSL("smtp.gmail.com", 465)
-        try:
-            response.ehlo()
-            response.mail(email.get("from"))
-            response.rcpt(url)
-            response.quit()
+def is_phishing(email):
+    # Check if the email contains a suspicious link
+    if 'http://' in email or 'https://' in email:
+        return True
+
+    # Check if the email contains a malicious attachment
+    for part in email.iterparts():
+        if part.get_content_maintype() == 'application' and part.get_filena[15D[K
+part.get_filename().endswith('.exe'):
             return True
-        except Exception as e:
-            print(f"Failed to connect to {url}: {e}")
+
     return False
 
-def mitigate_phishing_attack(email):
-    # Remove the link from the email and send a notification
-    body = re.sub(r'https?://\S+', '', email.get("body"))
-    subject = f"Phishing attack detected in {email.get('from')}"
-    message = Parser().parsestr(f"Subject: {subject}\n\n{body}")
-    smtplib.SMTP_SSL("smtp.gmail.com", 465).sendmail(
-        email.get("from"), ["admin@example.com"], message.as_string()
-    )
+def mitigate_phishing(email):
+    # Remove suspicious links from the email
+    for link in re.findall('http://[^"]+', email):
+        email = email.replace(link, '')
 
-def main():
-    # Read the email from stdin
-    email = Parser().parsestr(sys.stdin.read())
-    
-    if is_phishing_email(email):
-        mitigate_phishing_attack(email)
+    # Remove malicious attachments from the email
+    for part in email.iterparts():
+        if part.get_content_maintype() == 'application' and part.get_filena[15D[K
+part.get_filename().endswith('.exe'):
+            email = email.replace(part.get_payload(), '')
+
+    return email
