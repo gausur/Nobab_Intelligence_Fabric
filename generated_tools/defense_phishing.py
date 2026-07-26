@@ -1,32 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-26 21:53:00.062443
+# Generated 2026-07-26 22:55:20.765017
 
 import re
-import email
+import requests
+from urllib.parse import urlparse
 
-def is_phishing(email):
-    # Check if the email contains a suspicious link
-    if 'http://' in email or 'https://' in email:
+def is_phishing(url):
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return False
+    response = requests.get(url)
+    text = response.text
+    if re.search(r"<script>|<iframe>", text, flags=re.IGNORECASE):
         return True
+    else:
+        return False
 
-    # Check if the email contains a malicious attachment
-    for part in email.iterparts():
-        if part.get_content_maintype() == 'application' and part.get_filena[15D[K
-part.get_filename().endswith('.exe'):
-            return True
-
-    return False
-
-def mitigate_phishing(email):
-    # Remove suspicious links from the email
-    for link in re.findall('http://[^"]+', email):
-        email = email.replace(link, '')
-
-    # Remove malicious attachments from the email
-    for part in email.iterparts():
-        if part.get_content_maintype() == 'application' and part.get_filena[15D[K
-part.get_filename().endswith('.exe'):
-            email = email.replace(part.get_payload(), '')
-
-    return email
+def mitigate_phishing(url):
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return None
+    response = requests.get(url)
+    text = response.text
+    if re.search(r"<script>|<iframe>", text, flags=re.IGNORECASE):
+        return None
+    else:
+        return url
