@@ -1,30 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-26 17:01:47.477669
+# Generated 2026-07-26 18:04:59.505125
 
 import os
-import sys
-import stat
+import re
 
-def check_file_access(path):
-    try:
-        with open(path, "r"):
+def is_ransomware(file):
+    with open(file, 'rb') as f:
+        content = f.read()
+        if b'RANSOMWARE' in content:
             return True
-    except OSError:
-        return False
+        else:
+            return False
 
-def mitigate_ransomware(directory):
+def mitigate_ransomware(file):
+    with open(file, 'wb') as f:
+        f.write(b'DECRYPTED')
+
+def scan_directory(directory):
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if check_file_access(os.path.join(root, file)):
-                continue
-            else:
-                try:
-                    stat = os.stat(os.path.join(root, file))
-                    if stat.st_size == 0:
-                        os.remove(os.path.join(root, file))
-                except OSError:
-                    continue
+            if is_ransomware(os.path.join(root, file)):
+                mitigate_ransomware(os.path.join(root, file))
 
-if __name__ == "__main__":
-    mitigate_ransomware(sys.argv[1])
+def main():
+    directory = '/path/to/directory'
+    scan_directory(directory)
+
+if __name__ == '__main__':
+    main()
