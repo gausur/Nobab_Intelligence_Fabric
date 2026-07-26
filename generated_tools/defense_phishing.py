@@ -1,40 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-26 02:01:18.957639
+# Generated 2026-07-26 05:27:55.176700
 
-import requests
-from urllib.parse import urlparse, parse_qs
-import json
+import re
+import sys
 
-def is_phishing(url):
-    # Check if the URL is a HTTPS link
-    if not url.startswith("https"):
+def is_phishing_attack(url):
+    pattern = r"(https?:\/\/|www\.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6[61D[K
+r"(https?:\/\/|www\.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-r"(https?:\/\/|www\.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
+    if re.match(pattern, url):
+        return True
+    else:
         return False
 
-    # Parse the URL and extract the domain name
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc
+def mitigate_phishing_attack(url):
+    if is_phishing_attack(url):
+        print("Possible phishing attack detected!")
+        sys.exit(1)
+    else:
+        print("No phishing attack detected.")
 
-    # Check if the domain is in the list of known phishing domains
-    with open("phishing_domains.txt", "r") as f:
-        known_domains = f.read().splitlines()
-        if domain in known_domains:
-            return True
-
-    # Get the JSON response from the URL
-    response = requests.get(url)
-    data = json.loads(response.content)
-
-    # Check if the response contains any suspicious keywords
-    for keyword in ["phishing", "scam", "fraud"]:
-        if keyword in data["title"].lower() or keyword in data["description[17D[K
-data["description"].lower():
-            return True
-
-    # No phishing detected
-    return False
-
-def mitigate_phishing(url):
-    # If the URL is a phishing link, open a new tab with a warning message
-    if is_phishing(url):
-        webbrowser.open("https://www.example.com/phishing-warning")
+if __name__ == "__main__":
+    mitigate_phishing_attack(sys.argv[1])
