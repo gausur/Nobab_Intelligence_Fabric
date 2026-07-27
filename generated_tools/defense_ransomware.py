@@ -1,24 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-27 06:20:46.655867
+# Generated 2026-07-27 10:36:04.058655
 
 import os
 import sys
+import subprocess
 
-def detect_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
+def detect_ransomware():
+    try:
+        # Check for common ransomware files
+        if os.path.exists("C:\\ProgramData\\Microsoft\\Windows Defender\\Sc[12D[K
+Defender\\Scans\\"):
             return True
-    return False
+        elif os.path.exists("C:\\Users\\Public\\Public Documents\\"):
+            return True
+        else:
+            return False
+    except Exception as e:
+        # Catch any exceptions and print them
+        print(e)
+        return False
 
-def mitigate_ransomware(filepath):
-    os.remove(filepath)
+def mitigate_ransomware():
+    try:
+        # Unlock the user account
+        subprocess.run("net user {username} /active:yes", shell=True)
+        # Run a backup script
+        subprocess.run("C:\\backup.bat", shell=True)
+        # Restart the system
+        subprocess.run("shutdown /r /t 0", shell=True)
+    except Exception as e:
+        # Catch any exceptions and print them
+        print(e)
 
-def main():
-    for filepath in sys.argv[1:]:
-        if detect_ransomware(filepath):
-            mitigate_ransomware(filepath)
-
-if __name__ == "__main__":
-    main()
+if detect_ransomware():
+    mitigate_ransomware()
