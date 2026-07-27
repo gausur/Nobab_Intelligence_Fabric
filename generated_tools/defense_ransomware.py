@@ -1,37 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-27 20:18:12.132960
+# Generated 2026-07-27 22:03:35.710789
 
+import socket
 import os
-import subprocess
-from time import sleep
+import time
 
-def detect_ransomware(path):
+def check_for_ransomware(host, port):
     try:
-        # Check if the file is a ransomware
-        output = subprocess.check_output(['file', path])
-        if 'ransomware' in output:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host, port))
+        s.sendall(b"Hello, is this a ransomware attack?")
+        response = s.recv(1024)
+        if b"Yes" in response:
             return True
         else:
             return False
-    except FileNotFoundError:
+    except socket.error:
         return False
 
-def mitigate_ransomware(path):
+def mitigate_ransomware(host, port):
     try:
-        # Delete the ransomware file
-        os.remove(path)
-        return True
-    except OSError:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host, port))
+        s.sendall(b"Please pay the ransom and decrypt your files.")
+        response = s.recv(1024)
+        if b"Yes" in response:
+            return True
+        else:
+            return False
+    except socket.error:
         return False
 
-while True:
-    # Check for new files in the current directory
-    for file in os.listdir('.'):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-            print(f'Ransomware detected and mitigated: {file}')
+def main():
+    host = "localhost"
+    port = 8080
+    while True:
+        if check_for_ransomware(host, port):
+            mitigate_ransomware(host, port)
             break
+        else:
+            time.sleep(1)
 
-    # Sleep for 5 minutes before checking again
-    sleep(300)
+if __name__ == "__main__":
+    main()
