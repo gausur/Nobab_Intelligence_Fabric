@@ -1,48 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-27 16:10:52.760466
+# Generated 2026-07-27 18:22:02.208804
 
 import os
-import shutil
-import subprocess
+import json
+import hashlib
+import time
+import sys
 
-def detect_ransomware(path):
-    # Check if the path is a directory
-    if not os.path.isdir(path):
-        return False
-    
-    # Get the list of files in the directory
-    file_list = [os.path.join(path, f) for f in os.listdir(path)]
-    
-    # Check if any of the files have a specific pattern
-    for file in file_list:
-        if "ransomware" in file:
-            return True
-    
-    # If no ransomware files are found, return False
-    return False
+# Define the hashes of known ransomware files
+known_ransomware = ['86498b5d3271afa400e9e6c3ec20f5c7', '123456']
 
-def mitigate_ransomware(path):
-    # Check if the path is a directory
-    if not os.path.isdir(path):
-        return False
-    
-    # Get the list of files in the directory
-    file_list = [os.path.join(path, f) for f in os.listdir(path)]
-    
-    # Check if any of the files have a specific pattern
-    for file in file_list:
-        if "ransomware" in file:
-            # Remove the ransomware files
-            os.remove(file)
-    
-    # If no ransomware files are found, return False
-    return False
+# Define the directories to scan
+directories = ['./', './data', './config']
 
-# Use a try/except block to handle any errors that may occur
-try:
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
-except Exception as e:
-    print("Error:", e)
+# Define the file types to scan
+file_types = ['*.txt', '*.pdf', '*.docx', '*.xlsx']
+
+# Define the function to check if a file is infected with ransomware
+def check_ransomware(filename):
+    with open(filename, 'rb') as f:
+        file_hash = hashlib.md5(f.read()).hexdigest()
+        return file_hash in known_ransomware
+
+# Define the function to mitigate a ransomware attack
+def mitigate_ransomware(filename):
+    with open(filename, 'wb') as f:
+        f.write(b'This is a dummy file to mitigate ransomware attack')
+
+# Define the function to scan a directory for infected files
+def scan_directory(directory, file_types):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith(file_types):
+                filename = os.path.join(root, file)
+                if check_ransomware(filename):
+                    print(f'Infected file found: {filename}')
+                    mitigate_ransomware(filename)
+
+# Scan the directories for infected files
+for directory in directories:
+    scan_directory(directory, file_types)
