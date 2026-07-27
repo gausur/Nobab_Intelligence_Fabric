@@ -1,38 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-27 02:08:17.215196
+# Generated 2026-07-27 06:20:46.655867
 
 import os
-import subprocess
+import sys
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    result = subprocess.run(["file", path], stdout=subprocess.PIPE)
-    if b"encrypted" in result.stdout:
-        return True
-    else:
-        return False
+def detect_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        data = f.read()
+        if b"RANSOMWARE" in data:
+            return True
+    return False
 
-def mitigate_ransomware(path):
-    # Decrypt the file using the appropriate tool
-    subprocess.run(["cryptool", "decrypt", path])
+def mitigate_ransomware(filepath):
+    os.remove(filepath)
 
-# Main function to detect and mitigate ransomware attacks
 def main():
-    # Check if the script is running as root
-    if os.geteuid() != 0:
-        print("This script must be run as root")
-        return
-
-    # Get the path to the file or directory to scan
-    path = input("Enter the path to the file or directory to scan: ")
-
-    # Check if the file is encrypted and decrypt it if necessary
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
-        print("Ransomware detected and mitigated")
-    else:
-        print("No ransomware detected")
+    for filepath in sys.argv[1:]:
+        if detect_ransomware(filepath):
+            mitigate_ransomware(filepath)
 
 if __name__ == "__main__":
     main()
