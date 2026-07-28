@@ -1,44 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-28 00:05:11.707787
+# Generated 2026-07-28 11:12:49.015705
 
 import re
-import smtplib
-from email.message import EmailMessage
+import requests
+from bs4 import BeautifulSoup
 
-def detect_phishing_attack(email):
-    # Check for spammy keywords
-    if any(word in email.lower() for word in ["phish", "scam", "fraud"]):
-        return True
-    
-    # Check for suspicious sender domain
-    if not re.match(r"^[^@]+@[^\.]+\.[^\.]+$", email["from"]):
-        return True
-    
-    # Check for missing or invalid recipient
-    if not email["to"]:
-        return True
-    
+def is_phishing(url):
+    # Extract the domain name from the URL
+    domain = urlparse(url).netloc
+
+    # Check if the domain is in the phishing database
+    with open("phishing_database.txt", "r") as f:
+        for line in f:
+            if line.strip() == domain:
+                return True
     return False
 
-def mitigate_phishing_attack(email):
-    # Quarantine the email
-    with open("quarantine.txt", "a") as f:
-        f.write(str(email))
-    
-    # Send a warning to the sender
-    msg = EmailMessage()
-    msg["from"] = "no-reply@example.com"
-    msg["to"] = email["from"]
-    msg["subject"] = "Phishing Attempt Detected"
-    msg.set_content("We have detected a phishing attempt on your email acco[4D[K
-account. Please do not respond to this message.")
-    smtplib.sendmail(None, [email["from"]], msg.as_string())
+def mitigate_phishing(url):
+    # Extract the domain name from the URL
+    domain = urlparse(url).netloc
 
+    # Check if the domain is in the phishing database
+    with open("phishing_database.txt", "r") as f:
+        for line in f:
+            if line.strip() == domain:
+                return True
+    return False
+
+# Main function to run the script
 def main():
-    with open("emails.txt") as f:
-        emails = [EmailMessage().parse(line) for line in f]
-    
-    for email in emails:
-        if detect_phishing_attack(email):
-            mitigate_phishing_attack(email)
+    # Get the URL from the user
+    url = input("Enter the URL you want to check: ")
+
+    # Check if the URL is a phishing site
+    if is_phishing(url):
+        print("This URL is a phishing site!")
+    else:
+        print("This URL is not a phishing site.")
+
+# Run the main function
+if __name__ == "__main__":
+    main()
