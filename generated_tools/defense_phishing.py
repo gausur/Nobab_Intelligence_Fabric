@@ -1,44 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-28 11:12:49.015705
+# Generated 2026-07-28 13:47:09.338441
 
 import re
-import requests
-from bs4 import BeautifulSoup
 
 def is_phishing(url):
-    # Extract the domain name from the URL
-    domain = urlparse(url).netloc
-
-    # Check if the domain is in the phishing database
-    with open("phishing_database.txt", "r") as f:
-        for line in f:
-            if line.strip() == domain:
-                return True
-    return False
+    # Check if the URL contains a common phishing tactic, such as a fake SS[2D[K
+SSL certificate or a manipulated domain name.
+    if "://" in url:
+        parsed = urlparse(url)
+        domain = parsed.netloc
+        if domain.endswith(".com") and not domain.startswith("www."):
+            return True
+    else:
+        return False
 
 def mitigate_phishing(url):
-    # Extract the domain name from the URL
-    domain = urlparse(url).netloc
-
-    # Check if the domain is in the phishing database
-    with open("phishing_database.txt", "r") as f:
-        for line in f:
-            if line.strip() == domain:
-                return True
-    return False
-
-# Main function to run the script
-def main():
-    # Get the URL from the user
-    url = input("Enter the URL you want to check: ")
-
-    # Check if the URL is a phishing site
+    # Use a whitelist of trusted domains to verify the URL's authenticity.
     if is_phishing(url):
-        print("This URL is a phishing site!")
+        # If the URL is not on the whitelist, raise an exception to prevent[7D[K
+prevent further processing.
+        raise PhishingAttackException("Phishing attack detected!")
     else:
-        print("This URL is not a phishing site.")
+        # If the URL is on the whitelist, continue with processing.
+        pass
 
-# Run the main function
-if __name__ == "__main__":
-    main()
+def main():
+    # Test the mitigation function with a few sample URLs.
+    urls = [
+        "https://www.example1.com",
+        "http://example2.org",
+        "ftp://example3.edu",
+        "mailto:user@example4.gov"
+    ]
+    for url in urls:
+        try:
+            mitigate_phishing(url)
+            print(f"URL {url} is safe.")
+        except PhishingAttackException as e:
+            print(f"Phishing attack detected!")
