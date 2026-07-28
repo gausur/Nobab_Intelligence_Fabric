@@ -1,41 +1,64 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-27 23:00:25.787247
+# Generated 2026-07-28 00:03:08.095095
 
 import os
-import sys
-import hashlib
+import time
 import json
-from base64 import b64decode
+from collections import deque
 
-def detect_ransomware(filepath):
-    """Detects ransomware attacks by checking if the file is encoded using [K
-a specific algorithm."""
-    with open(filepath, "rb") as f:
-        data = f.read()
-        b64data = b64decode(data)
-        hash_val = hashlib.md5(b64data).hexdigest()
-        if hash_val == "28a9d4017d63ca4b3cb69b2003eac1d1":
-            return True
-    return False
+class RansomwareDetector:
+    def __init__(self, max_size=100):
+        self.max_size = max_size
+        self.deque = deque(maxlen=max_size)
+        self.data = {}
 
-def mitigate_ransomware(filepath):
-    """Mitigates ransomware attacks by decrypting the file using a specific[8D[K
-specific key."""
-    with open(filepath, "rb") as f:
-        data = f.read()
-        b64data = b64decode(data)
-        key = "ransomware_decryption_key"
-        decrypted_data = b64decode(b64data.replace(key, ""))
-        with open(filepath + ".dec", "wb") as f:
-            f.write(decrypted_data)
+    def append(self, data):
+        if len(self.deque) == self.max_size:
+            self.popleft()
+        self.deque.append(data)
+        self.data[data["timestamp"]] = data
+
+    def popleft(self):
+        oldest_key = min(self.data, key=lambda k: self.data[k]["timestamp"][25D[K
+self.data[k]["timestamp"])
+        del self.data[oldest_key]
+        return self.deque.popleft()
+
+    def get_stats(self):
+        stats = {
+            "total_files": len(self.data),
+            "unique_files": len(set(self.data)),
+            "new_files": len([d for d in self.data if d["is_new"]]),
+            "old_files": len([d for d in self.data if not d["is_new"]])
+        }
+        return stats
+
+    def save(self, filename):
+        with open(filename, "w") as f:
+            json.dump(self.data, f)
+
+    def load(self, filename):
+        with open(filename, "r") as f:
+            self.data = json.load(f)
 
 def main():
-    filepath = sys.argv[1]
-    if detect_ransomware(filepath):
-        mitigate_ransomware(filepath)
-    else:
-        print("This is not a ransomware attack.")
+    detector = RansomwareDetector()
+    while True:
+        try:
+            # Check for new files in the current directory
+            for file in os.listdir("."):
+                if not os.path.isfile(file):
+                    continue
+                # Check if the file is new or old
+                if os.path.getctime(file) > time.time() - 60 * 60 * 24:
+                    detector.append({"filename": file, "is_new": True})
+                else:
+                    detector.append({"filename": file, "is_new": False})
+            # Save the statistics to a file
+            detector.save("ransomware_stats.json")
+        except KeyboardInterrupt:
+            break
 
 if __name__ == "__main__":
     main()
