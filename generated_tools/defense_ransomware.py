@@ -1,32 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-28 19:13:25.906448
+# Generated 2026-07-28 21:02:10.292411
 
 import os
 import subprocess
 import re
-import shutil
+
+def detect_ransomware(directory):
+    # Check if the directory contains any encrypted files
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if re.search(r'^encrypted\w+', file):
+                return True
+    return False
+
+def mitigate_ransomware(directory):
+    # Recursively remove all encrypted files and directories
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if re.search(r'^encrypted\w+', file):
+                os.remove(os.path.join(root, file))
+        for dir in dirs:
+            if re.search(r'^encrypted\w+', dir):
+                os.rmdir(os.path.join(root, dir))
+    return True
 
 def main():
-    # Check if the system is infected with ransomware
-    if is_infected():
-        print("Infection detected!")
-        # Mitigate the infection by restoring the system to its original st[2D[K
-state
-        restore()
+    # Check the current directory and all subdirectories for encrypted file[4D[K
+files and directories
+    if detect_ransomware(os.getcwd()):
+        mitigate_ransomware(os.getcwd())
+        print('Ransomware detected and mitigated.')
     else:
-        print("No infection detected.")
+        print('No ransomware detected.')
 
-def is_infected():
-    # Check if the system is running a known ransomware program
-    output = subprocess.run(["ransomware_checker"], capture_output=True, te[2D[K
-text=True)
-    if re.search("Ransomware detected", output.stdout):
-        return True
-    else:
-        return False
-
-def restore():
-    # Restore the system to its original state by overwriting all files wit[3D[K
-with a backup copy
-    shutil.copyfile("backup_files/original_system", "/")
+if __name__ == '__main__':
+    main()
