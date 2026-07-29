@@ -1,65 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-28 19:12:37.748647
+# Generated 2026-07-29 05:16:47.111339
 
 import re
-import urllib.parse
-from email import message_from_string
+import urllib.request
+from html.parser import HTMLParser
 
-def detect_phishing(email):
-    # Extract the subject and body of the email
-    subject = email['Subject']
-    body = email.get_payload()
+class PhishingDetector(HTMLParser):
+    def __init__(self, url):
+        super().__init__()
+        self.url = url
+        self.target_domain = urllib.request.urlopen(url).getheader('host')
+        self.phish_detected = False
 
-    # Check for spelling mistakes in the subject line
-    if len(re.findall(r'[a-z]', subject)) < 5:
-        return True
+    def handle_starttag(self, tag, attrs):
+        if tag == 'a':
+            for key, value in attrs:
+                if key == 'href' and not re.match(r'^https?://' + self.targ[9D[K
+self.target_domain + '/', value):
+                    self.phish_detected = True
 
-    # Check for suspicious URLs in the body of the email
-    urls = re.findall(r'https?://\S+', body)
-    for url in urls:
-        try:
-            parsed_url = urllib.parse.urlsplit(url)
-            if parsed_url.netloc == 'example.com':
-                return True
-        except ValueError:
-            continue
+    def handle_endtag(self, tag):
+        pass
 
-    # Check for suspicious keywords in the body of the email
-    keywords = ['phish', 'scam', 'hack']
-    for keyword in keywords:
-        if keyword in body.lower():
-            return True
+    def handle_data(self, data):
+        if not self.phish_detected:
+            if re.search(r'^https?://' + self.target_domain + '/', data):
+                self.phish_detected = True
 
-    return False
+    def error(self, message):
+        pass
 
-def mitigate_phishing(email):
-    # Remove any suspicious links or attachments from the email
-    for part in email.walk():
-        if part.get_content_maintype() == 'multipart':
-            continue
-        if part.get('Content-Disposition') and part['Content-Disposition'].[28D[K
-part['Content-Disposition'].startswith('attachment'):
-            return True
-        if part.get('Content-Disposition') and part['Content-Disposition'].[28D[K
-part['Content-Disposition'].startswith('inline'):
-            return False
-
-    # Remove any suspicious content from the email body
-    body = email.get_payload()
-    for keyword in keywords:
-        if keyword in body.lower():
-            body = re.sub(keyword, '', body)
-    email.set_payload(body)
+def detect_phishing(url):
+    detector = PhishingDetector(url)
+    with urllib.request.urlopen(url) as response:
+        html = response.read().decode('utf-8')
+        detector.feed(html)
+    return detector.phish_detected
 
 def main():
-    # Load the email message from a file or other source
-    with open('email.txt') as f:
-        email = message_from_string(f.read())
+    url = input("Enter a URL: ")
+    if detect_phishing(url):
+        print("Possible phishing attack detected!")
+    else:
+        print("No phishing attacks detected.")
 
-    # Detect and mitigate phishing attacks
-    if detect_phishing(email):
-        mitigate_phishing(email)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
