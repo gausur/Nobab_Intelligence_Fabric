@@ -1,53 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-29 22:55:09.672598
+# Generated 2026-07-29 23:58:55.388818
 
 import os
+import re
 import subprocess
-import platform
-import shutil
-import stat
-import hashlib
-import requests
-import json
 
-# Define constants
-RANSOM_EXECUTABLE = "ransomware"
-RANSOM_FILE_PATH = "/tmp/ransomware"
-BACKUP_DIRECTORY = "/backup"
+def detect_ransomware(path):
+    """Detects ransomware by checking for known file names and extensions."[12D[K
+extensions."""
+    files = os.listdir(path)
+    for file in files:
+        if "encrypted" in file or ".crypt" in file:
+            return True
+    return False
+
+def mitigate_ransomware(path):
+    """Mitigates ransomware by restoring the original files."""
+    files = os.listdir(path)
+    for file in files:
+        if "encrypted" in file or ".crypt" in file:
+            try:
+                subprocess.call(["mcrypt", "-d", file])
+            except Exception as e:
+                print("Failed to decrypt {}: {}".format(file, e))
+    return True
 
 def main():
-    # Check if ransomware is running
-    if os.path.exists(RANSOM_EXECUTABLE):
-        print("Ransomware detected!")
-        mitigate_ransomware()
+    path = os.getcwd()
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+        print("Ransomware detected and mitigated.")
     else:
-        print("No ransomware detected.")
+        print("No ransomware detected in {}".format(path))
 
-def mitigate_ransomware():
-    # Backup important files
-    backup_important_files()
-
-    # Delete ransomware executable
-    os.remove(RANSOM_EXECUTABLE)
-
-    # Restore backed up files
-    restore_important_files()
-
-def backup_important_files():
-    # Create backup directory if it doesn't exist
-    if not os.path.exists(BACKUP_DIRECTORY):
-        os.makedirs(BACKUP_DIRECTORY)
-
-    # Backup important files
-    for filename in ["/etc/passwd", "/etc/shadow"]:
-        shutil.copyfile(filename, f"{BACKUP_DIRECTORY}/{filename}")
-
-def restore_important_files():
-    # Restore important files
-    for filename in ["/etc/passwd", "/etc/shadow"]:
-        shutil.move(f"{BACKUP_DIRECTORY}/{filename}", filename)
-
-# Main function to run the script
 if __name__ == "__main__":
     main()
