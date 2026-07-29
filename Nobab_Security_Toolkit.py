@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Nobab Security Toolkit – Auto‑generated from 3 threat intelligence entries.
-Build date: 2026-07-29T09:21:40.214250
+Nobab Security Toolkit – Auto‑generated from 2 threat intelligence entries.
+Build date: 2026-07-29T14:41:18.862854
 This toolkit performs basic threat detection and logging.
 """
 
@@ -45,6 +45,5 @@ if __name__ == "__main__":
 
 
 # Threat intelligence used:
-# 1. {'keyword': 'phishing', 'time': 1785315018.7849019}
-# 2. {'keyword': 'zero day exploit', 'time': 1785315049.6106124}
-# 3. {'keyword': 'ransomware', 'time': 1785314987.0212793}
+# 1. {'keyword': 'zero day exploit', 'time': 1785335013.7473783}
+# 2. {'keyword': 'ransomware', 'time': 1785334976.0211596}
