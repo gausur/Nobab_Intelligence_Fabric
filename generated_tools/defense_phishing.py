@@ -1,49 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-29 05:16:47.111339
+# Generated 2026-07-29 08:27:48.472337
 
 import re
-import urllib.request
-from html.parser import HTMLParser
+import requests
+from urllib.parse import urlparse
 
-class PhishingDetector(HTMLParser):
-    def __init__(self, url):
-        super().__init__()
-        self.url = url
-        self.target_domain = urllib.request.urlopen(url).getheader('host')
-        self.phish_detected = False
+def is_phishing(url):
+    # Check if the URL has the typical scheme, hostname, and path
+    pattern = r'^https?://([A-Za-z0-9\-]+)\.([A-Za-z0-9\-]+)/'
+    match = re.search(pattern, url)
+    if not match:
+        return False
 
-    def handle_starttag(self, tag, attrs):
-        if tag == 'a':
-            for key, value in attrs:
-                if key == 'href' and not re.match(r'^https?://' + self.targ[9D[K
-self.target_domain + '/', value):
-                    self.phish_detected = True
+    # Check if the URL is pointing to a known phishing domain
+    hostname = match.group(1)
+    if hostname in ['phishingdomain.com', 'anotherphishingdomain.net']:
+        return True
 
-    def handle_endtag(self, tag):
-        pass
+    # Check if the URL contains any suspicious parameters or query strings
+    parsed_url = urlparse(url)
+    query_params = parsed_url.query
+    for param, value in parse_qs(query_params).items():
+        if param.lower() == 'phish' and value[0].lower() == 'true':
+            return True
 
-    def handle_data(self, data):
-        if not self.phish_detected:
-            if re.search(r'^https?://' + self.target_domain + '/', data):
-                self.phish_detected = True
+    return False
 
-    def error(self, message):
-        pass
+def mitigate_phishing(url):
+    # Redirect the user to a safe landing page
+    response = requests.get('https://example.com/safe-landing')
+    return response.text
 
-def detect_phishing(url):
-    detector = PhishingDetector(url)
-    with urllib.request.urlopen(url) as response:
-        html = response.read().decode('utf-8')
-        detector.feed(html)
-    return detector.phish_detected
-
-def main():
-    url = input("Enter a URL: ")
-    if detect_phishing(url):
-        print("Possible phishing attack detected!")
-    else:
-        print("No phishing attacks detected.")
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    url = input('Enter URL: ')
+    if is_phishing(url):
+        mitigate_phishing(url)
