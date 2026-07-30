@@ -1,46 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-30 22:06:35.247996
+# Generated 2026-07-30 23:57:04.043128
 
 import re
-import urllib.parse
-from http import HTTPStatus
+import requests
 
 def is_phishing(url):
-    """
-    Detects if a URL is a phishing attack or not
-    Args:
-        url (str): The URL to be checked
-    Returns:
-        bool: True if the URL is a phishing attack, False otherwise
-    """
-    parsed_url = urllib.parse.urlparse(url)
-    domain = "{0}://{1}{2}".format(parsed_url.scheme, parsed_url.netloc, pa[2D[K
-parsed_url.path)
-    if "?" in parsed_url.query:
-        query_params = urllib.parse.parse_qs(parsed_url.query[1:])
-        for key, value in query_params.items():
-            if key == "username" or key == "password":
+    if not url:
+        return False
+    parsed = urlparse(url)
+    domain = parsed.netloc
+    if not domain:
+        return False
+    try:
+        whois_data = get_whois_data(domain)
+        if whois_data and "registrar" in whois_data:
+            registrar = whois_data["registrar"]
+            if registrar == "GoDaddy" or registrar == "Bluehost":
                 return True
-    if "://" not in domain:
-        return False
-    domain_parts = domain.split(".")
-    if len(domain_parts) < 2:
-        return False
-    for part in domain_parts:
-        if re.match(r"^[0-9]{3,}$", part):
-            return True
+    except Exception as e:
+        print(f"Error while checking phishing status of {url}: {e}")
     return False
 
-def mitigate_phishing(url):
-    """
-    Mitigates a phishing attack by redirecting the user to a safe URL
-    Args:
-        url (str): The URL to be mitigated
-    Returns:
-        str: The new URL to be redirected to
-    """
+def get_whois_data(domain):
+    try:
+        whois_response = requests.get(f"https://whois.internic.net/{domain}[50D[K
+requests.get(f"https://whois.internic.net/{domain}").text
+        whois_parser = whois.Parser()
+        return whois_parser.parse_domains([whois_response])[0]
+    except Exception as e:
+        print(f"Error while retrieving WHOIS data for {domain}: {e}")
+
+def main():
+    url = "https://www.example.com"
     if is_phishing(url):
-        return "https://example.com"
+        print("This URL is a phishing site!")
     else:
-        return url
+        print("This URL is not a phishing site.")
+
+if __name__ == "__main__":
+    main()
