@@ -1,26 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-30 19:13:25.045156
+# Generated 2026-07-30 21:03:41.731980
 
+import socket
 import os
-import json
-import subprocess
 
-def get_system_info():
-    # Get system information
-    pass
+def detect_ransomware(ip, port):
+    try:
+        s = socket.socket()
+        s.connect((ip, port))
+        s.send("Hello!".encode())
+        response = s.recv(1024)
+        if "RANSOMWARE" in response.decode():
+            return True
+    except:
+        pass
+    return False
 
-def check_for_ransomware():
-    # Check for ransomware infection
-    pass
+def mitigate_ransomware(ip, port):
+    try:
+        s = socket.socket()
+        s.connect((ip, port))
+        s.send("CANCEL".encode())
+        response = s.recv(1024)
+        if "CANCELED" in response.decode():
+            return True
+    except:
+        pass
+    return False
 
-def mitigate_ransomware(infection):
-    # Mitigate the ransomware infection
-    pass
+def main():
+    ip = input("Enter IP address: ")
+    port = input("Enter port number: ")
+    if detect_ransomware(ip, port):
+        mitigate_ransomware(ip, port)
+        print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")
 
-if __name__ == '__main__':
-    # Run the script with the following command: python ransomware_mitigati[19D[K
-ransomware_mitigation.py
-    get_system_info()
-    check_for_ransomware()
-    mitigate_ransomware()
+if __name__ == "__main__":
+    main()
