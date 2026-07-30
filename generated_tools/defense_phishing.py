@@ -1,32 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-30 15:08:39.165740
+# Generated 2026-07-30 17:21:42.292706
 
 import re
-import requests
-from bs4 import BeautifulSoup
 
-def is_phishing_site(url):
-    # Check if the URL is a known phishing site using the PhishTank API
-    api_key = "YOUR_API_KEY"
-    url_hash = hashlib.md5(url.encode()).hexdigest()
-    response = requests.get("https://api.phishtank.com/data/online-phish-de[60D[K
-requests.get("https://api.phishtank.com/data/online-phish-detail?&rt=1&uri=requests.get("https://api.phishtank.com/data/online-phish-deail?&rt=1&uri=" + url_hash, headers={"Authorization": "Bearer " + api_key})
-    if response.status_code == 200:
-        data = response.json()
-        if data["responseCode"] == 1:
-            return True
+def is_phishing_url(url):
+    """Check if the URL is a phishing website."""
+    # Check for common phishing patterns in the domain name
+    pattern = r"\.co\.uk$|\.ru$|\.gov$|\.mil$|\.edu$|\.gov$|\.net$|\.org$|\[61D[K
+r"\.co\.uk$|\.ru$|\.gov$|\.mil$|\.edu$|\.gov$|\.net$|\.org$|\.com$|\.biz$"
+    if re.search(pattern, url):
+        return True
+    
+    # Check for common phishing patterns in the URL path
+    pattern = r"/phishing\.html?$|/phish\.php?$"
+    if re.search(pattern, url):
+        return True
+    
+    # Check for common phishing patterns in the query string
+    pattern = r"q=|query=|keyword="
+    if re.search(pattern, url):
+        return True
+    
     return False
 
-def mitigate_phishing_attack(url, user_agent, referer):
-    # Check if the URL is a phishing site using the above function
-    if is_phishing_site(url):
-        # If it's a phishing site, send a 403 status code to the client and[3D[K
-and log the incident
-        return "HTTP/1.0 403 Forbidden\r\nContent-Type: text/plain\r\n\r\nP[19D[K
-text/plain\r\n\r\nPhishing attack detected", 403
-    else:
-        # If it's not a phishing site, proceed with the normal request hand[4D[K
-handling
-        return "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n<html><bo[26D[K
-text/html\r\n\r\n<html><body>Hello, world!</body></html>", 200
+def mitigate_phishing_attack():
+    """Mitigate a phishing attack by redirecting the user to a safe website[7D[K
+website."""
+    # Redirect the user to a known and trusted website
+    print("Location: https://www.example.com/")
+    print("Content-Type: text/html")
+    print("Status: 302 Found")
+    print("Set-Cookie: session=deleted; Expires=Thu, 01 Jan 1970 00:00:00 G[1D[K
+GMT")
+
+if __name__ == "__main__":
+    url = input("Enter the URL to check for phishing attacks: ")
+    if is_phishing_url(url):
+        mitigate_phishing_attack()
