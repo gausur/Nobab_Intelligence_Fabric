@@ -1,41 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-29 23:57:30.833465
+# Generated 2026-07-30 01:45:46.965835
 
 import re
 import urllib.parse
-from typing import List, Dict, Tuple
+from email import message_from_bytes
 
-def extract_domain(url: str) -> str:
-    """Extract the domain name from a URL."""
-    return urllib.parse.urlsplit(url).netloc
+def detect_phishing(email_message):
+    # Check if the email is from a legitimate sender
+    sender = email_message["From"]
+    if not is_legitimate_sender(sender):
+        return False
+    
+    # Check if the email contains a link to a suspicious domain
+    for part in email_message.walk():
+        if part.get_content_type() == "text/html":
+            body = part.get_payload()
+            links = re.findall(r"https?://[^\s]+", body)
+            for link in links:
+                url = urllib.parse.urlparse(link)
+                if is_suspicious_domain(url.hostname):
+                    return False
+    
+    # Check if the email contains a malicious attachment
+    for part in email_message.walk():
+        if part.get_content_type() == "application/octet-stream":
+            name = part.get_filename()
+            if name and is_malicious(name):
+                return False
+    
+    # If none of the above checks failed, the email is likely legitimate
+    return True
 
-def is_phishing_site(url: str) -> bool:
-    """Check if the URL is a phishing site based on its domain name."""
-    domain = extract_domain(url)
-    blacklisted_domains: List[str] = ["example.com", "fake-bank.org"]
-    for blacklisted_domain in blacklisted_domains:
-        if domain == blacklisted_domain:
-            return True
-    return False
+def is_legitimate_sender(sender):
+    # Check if the sender's domain is known to be legitimate
+    domain = urllib.parse.urlparse(sender).hostname
+    return domain in legitimate_domains
 
-def mitigate_phishing(url: str) -> Tuple[str, Dict[str, str]]:
-    """Mitigate a phishing attack by redirecting the user to a safe URL."""[7D[K
-URL."""
-    domain = extract_domain(url)
-    redirect_url = f"https://www.google.com/search?q={domain}"
-    headers = {"Content-Type": "text/html; charset=UTF-8"}
-    return (redirect_url, headers)
+def is_suspicious_domain(domain):
+    # Check if the domain is known to be suspicious
+    return domain in suspicious_domains
 
-def main():
-    """Main function to detect and mitigate phishing attacks."""
-    url = "https://example.com"
-    if is_phishing_site(url):
-        print("Phishing attack detected!")
-        redirect_url, headers = mitigate_phishing(url)
-        with open(redirect_url, "r") as f:
-            content = f.read()
-        return (content, headers)
-    else:
-        print("No phishing attack detected.")
-        return None
+def is_malicious(name):
+    # Check if the attachment name is known to be malicious
+    return name in malicious_attachments
+
+legitimate_domains = ["example.com", "gmail.com"]
+suspicious_domains = ["phishing.site", "scam.org"]
+malicious_attachments = ["virus.exe", "ransomware.exe"]
