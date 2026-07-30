@@ -1,50 +1,65 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-30 01:45:46.965835
+# Generated 2026-07-30 10:16:41.967512
 
 import re
-import urllib.parse
-from email import message_from_bytes
+import smtplib
+from email.message import EmailMessage
 
-def detect_phishing(email_message):
-    # Check if the email is from a legitimate sender
-    sender = email_message["From"]
-    if not is_legitimate_sender(sender):
-        return False
+def check_for_phishing(email):
+    """
+    Check if an email is a phishing attempt by looking for common patterns [K
+and keywords.
     
-    # Check if the email contains a link to a suspicious domain
-    for part in email_message.walk():
-        if part.get_content_type() == "text/html":
-            body = part.get_payload()
-            links = re.findall(r"https?://[^\s]+", body)
-            for link in links:
-                url = urllib.parse.urlparse(link)
-                if is_suspicious_domain(url.hostname):
-                    return False
+    Args:
+        email (str): The email message to be analyzed.
+        
+    Returns:
+        bool: True if the email is a phishing attack, False otherwise.
+    """
+    # Check for common phishing patterns
+    if re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$", email[5D[K
+email) and re.search(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b"[64D[K
+re.search(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}\b", email):
+        # Check for suspicious keywords
+        if "phishing" in email or "scam" in email:
+            return True
+    return False
+
+def mitigate_phishing(email):
+    """
+    Mitigate a phishing attack by sending an alert to the recipient and fla[3D[K
+flagging the message as spam.
     
-    # Check if the email contains a malicious attachment
-    for part in email_message.walk():
-        if part.get_content_type() == "application/octet-stream":
-            name = part.get_filename()
-            if name and is_malicious(name):
-                return False
+    Args:
+        email (str): The email message to be analyzed.
+    """
+    # Send an alert to the recipient
+    msg = EmailMessage()
+    msg["Subject"] = "Phishing Attempt Detected"
+    msg["From"] = "noreply@example.com"
+    msg["To"] = email["from"]
+    msg.set_content("We have detected a phishing attempt in your message an[2D[K
+and have flagged it as spam. Please be cautious when clicking on links or p[1D[K
+providing personal information.")
+    s = smtplib.SMTP("localhost")
+    s.send_message(msg)
     
-    # If none of the above checks failed, the email is likely legitimate
-    return True
+    # Flag the message as spam
+    email["flags"] = "spam"
 
-def is_legitimate_sender(sender):
-    # Check if the sender's domain is known to be legitimate
-    domain = urllib.parse.urlparse(sender).hostname
-    return domain in legitimate_domains
+def main():
+    """
+    Main function to check and mitigate phishing attacks.
+    """
+    while True:
+        # Read an email from stdin
+        email = input()
+        
+        # Check if the email is a phishing attack
+        if check_for_phishing(email):
+            # Mitigate the phishing attack
+            mitigate_phishing(email)
 
-def is_suspicious_domain(domain):
-    # Check if the domain is known to be suspicious
-    return domain in suspicious_domains
-
-def is_malicious(name):
-    # Check if the attachment name is known to be malicious
-    return name in malicious_attachments
-
-legitimate_domains = ["example.com", "gmail.com"]
-suspicious_domains = ["phishing.site", "scam.org"]
-malicious_attachments = ["virus.exe", "ransomware.exe"]
+if __name__ == "__main__":
+    main()
