@@ -1,47 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-30 21:00:49.658324
+# Generated 2026-07-30 22:06:35.247996
 
 import re
-import socket
-import urllib.request
-from email.utils import parseaddr
+import urllib.parse
+from http import HTTPStatus
 
-def is_phishing_url(url):
-    # Check if the URL has a known phishing domain
-    for domain in PHISHING_DOMAINS:
-        if domain in url:
+def is_phishing(url):
+    """
+    Detects if a URL is a phishing attack or not
+    Args:
+        url (str): The URL to be checked
+    Returns:
+        bool: True if the URL is a phishing attack, False otherwise
+    """
+    parsed_url = urllib.parse.urlparse(url)
+    domain = "{0}://{1}{2}".format(parsed_url.scheme, parsed_url.netloc, pa[2D[K
+parsed_url.path)
+    if "?" in parsed_url.query:
+        query_params = urllib.parse.parse_qs(parsed_url.query[1:])
+        for key, value in query_params.items():
+            if key == "username" or key == "password":
+                return True
+    if "://" not in domain:
+        return False
+    domain_parts = domain.split(".")
+    if len(domain_parts) < 2:
+        return False
+    for part in domain_parts:
+        if re.match(r"^[0-9]{3,}$", part):
             return True
     return False
 
-def mitigate_phishing_attack(request, response):
-    # Check if the request is from a phishing URL
-    url = parseaddr(request.url)[1]
-    if is_phishing_url(url):
-        # Block the request and send a warning message to the user
-        response.status_code = 403
-        return "<html><body>Phishing attempt blocked</body></html>"
+def mitigate_phishing(url):
+    """
+    Mitigates a phishing attack by redirecting the user to a safe URL
+    Args:
+        url (str): The URL to be mitigated
+    Returns:
+        str: The new URL to be redirected to
+    """
+    if is_phishing(url):
+        return "https://example.com"
     else:
-        # Proceed with the original request
-        return None
-
-# List of known phishing domains
-PHISHING_DOMAINS = ["phish.io", "example.com"]
-
-# Create a socket to listen for incoming requests
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind(("localhost", 80))
-    s.listen()
-
-while True:
-    # Accept an incoming request
-    conn, addr = s.accept()
-    with conn:
-        print("Connected by", addr)
-        # Read the request data
-        request = urllib.request.urlopen(conn)
-        # Check if the request is from a phishing URL
-        response = mitigate_phishing_attack(request, conn.recv())
-        # Send the modified response back to the client
-        if response:
-            conn.sendall(response.encode("utf-8"))
+        return url
