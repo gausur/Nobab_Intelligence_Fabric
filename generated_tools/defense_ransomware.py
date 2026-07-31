@@ -1,43 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-07-31 22:00:19.192429
+# Generated 2026-07-31 23:01:59.159413
 
 import os
+import stat
+import shutil
 import subprocess
-import socket
-import time
 
-def is_ransomware(ip):
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((ip, 80))
-        request = b'GET / HTTP/1.1\r\nHost: www.example.com\r\n\r\n'
-        sock.sendall(request)
-        response = sock.recv(4096)
-        if b'Ransomware' in response:
-            return True
-        else:
-            return False
-    except socket.error as e:
-        print('Connection error:', e)
-        return None
+def detect_ransomware():
+    """Detects ransomware by checking for unusual file permissions and owne[4D[K
+ownership"""
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            path = os.path.join(root, file)
+            mode = stat.S_IMODE(os.stat(path).st_mode)
+            if mode & 0o600 == 0 and mode >> 6 != 2:
+                return True
+    return False
 
-def mitigate_ransomware(ip):
-    try:
-        subprocess.check_call(['iptables', '-A', 'INPUT', '-p', 'tcp', '-s'[4D[K
-'-s', ip, '-j', 'DROP'])
-        print('Ransomware detected and mitigated')
-    except subprocess.CalledProcessError as e:
-        print('Mitigation failed:', e)
+def mitigate_ransomware():
+    """Mitigates ransomware by restoring the file permissions and ownership[9D[K
+ownership"""
+    for root, dirs, files in os.walk('/'):
+        for file in files:
+            path = os.path.join(root, file)
+            mode = stat.S_IMODE(os.stat(path).st_mode)
+            if mode & 0o600 == 0 and mode >> 6 != 2:
+                subprocess.run(['chmod', '755', path])
+                subprocess.run(['chown', 'root:root', path])
+    return True
 
-def main():
-    while True:
-        ip = input('Enter the IP address of the ransomware server: ')
-        if is_ransomware(ip):
-            mitigate_ransomware(ip)
-        else:
-            print('No ransomware detected')
-        time.sleep(60) # check every 60 seconds
-
-if __name__ == '__main__':
-    main()
+if detect_ransomware():
+    mitigate_ransomware()
+else:
+    print("No ransomware detected.")
