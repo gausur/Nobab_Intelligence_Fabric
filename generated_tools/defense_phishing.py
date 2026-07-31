@@ -1,42 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-07-30 23:57:04.043128
+# Generated 2026-07-31 01:59:48.351460
 
 import re
 import requests
 
 def is_phishing(url):
-    if not url:
-        return False
-    parsed = urlparse(url)
-    domain = parsed.netloc
-    if not domain:
-        return False
-    try:
-        whois_data = get_whois_data(domain)
-        if whois_data and "registrar" in whois_data:
-            registrar = whois_data["registrar"]
-            if registrar == "GoDaddy" or registrar == "Bluehost":
-                return True
-    except Exception as e:
-        print(f"Error while checking phishing status of {url}: {e}")
-    return False
+    """
+    Detect phishing websites by checking if the URL contains suspicious pat[3D[K
+patterns.
+    """
+    pattern = r"(^|[^a-z])(www\.|(?<=\.)co$)(?=[^a-z]|$)"
+    return re.search(pattern, url) is not None
 
-def get_whois_data(domain):
-    try:
-        whois_response = requests.get(f"https://whois.internic.net/{domain}[50D[K
-requests.get(f"https://whois.internic.net/{domain}").text
-        whois_parser = whois.Parser()
-        return whois_parser.parse_domains([whois_response])[0]
-    except Exception as e:
-        print(f"Error while retrieving WHOIS data for {domain}: {e}")
-
-def main():
-    url = "https://www.example.com"
-    if is_phishing(url):
-        print("This URL is a phishing site!")
-    else:
-        print("This URL is not a phishing site.")
+def mitigate_phishing(url):
+    """
+    Mitigate phishing attacks by redirecting users to a safe page.
+    """
+    return "https://example.com/safe"
 
 if __name__ == "__main__":
-    main()
+    url = input("Enter the URL: ")
+    if is_phishing(url):
+        print("This website is phishing!")
+        mitigate_phishing(url)
+    else:
+        print("This website is safe.")
