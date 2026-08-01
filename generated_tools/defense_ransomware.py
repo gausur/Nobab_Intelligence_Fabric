@@ -1,33 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-01 07:25:14.046282
+# Generated 2026-08-01 09:55:08.815142
 
 import os
+import socket
 import subprocess
+from pathlib import Path
 
-def detect_ransomware():
-    # Check for the presence of ransomware files
-    if not os.path.exists("ransomware_flag"):
+def detect_ransomware(file):
+    # Check if the file is a Windows executable
+    if not file.endswith('.exe'):
         return False
+    
+    # Check if the file has a known ransomware signature
+    for sig in ['EICAR', 'Win32/DOSkiller!']:
+        if sig in file.read_text():
+            return True
+    
+    return False
 
-    # Check if the ransomware is active by running a command to encrypt a f[1D[K
-file
-    result = subprocess.run(["encrypt", "test_file"], stdout=subprocess.PIP[21D[K
-stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+def mitigate_ransomware(file):
+    # Remove the file from the system
+    os.remove(file)
 
-    # If the encryption process was successful, it means that the ransomwar[9D[K
-ransomware is active
-    if result.returncode == 0:
-        return True
+# Walk through all files and directories on the system
+for root, dirs, files in os.walk('/'):
+    for f in files:
+        if detect_ransomware(Path(root, f)):
+            mitigate_ransomware(Path(root, f))
 
-    # If the encryption process failed, it's likely that the ransomware is [K
-not active
-    else:
-        return False
-
-def mitigate_ransomware():
-    # Remove any ransomware files and processes
-    subprocess.run(["rm", "-rf", "ransomware_flag"])
-
-if detect_ransomware():
-    mitigate_ransomware()
+# Check for ransomware on network sockets
+for conn in socket.getaddrinfo():
+    if detect_ransomware(conn):
+        mitigate_ransomware(conn)
