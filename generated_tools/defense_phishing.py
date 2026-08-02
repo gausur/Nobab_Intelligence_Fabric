@@ -1,63 +1,66 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-02 10:30:14.545565
+# Generated 2026-08-02 11:59:46.540531
 
 import re
 import smtplib
+from email.parser import Parser
 
-def check_email(email):
-    """Check if an email is a phishing attempt."""
-    regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if not re.match(regex, email):
+def is_phishing_email(email):
+    # Check if the email is a spam message
+    if not email.is_spam:
         return False
-    else:
+    
+    # Check if the email contains malicious links or attachments
+    for part in email.parts:
+        if 'Content-Disposition' in part:
+            filename = part.get_filename()
+            if filename and re.search(r'\.(exe|jar|scr)$', filename, re.I):[6D[K
+re.I):
+                return True
+    
+    # Check if the email contains malicious domains or IP addresses
+    for address in email.addresses:
+        host = address.host.lower()
+        if host == 'google.com' or host.endswith('.google.com'):
+            continue
+        elif host == 'gmail.com' or host.endswith('.gmail.com'):
+            return True
+    
+    # Check if the email contains malicious content or keywords
+    for part in email.parts:
+        content = part.get_content()
+        if re.search(r'\bphishing\b', content, re.I):
+            return True
+    
+    return False
+
+def mitigate_phishing_attack(email):
+    # Send a notification to the sender that their email has been detected [K
+as a phishing attack
+    with smtplib.SMTP('localhost') as server:
+        server.sendmail(email.from_address, email.to_addresses, 'Subject: P[1D[K
+Phishing Attack Detected\nThis email has been flagged as a phishing attack [K
+and will not be delivered to its intended recipient.')
+    
+    # Delete the email from the inbox
+    for part in email.parts:
+        if 'Content-Disposition' in part:
+            filename = part.get_filename()
+            if filename and re.search(r'\.(exe|jar|scr)$', filename, re.I):[6D[K
+re.I):
+                with open(filename, 'rb') as f:
+                    content = f.read()
+                if is_malicious(content):
+                    os.remove(filename)
+
+def is_malicious(content):
+    # Check if the content contains malware or viruses
+    if re.search(r'\bmalware\b', content, re.I):
         return True
-
-def check_sender(sender):
-    """Check if the sender is a legitimate source."""
-    blacklist = ["spam@example.com", "scammer@example.com"]
-    if sender in blacklist:
-        return False
-    else:
+    
+    # Check if the content contains a virus
+    if re.search(r'\bvirus\b', content, re.I):
         return True
-
-def check_subject(subject):
-    """Check if the subject line looks like a phishing attempt."""
-    regex = r"^[a-zA-Z0-9\s]+[:\s]+[a-zA-Z0-9\s]+$"
-    if not re.match(regex, subject):
-        return False
-    else:
-        return True
-
-def check_attachments(attachments):
-    """Check if the email has any suspicious attachments."""
-    for attachment in attachments:
-        extension = os.path.splitext(attachment)[1]
-        if extension not in [".pdf", ".docx", ".xlsx"]:
-            return False
-    return True
-
-def check_message(msg):
-    """Check the message body for phishing attempts."""
-    regex = r"^[a-zA-Z0-9\s]+[:\s]+[a-zA-Z0-9\s]+$"
-    if not re.match(regex, msg.decode("utf-8")):
-        return False
-    else:
-        return True
-
-def main():
-    """Main function to call all the other functions."""
-    email = input("Enter the email address to check: ")
-    sender = email.split("@")[0]
-    subject = input("Enter the subject line: ")
-    attachments = []
-    message = input("Enter the message body: ")
-
-    if check_email(email) and check_sender(sender) and check_subject(subjec[20D[K
-check_subject(subject) and check_attachments(attachments):
-        print("The email is likely a phishing attempt.")
-    else:
-        print("The email is not likely a phishing attempt.")
-
-if __name__ == "__main__":
-    main()
+    
+    return False
