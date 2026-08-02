@@ -1,58 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-02 15:57:27.259777
+# Generated 2026-08-02 16:53:27.337166
 
+import socket
 import os
-import subprocess
-import time
+import shutil
 
-def detect_ransomware(path):
-    # Check if the file exists
-    if not os.path.exists(path):
-        return False
-    
-    # Check if the file is a directory
-    if os.path.isdir(path):
-        return False
-    
-    # Check if the file has the ransomware signature
-    with open(path, "rb") as f:
-        data = f.read()
-        if b"ransomware" in data:
-            return True
-    
-    return False
+# Define the IP address of the server
+server_ip = "192.168.0.1"
 
-def mitigate_ransomware(path):
-    # Check if the file is a directory
-    if os.path.isdir(path):
-        return False
-    
-    # Remove the ransomware signature from the file
-    with open(path, "wb") as f:
-        data = f.read()
-        data = data.replace(b"ransomware", b"")
-        f.write(data)
-    
-    return True
+# Define the port number to listen on
+listen_port = 5000
 
-def main():
-    # Get the current working directory
-    cwd = os.getcwd()
-    
-    # Iterate through all files in the current directory
-    for root, dirs, files in os.walk(cwd):
-        for file in files:
-            path = os.path.join(root, file)
-            
-            # Detect ransomware
-            if detect_ransomware(path):
-                print("Ransomware detected!")
-                
-                # Mitigate ransomware
-                mitigate_ransomware(path)
-                
-                print("Mitigation successful!")
-            
-if __name__ == "__main__":
-    main()
+# Create a TCP server socket
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.bind((server_ip, listen_port))
+    s.listen()
+
+    # Accept an incoming connection
+    conn, addr = s.accept()
+
+    with conn:
+        print("Connected by", addr)
+
+        # Receive the payload from the client
+        data = conn.recv(1024)
+
+        # Check if the payload is a ransomware attack
+        if "ransomware" in data:
+            # Mitigate the attack
+            shutil.rmtree(os.getcwd())
+            print("Mitigated ransomware attack")
+
+# Close the server socket
+s.close()
