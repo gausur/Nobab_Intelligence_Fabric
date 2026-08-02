@@ -1,63 +1,25 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-02 05:22:11.894669
+# Generated 2026-08-02 08:08:55.552762
 
 import os
-import shutil
+import socket
 import subprocess
-import threading
-import time
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    cmd = "gpg --list-keys {}".format(path)
-    try:
-        output = subprocess.check_output(cmd, shell=True)
-        if b"gpg: no ultimately trusted keys" in output:
-            return True
-        else:
-            return False
-    except subprocess.CalledProcessError as e:
-        print("Failed to execute gpg command: {}".format(e))
-        return None
+def detect_ransomware(ip):
+    # Check if the IP address is in the known ransomware list
+    with open("ransomware_list.txt", "r") as f:
+        for line in f:
+            if ip == line.strip():
+                return True
+    return False
 
-def decrypt_file(path):
-    # Decrypt the file using GnuPG
-    cmd = "gpg -d {}".format(path)
-    try:
-        output = subprocess.check_output(cmd, shell=True)
-        print("Decrypted file successfully")
-        return True
-    except subprocess.CalledProcessError as e:
-        print("Failed to decrypt file: {}".format(e))
-        return False
+def mitigate_ransomware(ip):
+    # Shutdown the machine
+    subprocess.run(["shutdown", "-h", "now"])
 
-def mitigate_ransomware(path):
-    # Remove the encrypted file and its backup
-    try:
-        os.remove(path)
-        if path + ".gpg" in glob.glob("*"):
-            os.remove(path + ".gpg")
-        print("Removed encrypted file and its backup")
-    except FileNotFoundError as e:
-        print("Failed to remove encrypted file and its backup: {}".format(e[12D[K
-{}".format(e))
-
-def monitor_directory(path, interval=10):
-    while True:
-        # Check for new files in the directory
-        for file in os.listdir(path):
-            if detect_ransomware(file) == True:
-                print("Detected ransomware attack on {}".format(file))
-                decrypt_file(file)
-                mitigate_ransomware(file)
-        time.sleep(interval)
-
-def main():
-    # Start the monitoring thread
-    monitor_thread = threading.Thread(target=monitor_directory, args=("path[11D[K
-args=("path/to/directory",))
-    monitor_thread.start()
-
+# Main function
 if __name__ == "__main__":
-    main()
+    ip = socket.gethostbyname(socket.gethostname())
+    if detect_ransomware(ip):
+        mitigate_ransomware(ip)
