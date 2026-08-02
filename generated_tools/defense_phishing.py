@@ -1,66 +1,62 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-02 11:59:46.540531
+# Generated 2026-08-02 13:03:26.911567
 
 import re
-import smtplib
-from email.parser import Parser
+import requests
+from bs4 import BeautifulSoup
 
-def is_phishing_email(email):
-    # Check if the email is a spam message
-    if not email.is_spam:
+def is_phishing_attempt(url):
+    # Check if the URL is valid
+    if not url or not re.match(r'^https?://', url):
         return False
-    
-    # Check if the email contains malicious links or attachments
-    for part in email.parts:
-        if 'Content-Disposition' in part:
-            filename = part.get_filename()
-            if filename and re.search(r'\.(exe|jar|scr)$', filename, re.I):[6D[K
-re.I):
-                return True
-    
-    # Check if the email contains malicious domains or IP addresses
-    for address in email.addresses:
-        host = address.host.lower()
-        if host == 'google.com' or host.endswith('.google.com'):
-            continue
-        elif host == 'gmail.com' or host.endswith('.gmail.com'):
-            return True
-    
-    # Check if the email contains malicious content or keywords
-    for part in email.parts:
-        content = part.get_content()
-        if re.search(r'\bphishing\b', content, re.I):
-            return True
-    
-    return False
 
-def mitigate_phishing_attack(email):
-    # Send a notification to the sender that their email has been detected [K
-as a phishing attack
-    with smtplib.SMTP('localhost') as server:
-        server.sendmail(email.from_address, email.to_addresses, 'Subject: P[1D[K
-Phishing Attack Detected\nThis email has been flagged as a phishing attack [K
-and will not be delivered to its intended recipient.')
-    
-    # Delete the email from the inbox
-    for part in email.parts:
-        if 'Content-Disposition' in part:
-            filename = part.get_filename()
-            if filename and re.search(r'\.(exe|jar|scr)$', filename, re.I):[6D[K
-re.I):
-                with open(filename, 'rb') as f:
-                    content = f.read()
-                if is_malicious(content):
-                    os.remove(filename)
+    # Send a HEAD request to the URL and check the status code
+    response = requests.head(url)
+    if response.status_code != 200:
+        return False
 
-def is_malicious(content):
-    # Check if the content contains malware or viruses
-    if re.search(r'\bmalware\b', content, re.I):
+    # Get the HTML content of the page and parse it using BeautifulSoup
+    html = requests.get(url).text
+    soup = BeautifulSoup(html, 'lxml')
+
+    # Check for common phishing tactics such as misleading titles, suspicio[8D[K
+suspicious URLs, and missing security certificates
+    if not soup.title or soup.title.string.lower().startswith('phish'):
         return True
-    
-    # Check if the content contains a virus
-    if re.search(r'\bvirus\b', content, re.I):
+    if not soup.find('img', {'src': re.compile(r'^https?://')):
         return True
-    
-    return False
+    if not soup.find('script', {'src': re.compile(r'^https?://')}):
+        return True
+    if not soup.find('link', {'href': re.compile(r'^https?://'), 'rel': 'st[3D[K
+'stylesheet'}):
+        return True
+    if soup.find('input', {'type': 'password', 'value': re.compile(r'^https[19D[K
+re.compile(r'^https?://')}):
+        return True
+    if soup.find('a', {'href': re.compile(r'^https?://'), 'text': 'Login'})[9D[K
+'Login'}):
+        return True
+    if soup.find('form', {'action': re.compile(r'^https?://')}):
+        return True
+
+    # If the URL is not a phishing attempt, check for suspicious page conte[5D[K
+content
+    if not soup.find('h1', {'class': 'page-title'}):
+        return False
+    if not soup.find('p', {'class': 'page-description'}):
+        return False
+    if not soup.find('div', {'id': 'content'}):
+        return False
+
+    # If the URL is a phishing attempt, block it and display an error messa[5D[K
+message to the user
+    print('Phishing attack detected!')
+    return True
+
+# Test the function with some example URLs
+url = 'http://www.example.com'
+print(is_phishing_attempt(url))  # Should output "False"
+
+url = 'http://www.evil-phishing.com'
+print(is_phishing_attempt(url))  # Should output "True"
