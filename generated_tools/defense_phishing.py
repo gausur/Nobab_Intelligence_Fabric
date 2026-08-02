@@ -1,62 +1,58 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-02 13:03:26.911567
+# Generated 2026-08-02 15:00:21.642227
 
 import re
-import requests
-from bs4 import BeautifulSoup
+import socket
+import dns.resolver
+from urllib.parse import urlparse
 
-def is_phishing_attempt(url):
-    # Check if the URL is valid
-    if not url or not re.match(r'^https?://', url):
+def is_phishing(url):
+    # Check if the URL is a valid HTTP or HTTPS URL
+    parsed_url = urlparse(url)
+    if not (parsed_url.scheme == "http" or parsed_url.scheme == "https"):
         return False
-
-    # Send a HEAD request to the URL and check the status code
-    response = requests.head(url)
-    if response.status_code != 200:
+    
+    # Check if the domain name in the URL is a subdomain of the current web[3D[K
+website
+    hostname = parsed_url.netloc
+    if not hostname:
         return False
-
-    # Get the HTML content of the page and parse it using BeautifulSoup
-    html = requests.get(url).text
-    soup = BeautifulSoup(html, 'lxml')
-
-    # Check for common phishing tactics such as misleading titles, suspicio[8D[K
-suspicious URLs, and missing security certificates
-    if not soup.title or soup.title.string.lower().startswith('phish'):
-        return True
-    if not soup.find('img', {'src': re.compile(r'^https?://')):
-        return True
-    if not soup.find('script', {'src': re.compile(r'^https?://')}):
-        return True
-    if not soup.find('link', {'href': re.compile(r'^https?://'), 'rel': 'st[3D[K
-'stylesheet'}):
-        return True
-    if soup.find('input', {'type': 'password', 'value': re.compile(r'^https[19D[K
-re.compile(r'^https?://')}):
-        return True
-    if soup.find('a', {'href': re.compile(r'^https?://'), 'text': 'Login'})[9D[K
-'Login'}):
-        return True
-    if soup.find('form', {'action': re.compile(r'^https?://')}):
-        return True
-
-    # If the URL is not a phishing attempt, check for suspicious page conte[5D[K
-content
-    if not soup.find('h1', {'class': 'page-title'}):
+    if not hostname.startswith("www."):
+        hostname = "www." + hostname
+    if not hostname.endswith(".com"):
+        hostname += ".com"
+    current_hostname = socket.gethostname()
+    if not current_hostname:
         return False
-    if not soup.find('p', {'class': 'page-description'}):
+    if not current_hostname.endswith(".com"):
+        current_hostname += ".com"
+    if not current_hostname.startswith("www."):
+        current_hostname = "www." + current_hostname
+    if hostname.find(current_hostname) == -1:
         return False
-    if not soup.find('div', {'id': 'content'}):
-        return False
-
-    # If the URL is a phishing attempt, block it and display an error messa[5D[K
-message to the user
-    print('Phishing attack detected!')
-    return True
-
-# Test the function with some example URLs
-url = 'http://www.example.com'
-print(is_phishing_attempt(url))  # Should output "False"
-
-url = 'http://www.evil-phishing.com'
-print(is_phishing_attempt(url))  # Should output "True"
+    
+    # Check if the URL is a suspicious domain or IP address
+    try:
+        resolver = dns.resolver.Resolver()
+        answer = resolver.query(hostname, "A")
+        for rdata in answer:
+            ip_address = str(rdata)
+            if not ip_address.startswith("192."):
+                return True
+    except Exception as e:
+        # If the DNS query fails, assume it's a phishing URL
+        return True
+    
+    # Check if the URL is a suspicious path or query
+    if parsed_url.path != "/" and not parsed_url.path.startswith("/login") [K
+and not parsed_url.path.endswith(".js") and not parsed_url.path.endswith(".[27D[K
+parsed_url.path.endswith(".css"):
+        return True
+    for key, value in parsed_url.query.items():
+        if key != "username" and key != "password" and not value.startswith[16D[K
+value.startswith("192."):
+            return True
+    
+    # If all checks pass, the URL is likely not a phishing attack
+    return False
