@@ -1,42 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-03 21:00:10.849135
+# Generated 2026-08-03 22:03:29.060630
 
 import os
-import hashlib
+import subprocess
 
 def detect_ransomware(file):
-    # Calculate the SHA256 hash of the file
-    with open(file, "rb") as f:
-        data = f.read()
-    hash = hashlib.sha256(data).hexdigest()
-
-    # Check if the hash is in the known bad hash list
-    with open("bad_hashes.txt", "r") as f:
-        bad_hashes = set(f.read().splitlines())
-    if hash in bad_hashes:
-        return True
-    else:
+    # Check if the file is encrypted
+    if not subprocess.run(["gpg", "--list-packets", file], capture_output=T[16D[K
+capture_output=True).stdout:
         return False
+    
+    # Check if the file has been modified since it was created
+    if os.path.getmtime(file) > os.path.getctime(file):
+        return True
+    
+    # Check if the file has been accessed since it was created
+    if os.path.getatime(file) > os.path.getctime(file):
+        return True
+    
+    return False
 
 def mitigate_ransomware(file):
-    # Extract the file name from the path
-    filename = os.path.basename(file)
+    # Decrypt the file using GPG
+    subprocess.run(["gpg", "--decrypt", file])
     
-    # Move the file to a safe location
-    with open(f"safe_{filename}", "wb") as f:
-        f.write(data)
+    # Remove the encrypted version of the file
+    os.remove(file)
 
-# Main loop
-while True:
-    # Wait for a new file to be created in the monitored directory
-    new_file = os.path.join(os.getcwd(), "new_files", "filename")
-    if not os.path.isfile(new_file):
-        continue
-    
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(new_file):
-        mitigate_ransomware(new_file)
-
-# Clean up the monitored directory
-os.remove(new_file)
+for root, dirs, files in os.walk("."):
+    for f in files:
+        if detect_ransomware(os.path.join(root, f)):
+            mitigate_ransomware(os.path.join(root, f))
