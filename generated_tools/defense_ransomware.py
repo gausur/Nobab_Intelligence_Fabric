@@ -1,39 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-03 19:22:21.356207
+# Generated 2026-08-03 21:00:10.849135
 
-import sys
 import os
-import json
-from pathlib import Path
+import hashlib
 
-def main():
-    # Define the directories to scan for ransomware files
-    dirs = ['C:\\', 'D:\\', 'E:\\']
+def detect_ransomware(file):
+    # Calculate the SHA256 hash of the file
+    with open(file, "rb") as f:
+        data = f.read()
+    hash = hashlib.sha256(data).hexdigest()
+
+    # Check if the hash is in the known bad hash list
+    with open("bad_hashes.txt", "r") as f:
+        bad_hashes = set(f.read().splitlines())
+    if hash in bad_hashes:
+        return True
+    else:
+        return False
+
+def mitigate_ransomware(file):
+    # Extract the file name from the path
+    filename = os.path.basename(file)
     
-    # Loop through each directory and scan for ransomware files
-    for d in dirs:
-        for root, dirs, files in os.walk(d):
-            for f in files:
-                if 'ransomware' in f:
-                    print(f"Found ransomware file {f} in directory {root}")[8D[K
-{root}")
+    # Move the file to a safe location
+    with open(f"safe_{filename}", "wb") as f:
+        f.write(data)
+
+# Main loop
+while True:
+    # Wait for a new file to be created in the monitored directory
+    new_file = os.path.join(os.getcwd(), "new_files", "filename")
+    if not os.path.isfile(new_file):
+        continue
     
-    # Check if any ransomware files were found
-    if len(found_files) > 0:
-        # Iterate through each found file and mitigate it
-        for f in found_files:
-            print(f"Mitigating ransomware file {f}")
-            try:
-                os.remove(f)
-            except OSError as e:
-                print(f"Error removing ransomware file {f}: {e}")
-    
-    # Check if any other files were found that are not ransomware
-    if len(other_files) > 0:
-        # Iterate through each found file and notify the user
-        for f in other_files:
-            print(f"Found non-ransomware file {f}")
-    
-if __name__ == "__main__":
-    main()
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(new_file):
+        mitigate_ransomware(new_file)
+
+# Clean up the monitored directory
+os.remove(new_file)
