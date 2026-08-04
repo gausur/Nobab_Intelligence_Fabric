@@ -1,65 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-04 16:25:15.092686
+# Generated 2026-08-04 18:29:10.924182
 
 import re
-import urllib
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing(url):
-    """
-    Check if the given URL is a phishing site or not.
-    
-    Args:
-        url (str): The URL to check.
-    
-    Returns:
-        bool: True if the URL is a phishing site, False otherwise.
-    """
-    # Regular expression to match common phishing patterns
-    pattern = r"https?:\/\/[^@]+@([^.]+\.)+(phish|fishing|scam)\.com"
-    
-    # Check if the URL matches the regular expression
-    if re.match(pattern, url):
+def is_phishing_attack(email):
+    # Check for common phishing attack signs such as
+    # using a generic or poorly chosen sender name,
+    # lack of personalization in the subject line,
+    # and suspicious links or attachments.
+    if re.search(r"[A-Z]{2,10} Support", email.sender):
         return True
-    else:
-        return False
+    if re.search(r"Your [a-z]+\s+account has been compromised", email.subje[11D[K
+email.subject):
+        return True
+    for part in email.iter_parts():
+        content = part.get_content()
+        if isinstance(content, str):
+            if re.search(r"\bhttps?://[a-z]+\.[a-z]{2,3}\b", content):
+                return True
+    return False
 
-def mitigate_phishing(url):
-    """
-    Mitigate phishing attacks by redirecting to a safe URL.
-    
-    Args:
-        url (str): The URL to check.
-    
-    Returns:
-        str: A safe URL or the original URL if it's not a phishing site.
-    """
-    # Check if the URL is a phishing site
-    if is_phishing(url):
-        # Redirect to a safe URL
-        return "https://www.example.com"
-    else:
-        # Return the original URL
-        return url
+def mitigate_phishing_attack(email):
+    # Implement your phishing attack mitigation strategy here.
+    # For example, you can send a warning email to the sender and/or
+    # block their IP address or domain.
+    pass
 
 def main():
-    """
-    Main function.
-    """
-    # Get the URL from the user
-    url = input("Enter a URL: ")
-    
-    # Check if the URL is a phishing site
-    if is_phishing(url):
-        print("This is a phishing site!")
-    else:
-        print("This is not a phishing site.")
-    
-    # Mitigate the phishing attack by redirecting to a safe URL
-    mitigated_url = mitigate_phishing(url)
-    
-    # Print the mitigated URL
-    print(f"Mitigated URL: {mitigated_url}")
-
-if __name__ == "__main__":
-    main()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+        server.login(sender_email, password)
+        for recipient in recipients:
+            email = EmailMessage()
+            email["From"] = sender_email
+            email["To"] = recipient
+            email["Subject"] = "Testing Phishing Attack Detection"
+            email.set_content("This is a test message to detect phishing at[2D[K
+attacks.")
+            if is_phishing_attack(email):
+                mitigate_phishing_attack(email)
+            server.sendmail(sender_email, recipient, email.as_string())
