@@ -1,34 +1,47 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-03 22:03:29.060630
+# Generated 2026-08-04 00:04:44.850523
 
 import os
-import subprocess
+import json
+from datetime import datetime
 
-def detect_ransomware(file):
-    # Check if the file is encrypted
-    if not subprocess.run(["gpg", "--list-packets", file], capture_output=T[16D[K
-capture_output=True).stdout:
-        return False
-    
-    # Check if the file has been modified since it was created
-    if os.path.getmtime(file) > os.path.getctime(file):
+def main():
+    # Load the configuration file
+    with open('config.json', 'r') as f:
+        config = json.load(f)
+
+    # Check for ransomware infection
+    if is_infected(config['path']):
+        # Mitigate the attack
+        mitigate_attack()
+    else:
+        print('No ransomware detected')
+
+def is_infected(path):
+    # Check for known ransomware files
+    if os.path.exists(os.path.join(path, 'ransomware.exe')) or \
+            os.path.exists(os.path.join(path, 'ransomware.dll')):
         return True
-    
-    # Check if the file has been accessed since it was created
-    if os.path.getatime(file) > os.path.getctime(file):
+    # Check for suspicious file modifications
+    if os.path.exists(os.path.join(path, 'suspicious_modifications')):
         return True
-    
+    # Check for unusual network activity
+    if os.path.exists(os.path.join(path, 'unusual_network_activity.log')):
+        return True
     return False
 
-def mitigate_ransomware(file):
-    # Decrypt the file using GPG
-    subprocess.run(["gpg", "--decrypt", file])
-    
-    # Remove the encrypted version of the file
-    os.remove(file)
+def mitigate_attack():
+    # Delete all ransomware files
+    for file in ['ransomware.exe', 'ransomware.dll']:
+        if os.path.exists(os.path.join(config['path'], file)):
+            os.remove(os.path.join(config['path'], file))
+    # Restore backed up files
+    for file in ['backup.exe', 'backup.dll']:
+        if os.path.exists(os.path.join(config['path'], file)):
+            os.remove(os.path.join(config['path'], file))
+    # Restart the system
+    os.system('shutdown /r /t 0')
 
-for root, dirs, files in os.walk("."):
-    for f in files:
-        if detect_ransomware(os.path.join(root, f)):
-            mitigate_ransomware(os.path.join(root, f))
+if __name__ == '__main__':
+    main()

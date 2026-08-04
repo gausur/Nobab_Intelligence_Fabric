@@ -1,59 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-03 22:06:31.548524
+# Generated 2026-08-04 00:05:31.898530
 
 import re
 import smtplib
-from email.parser import Parser
 from email.message import EmailMessage
 
-def is_phishing(email):
-    # Check if the email contains a suspicious link or attachment
-    if "://" in email.get("Body") or len(email.get_attachments()) > 0:
-        return True
-    
-    # Check if the sender's domain is not from a trusted provider
-    sender = email.get("From").split("<")[1].split(">")[0]
-    if not check_domain(sender):
-        return True
-    
+def is_phishing_url(url):
+    pattern = r"^https?://.*\.(\w+)$"
+    if not re.match(pattern, url):
+        return False
+    tlds = ["com", "net", "org", "edu", "gov"]
+    for tld in tlds:
+        if url.endswith("." + tld):
+            return True
     return False
 
-def check_domain(domain):
-    # Check if the domain is in the list of trusted providers
-    with open("trusted_providers.txt", "r") as f:
-        for line in f:
-            if line.strip() == domain:
-                return True
-    return False
-
-def mitigate_phishing(email):
-    # Remove the suspicious link or attachment
-    email.body = re.sub("://", "", email.get("Body"))
-    
-    # Remove the sender's address from the email
-    email["From"] = "Phishing Attack Detected"
-    
-    # Send a notification to the admin
-    send_notification(email)
-
-def send_notification(email):
-    # Set up the email message
+def send_email(recipient, subject, body):
     msg = EmailMessage()
-    msg["Subject"] = "Phishing Attack Detected"
-    msg["From"] = "noreply@example.com"
-    msg["To"] = "admin@example.com"
-    msg.set_content(f"A phishing attack has been detected on the email {ema[4D[K
-{email['Subject']}. The sender's domain is not from a trusted provider.")
-    
-    # Send the email using SMTP
-    s = smtplib.SMTP("smtp.example.com")
-    s.send_message(msg)
-    s.quit()
+    msg["Subject"] = subject
+    msg["From"] = "phishing@example.com"
+    msg["To"] = recipient
+    msg.set_content(body)
+    smtplib.SMTP("localhost").sendmail(msg["From"], [msg["To"]], msg.as_str[10D[K
+msg.as_string())
+
+def mitigate_phishing(url):
+    if is_phishing_url(url):
+        send_email("admin@example.com", "Phishing Attack Detected", f"The f[1D[K
+following URL was detected as a phishing attack: {url}")
 
 if __name__ == "__main__":
-    with open("email.txt", "r") as f:
-        email = Parser().parsestr(f.read())
-    
-    if is_phishing(email):
-        mitigate_phishing(email)
+    url = input("Enter the URL to be checked for phishing attacks: ")
+    mitigate_phishing(url)
