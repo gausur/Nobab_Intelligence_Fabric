@@ -1,58 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-04 18:27:39.132741
+# Generated 2026-08-04 20:22:42.455018
 
 import os
-import shutil
+import json
 import subprocess
 
-def detect_ransomware(path):
-    # Check if the path is a directory
-    if not os.path.isdir(path):
+def detect_ransomware(file):
+    # Check if the file is a valid executable
+    if not os.path.isfile(file) or not os.access(file, os.X_OK):
         return False
-    
-    # Iterate over all files and directories in the path
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            # Check if the file is a binary or an executable
-            if not file.endswith(('.bin', '.exe')):
-                continue
-            
-            # Check if the file contains known ransomware strings
-            with open(os.path.join(root, file), 'rb') as f:
-                content = f.read()
-                for string in ('RANSOMWARE', 'PAYMENT_DEMAND'):
-                    if string in content:
-                        return True
-    
-    # If no ransomware strings are found, the path is not a ransomware atta[4D[K
-attack
+
+    # Get the file's SHA256 hash
+    sha256 = subprocess.check_output(['sha256sum', file]).decode().split()[[24D[K
+file]).decode().split()[0]
+
+    # Check if the file is in the list of known ransomware SHA256 hashes
+    with open('ransomware_hashes.json') as f:
+        ransomware_hashes = json.load(f)
+        if sha256 in ransomware_hashes:
+            return True
     return False
 
-def mitigate_ransomware(path):
-    # Check if the path is a directory
-    if not os.path.isdir(path):
-        return
-    
-    # Iterate over all files and directories in the path
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            # Check if the file is a binary or an executable
-            if not file.endswith(('.bin', '.exe')):
-                continue
-            
-            # Remove the file
-            os.remove(os.path.join(root, file))
-    
-    # Remove all empty directories in the path
-    for dir in dirs:
-        if not os.listdir(os.path.join(root, dir)):
-            os.rmdir(os.path.join(root, dir))
-
-# Detect and mitigate ransomware attacks on a specified path
-def main():
-    if detect_ransomware('path/to/files'):
-        mitigate_ransomware('path/to/files')
-
-if __name__ == '__main__':
-    main()
+def mitigate_ransomware(file):
+    # If the file is a ransomware, remove it and its corresponding director[8D[K
+directory
+    if detect_ransomware(file):
+        os.remove(file)
+        dirname = os.path.dirname(file)
+        while os.listdir(dirname):
+            os.rmdir(dirname)
+            dirname = os.path.dirname(dirname)
