@@ -1,48 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-04 20:24:19.466517
+# Generated 2026-08-04 22:09:42.957923
 
 import re
-import urllib.parse
+import urllib
 from email.parser import Parser
-from email.message import EmailMessage
 
-class PhishingAttackDetector:
-    def __init__(self, message):
-        self.message = message
+# Regular expression to match email addresses in the message body
+EMAIL_REGEX = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+
+def is_phishing(message):
+    # Check if the message contains a link to a suspicious website
+    if re.search(r"https?://[^/]*(yahoo|google|facebook)\.[^/]*", message.g[9D[K
+message.get("body")):
+        return True
     
-    def detect_phishing_attacks(self):
-        # Check if the message is an email
-        if not self.message.is_email():
-            return False
-        
-        # Extract the email headers and body
-        headers, body = self.message.get_headers(), self.message.get_body()[23D[K
-self.message.get_body()
-        
-        # Check if the subject line contains a suspicious keyword
-        if any(x in headers['Subject'] for x in ['phish', 'scam', 'fraud'])[9D[K
-'fraud']):
+    # Check if the message contains an email address that is not from the s[1D[K
+sender
+    for email in re.findall(EMAIL_REGEX, message.get("body")):
+        if email != message.get("from"):
             return True
-        
-        # Check if the message is from an unverified sender
-        if not self.message.get_from():
-            return False
-        
-        # Check if the message contains a suspicious link
-        url = re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|[61D[K
-re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-Fre.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|?:%[0-9a-fA-F][0-9a-fA-F]))+', body)
-        if url:
-            parsed_url = urllib.parse.urlparse(url)
-            if not self.message.get_hostname(parsed_url):
-                return True
-        
-        # Check if the message contains a suspicious attachment
-        for part in self.message.get_parts():
-            if any(x in part.get_content_type() for x in ['text/html', 'ima[4D[K
-'image']):
-                return False
-        
-        # No suspicious patterns detected, so the message is likely legitim[7D[K
-legitimate
-        return False
+    
+    return False
+
+def mitigate_phishing(message):
+    # Check if the message is a phishing attempt and mitigate accordingly
+    if is_phishing(message):
+        print("Phishing attempt detected!")
+        print("Message ID:", message.get("id"))
+        print("From:", message.get("from"))
+        print("Subject:", message.get("subject"))
+        print("Body:", message.get("body"))
+    
+    # Print the original message if it is not a phishing attempt
+    else:
+        print("Message ID:", message.get("id"))
+        print("From:", message.get("from"))
+        print("Subject:", message.get("subject"))
+        print("Body:", message.get("body"))
+
+# Example usage:
+message = {
+    "id": 1234,
+    "from": "john@example.com",
+    "subject": "Your account has been compromised",
+    "body": "Click here to reset your password: https://www.google.com/logi[27D[K
+https://www.google.com/login"
+}
+mitigate_phishing(message)
