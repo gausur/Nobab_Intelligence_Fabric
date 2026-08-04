@@ -1,47 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-04 06:32:32.035347
+# Generated 2026-08-04 09:36:59.630436
 
 import re
 import smtplib
 
-def is_phishing_email(email):
-    # Check if the email contains any suspicious keywords or URLs
-    for keyword in ["phish", "scam", "spoof"]:
-        if keyword in email.lower():
-            return True
-    for url in email.split("http://"):
-        if len(url) < 10:
-            continue
-        try:
-            response = smtplib.SMTP().sendmail("", "", url)
-        except smtplib.SMTPServerDisconnected:
-            return True
-    return False
+# Define the regular expression for email addresses
+email_regex = r"[^@]+@[^@]+\.[^@]+"
 
-def mitigate_phishing_attack(email):
-    # Remove any suspicious keywords or URLs from the email
-    for keyword in ["phish", "scam", "spoof"]:
-        if keyword in email.lower():
-            email = email.replace(keyword, "")
-    for url in email.split("http://"):
-        if len(url) < 10:
-            continue
-        try:
-            response = smtplib.SMTP().sendmail("", "", url)
-        except smtplib.SMTPServerDisconnected:
-            email = email.replace(url, "")
+# Define the regular expression for phishing URLs
+phishing_url_regex = r"(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\[54D[K
+r"(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-r"(https?:\/\/)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
+
+def detect_phishing(email):
+    """
+    Detect phishing attacks in emails.
+    Args:
+        email (str): The email message to check for phishing.
+    Returns:
+        bool: True if the email is a phishing attack, False otherwise.
+    """
+    # Check if the email contains a URL that matches the phishing URL regex[5D[K
+regex
+    if re.search(phishing_url_regex, email):
+        return True
+    else:
+        return False
+
+def mitigate_phishing(email):
+    """
+    Mitigate phishing attacks in emails.
+    Args:
+        email (str): The email message to check for phishing.
+    Returns:
+        str: The modified email message with the phishing URL removed.
+    """
+    # Check if the email contains a URL that matches the phishing URL regex[5D[K
+regex
+    match = re.search(phishing_url_regex, email)
+    if match:
+        # Remove the matched URL from the email
+        email = email.replace(match.group(), "")
     return email
 
-def main():
-    # Take the input email from the user
-    email = input("Enter an email address: ")
-    if is_phishing_email(email):
-        mitigate_phishing_attack(email)
-        print("The email contains suspicious content. Mitigation successful[10D[K
-successful.")
-    else:
-        print("The email does not contain any suspicious content.")
+# Test the script
+email = "Hello world! Check out this link: https://www.phishing-attack.com"[32D[K
+https://www.phishing-attack.com"
+print("Original email:", email)
+if detect_phishing(email):
+    print("Phishing attack detected!")
+else:
+    print("No phishing attack detected.")
 
-if __name__ == "__main__":
-    main()
+# Mitigate the phishing attack
+email = mitigate_phishing(email)
+print("Modified email:", email)
