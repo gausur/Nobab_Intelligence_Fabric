@@ -1,59 +1,61 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-04 23:59:26.490057
+# Generated 2026-08-05 01:55:21.052861
 
 import re
-import smtplib
-from email.message import EmailMessage
+import urllib.parse
+from http import client
 
-def is_phishing_attempt(email):
-    # Check if the email contains a suspicious link
-    if re.search(r"https?://[^\s]+", email):
-        return True
-    
-    # Check if the email has a malicious attachment
-    if any(re.search(r"\.exe$|\.zip$|\.rar$", a) for a in email.attachments[17D[K
-email.attachments):
-        return True
-    
-    # Check if the sender's domain is not legitimate
-    if re.search(r"@[^\.]+\.\w{2,4}$", email.from_addr):
-        return True
-    
-    # Check if the email contains a suspicious subject line
-    if re.search(r"[\w\W]+?[Ff]raud|[Ss]cams|[Hh]acking|[Pp]wned", email.su[8D[K
-email.subject):
-        return True
-    
-    # Check if the email is from a known spammer or phisher
-    if email.from_addr in ("spammer@example.com", "phisher@example.org"):
-        return True
-    
-    # Check if the email contains a suspicious message body
-    if re.search(r"[\w\W]+?[Ff]ree [Dd]omains|[Bb]uy [Cc]redit", email.body[10D[K
-email.body):
-        return True
-    
-    return False
+# Define the list of domain names that are considered safe for phishing att[3D[K
+attempts
+safe_domains = ['example.com', 'example2.com']
 
-def mitigate_phishing_attempt(email):
-    # Remove the suspicious link from the email body
-    if re.search(r"https?://[^\s]+", email.body):
-        email.body = re.sub(r"https?://[^\s]+", "", email.body)
+# Set up a regular expression to match URLs
+url_regex = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA[63D[K
+r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fAF][0-9a-fA-F]))+'
+
+# Define the function to detect phishing attempts
+def detect_phishing(url):
+    # Parse the URL and extract the domain name
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
     
-    # Remove the malicious attachment from the email
-    for a in email.attachments:
-        if any(re.search(r"\.exe$|\.zip$|\.rar$", a)):
-            email.attachments.remove(a)
+    # Check if the domain is in the list of safe domains
+    if domain in safe_domains:
+        return False
     
-    # Send the mitigated email to the recipient
-    with smtplib.SMTP("smtp.example.com") as server:
-        msg = EmailMessage()
-        msg["From"] = "phishing@example.com"
-        msg["To"] = email.to_addr
-        msg["Subject"] = f"Phishing attempt detected and mitigated ({email.[8D[K
-({email.subject})"
-        msg.set_content(f"This email was sent to {email.from_addr} from a p[1D[K
-phishing attempt.\n\nSent by: {email.from_addr}")
-        server.sendmail("phishing@example.com", email.to_addr, msg.as_strin[12D[K
-msg.as_string())
+    # Match the URL against the regular expression for phishing attempts
+    match = re.match(url_regex, url)
+    if match:
+        return True
+    else:
+        return False
+
+# Define the function to mitigate phishing attacks
+def mitigate_phishing(url):
+    # Redirect the user to a safe domain
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    if domain not in safe_domains:
+        return 'http://example.com'
+    
+    # Handle any other phishing attempts
+    else:
+        return None
+
+# Define the main function to run the script
+def main():
+    # Get the URL from the user
+    url = input('Enter the URL: ')
+    
+    # Detect and mitigate phishing attacks
+    if detect_phishing(url):
+        print('Phishing attempt detected!')
+        return mitigate_phishing(url)
+    else:
+        print('No phishing attempts detected.')
+        return url
+
+# Run the script with the main function
+if __name__ == '__main__':
+    main()
