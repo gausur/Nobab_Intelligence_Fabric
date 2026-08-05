@@ -1,61 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-05 05:00:07.940063
+# Generated 2026-08-05 07:40:55.070451
 
 import os
-import sys
-import time
-import psutil
-import socket
-import threading
-from shutil import move
+import subprocess
 
-class RansomwareDetector:
-    def __init__(self):
-        self.ransomware_processes = []
-        self.ransomware_files = []
-        self.ransomware_sockets = []
+def detect_ransomware():
+    # Check if the system is running Windows
+    if os.name == 'nt':
+        # Run the command "reg query HKLM\SOFTWARE\Microsoft\Windows\Curren[38D[K
+HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" to check if the system [K
+has a ransomware registry key set
+        result = subprocess.run(["reg", "query", "HKLM\\SOFTWARE\\Microsoft[26D[K
+"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"], stdout=subproce[15D[K
+stdout=subprocess.PIPE)
+        # Check if the command output contains "Ransomware"
+        if b"Ransomware" in result.stdout:
+            return True
+    return False
 
-    def detect(self):
-        # Scan the system for ransomware processes
-        for process in psutil.process_iter():
-            try:
-                if 'ransomware' in process.name().lower():
-                    self.ransomware_processes.append(process)
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-
-        # Scan the system for ransomware files
-        for root, dirs, files in os.walk('/'):
-            for file in files:
-                if 'ransomware' in file.lower():
-                    self.ransomware_files.append(os.path.join(root, file))
-
-        # Scan the system for ransomware sockets
-        for socket in psutil.net_connections():
-            if 'ransomware' in str(socket).lower():
-                self.ransomware_sockets.append(socket)
-
-    def mitigate(self):
-        # Kill any detected ransomware processes
-        for process in self.ransomware_processes:
-            try:
-                process.kill()
-            except psutil.NoSuchProcess:
-                pass
-        
-        # Delete any detected ransomware files
-        for file in self.ransomware_files:
-            move(file, 'C:\\Windows\\System32\\$Recycle.Bin')
-
-        # Disconnect any detected ransomware sockets
-        for socket in self.ransomware_sockets:
-            try:
-                socket.close()
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                pass
-
-if __name__ == '__main__':
-    detector = RansomwareDetector()
-    detector.detect()
-    detector.mitigate()
+def mitigate_ransomware():
+    # Kill all running processes that have a "Ransomware" keyword in their [K
+name
+    for proc in psutil.process_iter(attrs=['name']):
+        if "Ransomware" in proc.info['name']:
+            os.kill(proc.pid, signal.SIGTERM)
+    # Delete the ransomware registry key
+    subprocess.run(["reg", "delete", "HKLM\\SOFTWARE\\Microsoft\\Windows\\C[38D[K
+"HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run"])
