@@ -1,27 +1,22 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-06 05:01:19.171430
+# Generated 2026-08-06 07:40:19.117373
 
 import os
 import sys
-import time
-from pathlib import Path
+import subprocess
 
-def is_ransomware(filename):
-    with open(filename, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
+def check_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        if "LOCK" in file:
             return True
     return False
 
-def mitigate_ransomware(filename):
-    with open(filename, "wb") as f:
-        f.write(b"\x00" * os.path.getsize(filename))
-
-def main():
-    for filename in sys.argv[1:]:
-        if is_ransomware(filename):
-            mitigate_ransomware(filename)
+def mitigate_ransomware(path):
+    subprocess.call("rm -rf " + path, shell=True)
 
 if __name__ == "__main__":
-    main()
+    path = sys.argv[1]
+    if check_ransomware(path):
+        mitigate_ransomware(path)
