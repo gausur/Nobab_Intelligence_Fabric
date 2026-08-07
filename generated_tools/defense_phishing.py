@@ -1,45 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-07 06:07:03.031178
+# Generated 2026-08-07 08:11:36.026456
 
 import re
-import json
 import requests
+from urllib.parse import urlparse
 
-# Load the list of known phishing URLs from a file
-with open("phishing_urls.txt", "r") as f:
-    phishing_urls = [line.strip() for line in f if line.strip()]
-
-# Define a function to check if a URL is a phishing site
-def is_phishing(url):
-    # Check if the URL matches any of the known phishing sites
-    for phishing_url in phishing_urls:
-        if re.search(phishing_url, url):
-            return True
-    return False
-
-# Define a function to send a request and check the response code
-def send_request(url):
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            print("Successfully retrieved URL:", url)
-        else:
-            print("Error retrieving URL:", url, "Status code:", response.st[11D[K
-response.status_code)
-    except Exception as e:
-        print("Error retrieving URL:", url, "Exception:", str(e))
-
-# Define a function to check if the website is legitimate
-def check_legitimacy(url):
-    # Check if the URL is a phishing site
-    if is_phishing(url):
-        print("Phishing site detected:", url)
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    if parsed.scheme == "http" and parsed.netloc.endswith("google.com"):
+        return True
     else:
-        send_request(url)
+        return False
 
-# Get the user input for the URL to check
-url = input("Enter the URL to check: ")
+def mitigate_phishing_attack(url):
+    # TODO: Implement mitigation strategies here
+    pass
 
-# Check if the URL is legitimate
-check_legitimacy(url)
+if __name__ == "__main__":
+    url = input("Enter the URL to check for phishing attacks: ")
+    if is_phishing_url(url):
+        print("This URL appears to be a phishing site.")
+        mitigate_phishing_attack(url)
+    else:
+        print("This URL does not appear to be a phishing site.")

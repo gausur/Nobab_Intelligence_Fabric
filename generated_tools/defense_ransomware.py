@@ -1,43 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-07 06:07:49.825684
+# Generated 2026-08-07 08:10:00.261145
 
 import os
-import time
-from datetime import datetime
+import json
+from urllib.request import urlopen
+from shutil import copyfile
+
+def detect_ransomware(path):
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+            if b"RANSOMWARE" in data:
+                print("Detected ransomware!")
+                return True
+            else:
+                return False
+    except IOError:
+        print("Unable to read file")
+        return False
+
+def mitigate_ransomware(path):
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+            if b"RANSOMWARE" in data:
+                print("Removing ransomware from file...")
+                copyfile(path, path + ".bak")
+                data = data.replace(b"RANSOMWARE", b"")
+                with open(path, "wb") as f:
+                    f.write(data)
+        return True
+    except IOError:
+        print("Unable to read file")
+        return False
 
 def main():
-    # Initialize variables
-    detected_ransomware = False
-    last_modified_time = 0
-
-    # Check for ransomware on startup
-    check_for_ransomware()
-
-    # Start monitoring for ransomware
-    while True:
-        time.sleep(60)
-        check_for_ransomware()
-
-def check_for_ransomware():
-    global detected_ransomware, last_modified_time
-
-    # Check if any files have been modified in the past hour
-    for file in os.listdir(os.getcwd()):
-        if os.path.isfile(file) and os.stat(file).st_mtime > last_modified_[14D[K
-last_modified_time:
-            last_modified_time = os.stat(file).st_mtime
-            detected_ransomware = True
-            break
-
-    # Mitigate ransomware if detected
-    if detected_ransomware:
-        print("Ransomware detected!")
-        mitigate_ransomware()
-
-def mitigate_ransomware():
-    # TODO: implement mitigation techniques here
-    pass
+    # Check if the script is running in a container or virtual machine
+    if os.environ.get("container"):
+        print("Running in a container or virtual machine, skipping ransomwa[8D[K
+ransomware detection...")
+        return
+    # Get the list of files to check from the config file
+    with open("ransomware_config.json", "r") as f:
+        config = json.load(f)
+    for file in config["files"]:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
 if __name__ == "__main__":
     main()
