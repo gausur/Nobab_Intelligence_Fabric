@@ -1,48 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-07 10:48:29.906054
+# Generated 2026-08-07 11:43:14.229420
 
 import os
-import json
-import time
+import shutil
+import subprocess
 
-def main():
-    # Initialize variables
-    path = "C:\\"
-    pattern = "*.exe"
-    exclude = ["C:\\Windows\\", "C:\\Program Files\\"]
-    timeout = 60 * 5  # 5 minutes
-    results = {}
+def is_ransomware(file):
+    # Check if the file is a valid executable
+    if not file.endswith('.exe'):
+        return False
+    
+    # Get the file's hash
+    hash = subprocess.check_output(['md5sum', file]).decode().split(' ')[0][5D[K
+')[0]
+    
+    # Compare the hash to known ransomware hashes
+    with open('ransomware_hashes.txt') as f:
+        for line in f:
+            if line.strip() == hash:
+                return True
+    
+    return False
 
-    # Start time
-    start_time = time.time()
+def mitigate(file):
+    # Move the file to a safe location
+    shutil.move(file, 'safe_location')
+    
+    # Delete the file
+    os.remove(file)
 
-    # Iterate over all files in the path
-    for root, dirs, files in os.walk(path):
-        if root in exclude:
-            continue
-        for file in files:
-            if file.endswith(pattern):
-                try:
-                    with open(os.path.join(root, file), "r") as f:
-                        contents = f.read()
-                    if "ransomware" in contents:
-                        results[file] = "Virus detected"
-                except Exception as e:
-                    results[file] = f"Error reading file: {e}"
+# Get a list of all files in the current directory
+files = os.listdir()
 
-    # Print results
-    for result in results:
-        print(f"{result}: {results[result]}")
-
-    # End time
-    end_time = time.time()
-
-    # Calculate duration
-    duration = end_time - start_time
-
-    # Print duration
-    print(f"Duration: {duration} seconds")
-
-if __name__ == "__main__":
-    main()
+for file in files:
+    if is_ransomware(file):
+        mitigate(file)
