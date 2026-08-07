@@ -1,36 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-07 19:48:31.478521
+# Generated 2026-08-07 20:32:27.524139
 
 import re
-import requests
+import smtplib
 
-def is_phishing(url):
-    if not url:
+# Define the list of domains that are considered safe
+safe_domains = ["example1.com", "example2.com"]
+
+def is_phishing(email):
+    # Check if the email address is in a safe domain
+    if email.split("@")[1] in safe_domains:
         return False
+    
+    # Check if the email contains any suspicious keywords
+    for keyword in ["phish", "scam", "malware"]:
+        if keyword in email:
+            return True
+    
+    # Check if the email is from a known spammer
     try:
-        response = requests.get(url)
-    except Exception as e:
-        print(f"Error fetching {url}: {e}")
+        smtplib.SMTP("smtp.example.com").sendmail(email, "spammer@example.c[18D[K
+"spammer@example.com")
         return False
-    if response.status_code != 200:
-        print(f"Invalid status code for {url}: {response.status_code}")
-        return False
-    html = response.text
-    if not html or len(html) < 50:
-        print(f"Invalid HTML content for {url}")
-        return False
-    if re.search(r'(?i)(phishing|scam|malware)', html):
-        print(f"Possible phishing attack detected in {url}")
+    except smtplib.SMTPException:
         return True
-    else:
-        print(f"No phishing attack detected in {url}")
-        return False
 
-def main():
-    while True:
-        url = input("Enter URL to check: ")
-        if is_phishing(url):
-            print(f"Possible phishing attack detected in {url}.")
-        else:
-            print(f"No phishing attack detected in {url}.")
+def mitigate_phishing(email):
+    # Move the email to the spam folder
+    try:
+        smtplib.SMTP("smtp.example.com").sendmail(email, "spammer@example.c[18D[K
+"spammer@example.com")
+        return True
+    except smtplib.SMTPException:
+        return False
