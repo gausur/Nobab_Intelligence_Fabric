@@ -1,30 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-07 18:42:33.901753
+# Generated 2026-08-07 19:48:31.478521
 
 import re
 import requests
-from urllib.parse import urlparse
 
-def is_phishing_attempt(url):
-    parsed = urlparse(url)
-    host = parsed.netloc
-    if "gmail" in host or "googlemail" in host:
+def is_phishing(url):
+    if not url:
+        return False
+    try:
+        response = requests.get(url)
+    except Exception as e:
+        print(f"Error fetching {url}: {e}")
+        return False
+    if response.status_code != 200:
+        print(f"Invalid status code for {url}: {response.status_code}")
+        return False
+    html = response.text
+    if not html or len(html) < 50:
+        print(f"Invalid HTML content for {url}")
+        return False
+    if re.search(r'(?i)(phishing|scam|malware)', html):
+        print(f"Possible phishing attack detected in {url}")
         return True
     else:
+        print(f"No phishing attack detected in {url}")
         return False
 
-def mitigate_phishing_attack(url):
-    if is_phishing_attempt(url):
-        print("Phishing attempt detected!")
-        # TODO: Add code to block the request and prevent the user from bei[3D[K
-being redirected
-    else:
-        return True
-
 def main():
-    url = "https://www.example.com"
-    mitigate_phishing_attack(url)
-
-if __name__ == "__main__":
-    main()
+    while True:
+        url = input("Enter URL to check: ")
+        if is_phishing(url):
+            print(f"Possible phishing attack detected in {url}.")
+        else:
+            print(f"No phishing attack detected in {url}.")
