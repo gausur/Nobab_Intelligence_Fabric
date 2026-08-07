@@ -1,45 +1,63 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-07 20:34:43.279024
+# Generated 2026-08-07 21:33:28.333969
 
 import os
+import json
+import time
 import subprocess
-import shutil
+import re
+from pathlib import Path
 
-def detect_ransomware():
-    # Check if any ransomware is running
-    proc = subprocess.run(['ps', '-ef'], stdout=subprocess.PIPE)
-    for line in proc.stdout.decode('utf-8').splitlines():
-        if 'ransomware' in line:
-            print(f'Ransomware detected!')
-            return True
-    return False
+def get_system_info():
+    system_info = {}
+    system_info["hostname"] = socket.gethostname()
+    system_info["ip"] = socket.gethostbyname(socket.gethostname())
+    system_info["os"] = platform.system()
+    return json.dumps(system_info)
 
-def mitigate_ransomware():
-    # Check for ransomware and stop it
-    if detect_ransomware():
-        proc = subprocess.run(['killall', 'ransomware'], stdout=subprocess.[18D[K
-stdout=subprocess.PIPE)
-        print(f'Ransomware stopped!')
+def get_process_list():
+    process_list = []
+    for proc in psutil.process_iter():
+        try:
+            pinfo = proc.as_dict(attrs=["pid", "name", "username"])
+            process_list.append(pinfo)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombiePro[16D[K
+psutil.ZombieProcess):
+            pass
+    return json.dumps(process_list)
+
+def get_file_list():
+    file_list = []
+    for path in Path("/").glob("**/*"):
+        try:
+            finfo = {"name": path.name, "size": path.stat().st_size}
+            file_list.append(finfo)
+        except PermissionError:
+            pass
+    return json.dumps(file_list)
+
+def check_for_ransomware():
+    # Check for suspicious processes and files
+    process_list = get_process_list()
+    file_list = get_file_list()
+    ransomware_detected = False
+    if "ransomware" in process_list or "ransomware" in file_list:
+        ransomware_detected = True
+    return ransomware_detected
+
+def mitigate_ransomware(ransomware_detected):
+    if ransomware_detected:
+        # Restart system to remove ransomware processes and files
+        subprocess.run(["shutdown", "-r", "now"])
     else:
-        print(f'No ransomware detected.')
+        # Log mitigation failure
+        print("Failed to mitigate ransomware attack")
 
-def main():
-    mitigate_ransomware()
-    # Check if there are any files that have been encrypted
-    proc = subprocess.run(['ls', '-l'], stdout=subprocess.PIPE)
-    for line in proc.stdout.decode('utf-8').splitlines():
-        if '?=' in line:
-            print(f'Encrypted file detected!')
-            # Decrypt the file
-            cmd = ['openssl', 'aes-256-cbc', '-d', '-in', 'encrypted_file.t[17D[K
-'encrypted_file.txt']
-            subprocess.run(cmd)
-            # Remove the encrypted file
-            os.remove('encrypted_file.txt')
-            print(f'Encrypted file removed!')
-        else:
-            print(f'No encrypted files detected.')
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    system_info = get_system_info()
+    print(f"System info: {system_info}")
+    process_list = get_process_list()
+    file_list = get_file_list()
+    ransomware_detected = check_for_ransomware()
+    mitigate_ransomware(ransomware_detected)
