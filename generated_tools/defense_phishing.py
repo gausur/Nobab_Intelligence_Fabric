@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-07 12:44:32.772089
+# Generated 2026-08-07 14:10:26.196441
 
 import re
-import ssl
-from urllib.parse import urlparse
+import smtplib
+from email import message_from_string
 
-def is_phishing_url(url):
-    # Check if the URL contains any suspicious characters
-    if re.search("[^-a-zA-Z0-9.]", url):
+def is_phishing_email(msg):
+    # Check if the email contains a suspicious link or attachment
+    if re.search(r'https://[a-zA-Z0-9.-]+\.(?:com|net|org)', msg['body']):
         return True
-    
-    # Check if the URL is for a known phishing website
-    parsed_url = urlparse(url)
-    if parsed_url.netloc in ["phishingwebsite1.com", "phishingwebsite2.com"[22D[K
-"phishingwebsite2.com"]:
-        return True
-    
-    # Check if the URL has a suspicious SSL certificate
-    try:
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        conn = http.client.HTTPSConnection(parsed_url.netloc, context=ssl_c[13D[K
-context=ssl_context)
-        conn.request("HEAD", parsed_url.path)
-        response = conn.getresponse()
-        if response.status == 200:
-            return True
-    except ssl.SSLError:
-        # SSL handshake failed, likely due to a man-in-the-middle attack
-        return True
-    
-    return False
+    else:
+        return False
+
+def mitigate_phishing_attack(msg):
+    # Remove the suspicious link or attachment from the email
+    if re.search(r'https://[a-zA-Z0-9.-]+\.(?:com|net|org)', msg['body']):
+        msg['body'] = re.sub(r'https://[a-zA-Z0-9.-]+\.(?:com|net|org)', ''[2D[K
+'', msg['body'])
+    # Send the mitigated email to the recipient's address
+    smtplib.sendmail(msg['from'], msg['to'], msg.as_string())
+
+def main():
+    while True:
+        # Receive an email from the SMTP server
+        msg = message_from_string(smtplib.recv().decode('utf-8'))
+        # Check if the email is a phishing attack
+        if is_phishing_email(msg):
+            # Mitigate the phishing attack and send it to the recipient's a[1D[K
+address
+            mitigate_phishing_attack(msg)
+
+if __name__ == '__main__':
+    main()
