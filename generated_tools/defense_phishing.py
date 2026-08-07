@@ -1,52 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-07 21:32:04.539331
+# Generated 2026-08-07 22:28:12.503121
 
 import re
-from urllib.parse import urlparse
-from http import HTTPStatus
-from json import loads
+import requests
+from bs4 import BeautifulSoup
 
-# Define a list of common phishing URLs
-phishing_urls = ["https://www.example.com/login", "https://www.example.com/[25D[K
-"https://www.example.com/reset-password"]
-
-def detect_phishing(url):
-    # Check if the URL is in the list of known phishing URLs
-    if url in phishing_urls:
-        return True
-    
-    # Check if the URL has a valid domain name and scheme
-    parsed = urlparse(url)
-    if not parsed.netloc or not parsed.scheme:
-        return False
-    
-    # Check if the domain name is in the list of known phishing domains
-    domain_name = parsed.netloc.split(":")[0]
-    if domain_name in phishing_urls:
-        return True
-    
-    # Check if the URL has a valid path and query string
-    if not re.match(r"^/[^/]+(/|$)", parsed.path):
-        return False
-    if not re.match(r"^\?[a-zA-Z0-9=_]", parsed.query):
-        return False
-    
-    # Check if the URL has a valid JSON body
+def is_phishing(url):
+    # Check if the URL is valid
     try:
-        loads(url)
-    except ValueError:
+        response = requests.get(url)
+        if response.status_code != 200:
+            return False
+    except requests.exceptions.RequestException as e:
+        print("Error:", str(e))
         return False
-    
-    return True
 
-def mitigate_phishing(url, data):
-    if detect_phishing(url):
-        # Send an alert to the user's email address
-        send_alert(data["email"])
-        
-        # Return a 403 status code and a message indicating the URL is phis[4D[K
-phishing
-        return HTTPStatus.FORBIDDEN, "Phishing attack detected"
-    
-    return True
+    # Check if the URL is from a known phishing domain
+    soup = BeautifulSoup(response.content, "html.parser")
+    for link in soup.find_all("a"):
+        href = link.get("href")
+        if re.match(r"^https?://([a-z0-9.]*)\.(phishing|socialmedia|fake)\.[64D[K
+re.match(r"^https?://([a-z0-9.]*)\.(phishing|socialmedia|fake)\.com/?$", hr[2D[K
+href, re.I):
+            return True
+    return False
+
+def mitigate_phishing(url):
+    # Redirect to a safe URL
+    response = requests.get("https://www.example.com/")
+    print("Redirecting to", response.status_code, "location:", response.hea[12D[K
+response.headers["Location"])
+
+# Main function
+if __name__ == "__main__":
+    url = input("Enter URL: ")
+    if is_phishing(url):
+        mitigate_phishing(url)
+    else:
+        print("Not a phishing site.")
