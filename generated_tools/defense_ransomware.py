@@ -1,31 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-07 09:56:16.770431
+# Generated 2026-08-07 10:48:29.906054
 
 import os
-import subprocess
-import shutil
-import hashlib
-import zipfile
+import json
+import time
 
-def detect_ransomware(filename):
-    with open(filename, "rb") as f:
-        data = f.read()
-    file_hash = hashlib.sha256(data).hexdigest()
-    if file_hash in RANSOMWARE_HASHES:
-        return True
-    else:
-        return False
+def main():
+    # Initialize variables
+    path = "C:\\"
+    pattern = "*.exe"
+    exclude = ["C:\\Windows\\", "C:\\Program Files\\"]
+    timeout = 60 * 5  # 5 minutes
+    results = {}
 
-def mitigate_ransomware(filename):
-    try:
-        with zipfile.ZipFile(filename, "r") as zf:
-            for file in zf.namelist():
-                if detect_ransomware(file):
-                    # remove the ransomed file
-                    os.remove(file)
-                    break
-        return True
-    except (zipfile.BadZipFile, IOError):
-        # not a valid zip file
-        return False
+    # Start time
+    start_time = time.time()
+
+    # Iterate over all files in the path
+    for root, dirs, files in os.walk(path):
+        if root in exclude:
+            continue
+        for file in files:
+            if file.endswith(pattern):
+                try:
+                    with open(os.path.join(root, file), "r") as f:
+                        contents = f.read()
+                    if "ransomware" in contents:
+                        results[file] = "Virus detected"
+                except Exception as e:
+                    results[file] = f"Error reading file: {e}"
+
+    # Print results
+    for result in results:
+        print(f"{result}: {results[result]}")
+
+    # End time
+    end_time = time.time()
+
+    # Calculate duration
+    duration = end_time - start_time
+
+    # Print duration
+    print(f"Duration: {duration} seconds")
+
+if __name__ == "__main__":
+    main()

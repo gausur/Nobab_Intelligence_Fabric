@@ -1,45 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-07 09:55:42.314085
+# Generated 2026-08-07 10:47:36.706728
 
 import re
+import ssl
+from urllib.request import urlopen
+from urllib.parse import urlparse
 
-def is_phishing_url(url):
-    """Check if the URL is a phishing website."""
-    # Check for common phishing URLs
-    phishing_urls = ["https://www.example.com", "http://www.example.net"]
-    if url in phishing_urls:
-        return True
-    else:
-        return False
-
-def is_phishing_email(email):
-    """Check if the email is from a phishing sender."""
-    # Check for common phishing senders
-    phishing_senders = ["noreply@example.com", "support@example.net"]
-    if email["From"].lower() in phishing_senders:
-        return True
-    else:
-        return False
-
-def is_phishing_content(content):
-    """Check if the content contains phishing keywords."""
-    # Check for common phishing keywords
-    phishing_keywords = ["click here", "get your money back", "buy now"]
-    for keyword in phishing_keywords:
-        if re.search(keyword, content):
+def is_phishing(url):
+    """Detect phishing attempts by checking the URL for suspicious patterns[8D[K
+patterns"""
+    parsed = urlparse(url)
+    hostname = parsed.netloc
+    if re.search(r'^[a-z0-9]+(\.[a-z0-9]+)*$', hostname):
+        # check for subdomain taken from public suffix list
+        try:
+            ssl.get_server_certificate((hostname, 443))
+            return False
+        except Exception as e:
+            print(f"Phishing attempt detected: {e}")
             return True
     else:
-        return False
+        # check for common phishing patterns in URL
+        if re.search(r'[a-zA-Z]+://', url):
+            # contains a scheme
+            return False
+        elif re.search(r'^www\.[a-z0-9]+(\.[a-z0-9]+)*$', hostname):
+            # starts with www.
+            return False
+        else:
+            # unknown phishing pattern
+            return True
 
-def mitigate_phishing(url, email, content):
-    """Mitigate a phishing attack."""
-    # Check for phishing URLs, emails and content
-    if is_phishing_url(url) or is_phishing_email(email) or is_phishing_cont[16D[K
-is_phishing_content(content):
-        # Display warning message to the user
-        print("This URL/email/content may be a phishing attack. Please proc[4D[K
-proceed with caution.")
+def main():
+    url = "https://www.example.com"
+    if is_phishing(url):
+        print("Phishing attempt detected!")
     else:
-        # Proceed with normal processing
-        pass
+        print("No phishing attempt detected.")
+
+if __name__ == '__main__':
+    main()
