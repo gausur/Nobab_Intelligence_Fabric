@@ -1,35 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-07 16:45:22.660301
+# Generated 2026-08-07 17:43:51.728312
 
 import os
-import shutil
 import subprocess
-from datetime import datetime
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    encryption_pattern = "Encrypt"
-    with open(path, "rb") as f:
-        content = f.read()
-        if encryption_pattern in content:
+def detect_ransomware(directory):
+    # Check if the directory is encrypted
+    process = subprocess.run(['ls', '-l'], cwd=directory, stdout=subprocess[17D[K
+stdout=subprocess.PIPE)
+    output = process.stdout.decode('utf-8').splitlines()
+    for line in output:
+        if 'encrypted' in line:
             return True
     return False
 
-def mitigate_ransomware(path):
-    # Unencrypt the file
-    unencryption_command = "unencrypt"
-    subprocess.run([unencryption_command, path], shell=True)
+def mitigate_ransomware(directory):
+    # Unlock the directory
+    process = subprocess.run(['ls', '-l'], cwd=directory, stdout=subprocess[17D[K
+stdout=subprocess.PIPE)
+    output = process.stdout.decode('utf-8').splitlines()
+    for line in output:
+        if 'encrypted' in line:
+            # Unlock the directory using a key file
+            subprocess.run(['cp', '-r', '--key=<key_file>', directory, '.'][4D[K
+'.'])
+            return True
+    return False
 
-# Get current directory
-current_directory = os.getcwd()
+def main(directory):
+    if detect_ransomware(directory):
+        mitigate_ransomware(directory)
 
-# Walk through all files in the current directory and subdirectories
-for root, dirs, files in os.walk(current_directory):
-    for file in files:
-        # Check if the file is a ransomware executable
-        file_path = os.path.join(root, file)
-        if detect_ransomware(file_path):
-            mitigate_ransomware(file_path)
-            print(f"{datetime.now()} - Mitigated ransomware in {file_path}"[12D[K
-{file_path}")
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--directory', help='Directory to check for r[1D[K
+ransomware')
+    args = parser.parse_args()
+    main(args.directory)
