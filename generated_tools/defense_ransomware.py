@@ -1,40 +1,64 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-08 08:31:33.021248
+# Generated 2026-08-08 09:31:04.080516
 
 import os
-import shutil
+import json
 import subprocess
+import time
 
-def detect_ransomware():
-    # Check for the presence of ransomware files or suspicious processes
-    if os.path.exists("C:\\Program Files\\Ransomware"):
-        return True
-    else:
-        processes = subprocess.check_output(["tasklist", "/svc"])
-        for process in processes.splitlines():
-            if "Ransomware" in process.decode().lower():
-                return True
+def detect_ransomware(filepath):
+    # Check if the file is a directory
+    if os.path.isdir(filepath):
         return False
 
-def mitigate_ransomware():
-    # Check if the system is running Windows 10 or later
-    if os.name != "nt":
-        raise RuntimeError("This script only supports Windows 10 and later"[6D[K
-later")
-    
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware():
-        print("Ransomware detected! Attempting to mitigate...")
-        
-        # Stop the ransomware service
-        subprocess.check_call(["sc", "stop", "RansomwareService"])
-        
-        # Delete the ransomware files and folders
-        shutil.rmtree("C:\\Program Files\\Ransomware")
-        
-        # Reboot the system to clear the ransomware from memory
-        subprocess.check_call(["shutdown", "-r", "now"])
-    
-    else:
-        print("No ransomware detected.")
+    # Check if the file is a symbolic link
+    if os.path.islink(filepath):
+        return False
+
+    # Check if the file is a block device
+    if os.path.ismount(filepath):
+        return False
+
+    # Check if the file has the ransomware signature
+    with open(filepath, 'rb') as f:
+        data = f.read()
+        if b'YOUR_SIGNATURE_HERE' in data:
+            return True
+    return False
+
+def mitigate_ransomware(filepath):
+    # Remove the ransomware signature from the file
+    with open(filepath, 'rb') as f:
+        data = f.read()
+        data = data.replace(b'YOUR_SIGNATURE_HERE', b'')
+        with open(filepath, 'wb') as f:
+            f.write(data)
+
+    # Remove any ransomware files or directories
+    if os.path.isdir(filepath):
+        for root, dirs, files in os.walk(filepath):
+            for file in files:
+                full_path = os.path.join(root, file)
+                if detect_ransomware(full_path):
+                    os.remove(full_path)
+    elif detect_ransomware(filepath):
+        os.remove(filepath)
+
+if __name__ == '__main__':
+    # Get the path to the file or directory to scan
+    if len(sys.argv) < 2:
+        print("Usage: python ransomware_detector.py [file/directory]")
+        sys.exit(1)
+
+    filepath = sys.argv[1]
+
+    # Scan the file or directory for ransomware
+    if os.path.isdir(filepath):
+        for root, dirs, files in os.walk(filepath):
+            for file in files:
+                full_path = os.path.join(root, file)
+                if detect_ransomware(full_path):
+                    mitigate_ransomware(full_path)
+    elif detect_ransomware(filepath):
+        mitigate_ransomware(filepath)
