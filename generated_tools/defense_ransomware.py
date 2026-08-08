@@ -1,34 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-08 15:24:03.726009
+# Generated 2026-08-08 16:23:39.306808
 
-import socket
-import hashlib
 import os
+import re
+import json
+from base64 import b64decode
 
-def check_ransomware(path):
-    with open(path, 'rb') as f:
+def detect_ransomware(file):
+    with open(file, "rb") as f:
         data = f.read()
-        # Check if the file is a ransomware by analyzing its binary code
-        if b'I love you' in data:
-            return True
-        else:
-            return False
+        if len(data) > 1024:
+            hash = hashlib.sha256(data).hexdigest()
+            if re.search(r"(\\x|%)\w{2}", hash):
+                return True
+    return False
 
-def mitigate_ransomware(path):
-    with open(path, 'wb') as f:
-        # Overwrite the file with a known good version to mitigate the rans[4D[K
-ransomware attack
-        f.write(b'I love you')
+def mitigate_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+        cleaned_data = b64decode(data)
+        with open(file, "wb") as f:
+            f.write(cleaned_data)
 
-# Check if the system is running on a virtual machine
-if os.environ.get('VIRTUAL_ENV'):
-    print("Running in a virtual machine, skipping ransomware detection")
-else:
-    # Iterate through all files and directories in the current directory
-    for root, dirs, files in os.walk(os.getcwd()):
-        for file in files:
-            path = os.path.join(root, file)
-            if check_ransomware(path):
-                print("Ransomware detected in", path)
-                mitigate_ransomware(path)
+def main():
+    for file in os.listdir("."):
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+
+if __name__ == "__main__":
+    main()
