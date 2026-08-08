@@ -1,64 +1,61 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-08 09:31:04.080516
+# Generated 2026-08-08 10:25:50.644424
 
 import os
-import json
-import subprocess
 import time
+import hashlib
+import shutil
+import json
+import zipfile
+from datetime import datetime
 
-def detect_ransomware(filepath):
-    # Check if the file is a directory
-    if os.path.isdir(filepath):
+def detect_ransomware(path):
+    # Check if the file is a valid ZIP archive
+    try:
+        with zipfile.ZipFile(path) as zf:
+            pass
+    except zipfile.BadZipFile:
         return False
-
-    # Check if the file is a symbolic link
-    if os.path.islink(filepath):
-        return False
-
-    # Check if the file is a block device
-    if os.path.ismount(filepath):
-        return False
-
-    # Check if the file has the ransomware signature
-    with open(filepath, 'rb') as f:
-        data = f.read()
-        if b'YOUR_SIGNATURE_HERE' in data:
-            return True
+    
+    # Check if the file contains a malicious file with a known hash
+    for f in zf.infolist():
+        try:
+            with open(os.path.join(path, f.filename), 'rb') as fi:
+                file_hash = hashlib.sha256(fi.read()).hexdigest()
+                if file_hash == 'YOUR_MALICIOUS_FILE_HASH':
+                    return True
+        except FileNotFoundError:
+            pass
+    
+    # Check if the file contains a known ransomware flag
+    for f in zf.infolist():
+        try:
+            with open(os.path.join(path, f.filename), 'rb') as fi:
+                data = fi.read()
+                if b'YOUR_RANSOMWARE_FLAG' in data:
+                    return True
+        except FileNotFoundError:
+            pass
+    
     return False
 
-def mitigate_ransomware(filepath):
-    # Remove the ransomware signature from the file
-    with open(filepath, 'rb') as f:
-        data = f.read()
-        data = data.replace(b'YOUR_SIGNATURE_HERE', b'')
-        with open(filepath, 'wb') as f:
-            f.write(data)
-
-    # Remove any ransomware files or directories
-    if os.path.isdir(filepath):
-        for root, dirs, files in os.walk(filepath):
-            for file in files:
-                full_path = os.path.join(root, file)
-                if detect_ransomware(full_path):
-                    os.remove(full_path)
-    elif detect_ransomware(filepath):
-        os.remove(filepath)
+def mitigate_ransomware(path):
+    # Remove the malicious file or folder
+    try:
+        shutil.rmtree(path)
+    except FileNotFoundError:
+        os.remove(path)
+    
+    # Update the last modified time of the affected file to prevent future [K
+ransomware attacks
+    try:
+        os.utime(path, (datetime.now().timestamp(), datetime.now().timestam[23D[K
+datetime.now().timestamp()))
+    except OSError:
+        pass
 
 if __name__ == '__main__':
-    # Get the path to the file or directory to scan
-    if len(sys.argv) < 2:
-        print("Usage: python ransomware_detector.py [file/directory]")
-        sys.exit(1)
-
-    filepath = sys.argv[1]
-
-    # Scan the file or directory for ransomware
-    if os.path.isdir(filepath):
-        for root, dirs, files in os.walk(filepath):
-            for file in files:
-                full_path = os.path.join(root, file)
-                if detect_ransomware(full_path):
-                    mitigate_ransomware(full_path)
-    elif detect_ransomware(filepath):
-        mitigate_ransomware(filepath)
+    for path in sys.argv[1:]:
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
