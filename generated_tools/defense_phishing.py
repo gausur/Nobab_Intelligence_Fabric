@@ -1,48 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-08 04:07:14.175575
+# Generated 2026-08-08 05:39:05.660438
 
 import re
-import urllib.parse
-from collections import Counter
+import requests
+from urllib.parse import urlparse
 
 def is_phishing(url):
-    parsed = urllib.parse.urlparse(url)
+    parsed = urlparse(url)
     domain = parsed.netloc
     if not domain:
         return False
-    if "." not in domain:
+    # Check if the domain is in the top 10,000 most popular websites
+    if domain in requests.get("https://data.gov/top-domains").json()["items[58D[K
+requests.get("https://data.gov/top-domains").json()["items"]:
         return False
-    parts = domain.split(".")
-    if len(parts) < 2:
+    # Check if the domain has a valid SSL certificate
+    try:
+        res = requests.get(f"https://{domain}", verify=True)
+        if res.status_code == 200 and "content-type" in res.headers:
+            return True
+        else:
+            return False
+    except Exception:
         return False
-    if any(part.isdigit() for part in parts):
+    # Check if the URL is a known phishing website
+    if url in requests.get("https://data.gov/known-phish").json()["items"]:[61D[K
+requests.get("https://data.gov/known-phish").json()["items"]:
+        return[6D[K
+return True
+    else:
         return False
-    if parts[-1] == "com":
-        return False
-    return True
 
 def mitigate_phishing(url):
-    parsed = urllib.parse.urlparse(url)
+    parsed = urlparse(url)
     domain = parsed.netloc
-    if not domain:
+    # Redirect to a known safe website if the domain is in the top 10,000 m[1D[K
+most popular websites
+    if domain in requests.get("https://data.gov/top-domains").json()["items[58D[K
+requests.get("https://data.gov/top-domains").json()["items"]:
+        return f"https://www.example.com"
+    # Redirect to a known safe website if the URL is a known phishing websi[5D[K
+website
+    elif url in requests.get("https://data.gov/known-phish").json()["items"[59D[K
+requests.get("https://data.gov/known-phish").json()["items"]:
+        return f"https://www.example.com"
+    else:
         return False
-    if "." not in domain:
-        return False
-    parts = domain.split(".")
-    if len(parts) < 2:
-        return False
-    if any(part.isdigit() for part in parts):
-        return False
-    if parts[-1] == "com":
-        return False
-    return True
-
-def main():
-    urls = ["http://www.example.com", "https://www.example.com"]
-    for url in urls:
-        is_phishing(url)
-        mitigate_phishing(url)
-
-if __name__ == "__main__":
-    main()
