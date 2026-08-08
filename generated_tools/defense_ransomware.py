@@ -1,42 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-08 02:55:49.518661
+# Generated 2026-08-08 04:07:44.438847
 
 import os
-import socket
-import subprocess
+import json
 
-# Define list of common ransomware extensions
-extensions = ['*.exe', '*.dll', '*.docx', '*.xlsx', '*.pptx']
+def is_ransomware(file):
+    # Check if the file has a specific pattern of bytes
+    with open(file, 'rb') as f:
+        data = f.read()
+        if data[0:4] == b'RANS':
+            return True
+        else:
+            return False
 
-# Get list of files and directories in current directory
-files = os.listdir()
-directories = []
+def mitigate_ransomware(file):
+    # Remove the file and its contents
+    os.remove(file)
+
+# Get a list of all files in the current directory
+files = [f for f in os.listdir('.') if os.path.isfile(f)]
+
+# Iterate over each file and check if it's a ransomware
 for file in files:
-    if os.path.isfile(file):
-        for extension in extensions:
-            if file.endswith(extension):
-                # If file is a ransomware, raise an exception
-                raise Exception('Ransomware detected')
-    elif os.path.isdir(file):
-        directories.append(file)
-
-# Recursively search for ransomware in subdirectories
-for directory in directories:
-    search_ransomware(directory)
-
-def search_ransomware(directory):
-    # Get list of files and directories in the current directory
-    files = os.listdir(directory)
-    for file in files:
-        if os.path.isfile(os.path.join(directory, file)):
-            for extension in extensions:
-                if file.endswith(extension):
-                    # If file is a ransomware, raise an exception
-                    raise Exception('Ransomware detected')
-        elif os.path.isdir(os.path.join(directory, file)):
-            search_ransomware(os.path.join(directory, file))
-
-# If no ransomware is found, print a message to indicate that the script ha[2D[K
-has completed successfully
-print('No ransomware detected')
+    if is_ransomware(file):
+        mitigate_ransomware(file)
