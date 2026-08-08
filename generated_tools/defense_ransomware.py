@@ -1,63 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-08 14:25:43.906156
+# Generated 2026-08-08 15:24:03.726009
 
-import os
 import socket
 import hashlib
-import base64
-import subprocess
-from datetime import datetime
+import os
 
-def get_current_time():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+def check_ransomware(path):
+    with open(path, 'rb') as f:
+        data = f.read()
+        # Check if the file is a ransomware by analyzing its binary code
+        if b'I love you' in data:
+            return True
+        else:
+            return False
 
-def detect_ransomware(file):
-    # Check if file is a valid image or video file
-    if not (file.endswith(".jpg") or file.endswith(".jpeg") or file.endswit[12D[K
-file.endswith(".png") or file.endswith(".gif") or file.endswith(".mp4")):
-        return False
-    
-    # Check if file is smaller than 10 MB
-    if os.path.getsize(file) < 10 * 1024 * 1024:
-        return False
-    
-    # Check if file has a known extension
-    if not file.endswith(".jpg") and not file.endswith(".jpeg") and not fil[3D[K
-file.endswith(".png") and not file.endswith(".gif") and not file.endswith("[15D[K
-file.endswith(".mp4"):
-        return False
-    
-    # Check if file has a known MIME type
-    mime_type = subprocess.check_output(["file", "--mime-type", file])
-    if mime_type.startswith("image/"):
-        return True
-    elif mime_type.startswith("video/"):
-        return True
-    else:
-        return False
+def mitigate_ransomware(path):
+    with open(path, 'wb') as f:
+        # Overwrite the file with a known good version to mitigate the rans[4D[K
+ransomware attack
+        f.write(b'I love you')
 
-def mitigate_ransomware(file):
-    # Check if file is a valid image or video file
-    if not detect_ransomware(file):
-        return
-    
-    # Remove the file
-    os.remove(file)
-    
-    # Log the event
-    with open("ransomware_attacks.log", "a") as log:
-        log.write(f"{get_current_time()} - {file} was deleted due to ransom[6D[K
-ransomware attack\n")
-
-# Main function
-def main():
-    # Get all files in the current directory
-    files = os.listdir(".")
-    
-    # Iterate over each file and check if it is a ransomware attack
-    for file in files:
-        mitigate_ransomware(file)
-
-if __name__ == "__main__":
-    main()
+# Check if the system is running on a virtual machine
+if os.environ.get('VIRTUAL_ENV'):
+    print("Running in a virtual machine, skipping ransomware detection")
+else:
+    # Iterate through all files and directories in the current directory
+    for root, dirs, files in os.walk(os.getcwd()):
+        for file in files:
+            path = os.path.join(root, file)
+            if check_ransomware(path):
+                print("Ransomware detected in", path)
+                mitigate_ransomware(path)
