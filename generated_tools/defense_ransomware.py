@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-08 05:39:32.208265
+# Generated 2026-08-08 06:38:07.369819
 
 import os
-import re
-import subprocess
-import time
+import json
+from datetime import datetime
 
-def detect_ransomware(file_path):
-    file_size = os.path.getsize(file_path)
-    if file_size > 1000:
-        return True
-    else:
-        return False
+# Define the directories to monitor
+directories = ['/path/to/directory1', '/path/to/directory2']
 
-def mitigate_ransomware(file_path):
-    subprocess.run(["rm", "-f", file_path])
+# Set up a timer for monitoring
+timer = datetime.now()
 
-if __name__ == "__main__":
-    file_path = sys.argv[1]
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
+while True:
+    # Check if any files in the directories have been modified
+    for directory in directories:
+        if os.path.exists(directory):
+            for root, dirs, files in os.walk(directory):
+                for file in files:
+                    path = os.path.join(root, file)
+                    mtime = os.stat(path).st_mtime
+                    if timer - datetime.fromtimestamp(mtime) > 10:
+                        print(f'File {file} modified more than 10 seconds a[1D[K
+ago in {directory}')
+                        # Mitigate the attack by deleting the file
+                        os.remove(path)
+    
+    # Sleep for 5 minutes before checking again
+    time.sleep(300)
