@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-09 16:25:09.458805
+# Generated 2026-08-09 17:26:23.770126
 
 import os
-import sys
 import time
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.isfile(path):
+def detect_ransomware():
+    try:
+        # Check if the file has been modified within the past hour
+        modified_time = os.path.getmtime(filename)
+        if (time.time() - modified_time) > 3600:
+            return True
+        else:
+            return False
+    except Exception as e:
+        # If any exception occurs, assume the file is not modified recently[8D[K
+recently
+        print("Error occurred while detecting ransomware:", e)
         return False
-    with open(path, "rb") as f:
-        data = f.read()
-        for i in range(len(data) - 128):
-            if data[i:i+128] == b"RANSOMWARE DETECTED":
-                return True
-    return False
 
-def mitigate_ransomware(path):
-    # Delete the file to prevent the ransomware from decrypting it
-    if detect_ransomware(path):
-        os.remove(path)
-        print("Ransomware detected and mitigated!")
+def mitigate_ransomware(filename):
+    try:
+        # Restore the original file
+        os.rename(f"{filename}.backup", filename)
+    except Exception as e:
+        print("Error occurred while restoring file:", e)
 
 if __name__ == "__main__":
-    # Monitor all files in the current directory for ransomware attacks
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            mitigate_ransomware(os.path.join(root, file))
+    filename = "important_file.txt"
+    if detect_ransomware():
+        mitigate_ransomware(filename)
+        print("Ransomware detected and mitigated")
+    else:
+        print("No ransomware detected")
