@@ -1,49 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-09 08:35:57.867644
+# Generated 2026-08-09 09:33:51.180602
 
 import re
-import smtplib
+import json
 from email.message import EmailMessage
-from socket import gaierror
 
-def is_phishing(email: str) -> bool:
-    # Check if the email contains spammy keywords
-    for keyword in ["phishing", "fake", "scam"]:
-        if keyword in email.lower():
+# Load the domain list
+with open("domains.json", "r") as f:
+    domains = json.load(f)
+
+def is_phishing_attack(email):
+    """Check if the email is a phishing attack"""
+    message = EmailMessage.from_bytes(email)
+    subject = message["Subject"]
+    sender = message["From"]
+    recipient = message["To"]
+    body = message.get_payload()
+
+    # Check for suspicious subjects
+    if re.search(r"[Ff]ake|[Ss]ocial [Ee]ngineering", subject, re.IGNORECAS[12D[K
+re.IGNORECASE):
+        return True
+
+    # Check for suspicious senders or recipients
+    for domain in domains:
+        if domain in sender or domain in recipient:
             return True
+
+    # Check for suspicious content
+    if re.search(r"[Cc]lick here|[Jj]oin now", body, re.IGNORECASE):
+        return True
+
     return False
 
-def get_sender_domain(email: str) -> str:
-    # Extract the sender's domain from the email address
-    regex = r"^.*?@(?P<domain>[^.]+\.[a-z]{2,3})$"
-    match = re.search(regex, email)
-    return match.group("domain") if match else None
-
-def check_sender_reputation(domain: str) -> bool:
-    # Check the reputation of the sender's domain using a third-party API
-    try:
-        response = smtplib.sendmail("", "", "Hello World!")
-        return response.startswith("250")
-    except (gaierror, ConnectionError):
-        return False
-
-def mitigate_phishing(email: str) -> None:
-    # Mitigate the phishing attack by blocking the email and alerting the u[1D[K
-user
-    print(f"Blocked {email}")
-    return
-
-def main():
-    # Read the email message from stdin
-    message = EmailMessage()
-    message.set_payload(input())
-
-    # Check if the email is a phishing attack
-    if is_phishing(message.get("Subject")):
-        domain = get_sender_domain(message.get("From"))
-        if check_sender_reputation(domain):
-            mitigate_phishing(message)
-
-if __name__ == "__main__":
-    main()
+def mitigate_phishing_attack(email):
+    """Mitigate a phishing attack"""
+    message = EmailMessage.from_bytes(email)
+    message["To"] = "undisclosed-recipients@example.com"
+    message["Subject"] = f"Phishing Attempt: {message['Subject']}"
+    return message.as_bytes()
