@@ -1,33 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-09 19:27:14.881539
+# Generated 2026-08-09 20:25:41.277154
 
+import json
 import os
-import sys
+import re
+import subprocess
+from datetime import datetime
 
-def detect_ransomware(filename):
-    with open(filename, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            print("Detected ransomware!")
-            return True
-        else:
-            return False
+def is_ransomware(file):
+    # Check if file is a binary executable
+    if not file.is_executable():
+        return False
 
-def mitigate_ransomware(filename):
-    with open(filename, "wb") as f:
-        f.write(b"RANSOMWARE DETECTED AND MITIGATED BY PRODUCTION-READY SCR[3D[K
-SCRIPT")
-    print("Mitigation successful!")
+    # Check if file has a known ransomware signature
+    with open("ransomware_signatures.json", "r") as f:
+        signatures = json.load(f)
+        for signature in signatures:
+            if re.search(signature, file.read()):
+                return True
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python ransomware_detector.py [filename]")
-        sys.exit(1)
-    filename = sys.argv[1]
-    detected = detect_ransomware(filename)
-    if detected:
-        mitigate_ransomware(filename)
+    # Check if file has been modified within the last hour
+    modified_time = datetime.fromtimestamp(file.stat().st_mtime)
+    if modified_time > (datetime.now() - timedelta(hours=1)):
+        return False
+
+def mitigate_ransomware(file):
+    # Delete the file
+    file.unlink()
+
+    # Run a system restore to undo any changes made by the ransomware
+    subprocess.run("sudo system-restore", shell=True)
 
 if __name__ == "__main__":
-    main()
+    # Get list of files in current directory and its subdirectories
+    for file in os.scandir():
+        if is_ransomware(file):
+            mitigate_ransomware(file)
