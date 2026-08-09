@@ -1,46 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-09 05:47:06.733299
+# Generated 2026-08-09 06:44:20.867716
 
 import re
 import requests
+from bs4 import BeautifulSoup
 
 def is_phishing(url):
-    # Check if the URL is a valid HTTP/HTTPS URL
-    if not re.match(r'^https?://', url):
+    """Check if the URL is a phishing site."""
+    # Send a HEAD request to get just the headers
+    response = requests.head(url)
+    
+    # Check if the response code is 200
+    if response.status_code != 200:
         return False
     
-    # Send a HEAD request to the URL to get the headers
-    try:
-        response = requests.head(url)
-    except requests.exceptions.RequestException:
-        return False
+    # Get the content of the page
+    html = BeautifulSoup(requests.get(url).text, "html.parser")
     
-    # Check if the server responded with a redirect or an error
-    if response.status_code not in [200, 301, 302]:
-        return False
-    
-    # Extract the URL from the Location header
-    location = response.headers.get('Location')
-    
-    # Check if the URL is a valid HTTP/HTTPS URL
-    if not re.match(r'^https?://', location):
-        return False
-    
-    # Check if the URL is the same as the original URL or a subdomain of it[2D[K
-it
-    if location == url or location.startswith(url + '/'):
+    # Check for common phishing patterns
+    if re.search(r"[fF]ake|[pP]hishing", html.title.string):
         return True
-    else:
-        return False
-
-def mitigate_phishing(url):
-    # If the URL is not a valid phishing URL, do nothing
-    if not is_phishing(url):
-        return
+    elif re.search(r"[sS]ecurity[mM]atters", html.body.text):
+        return True
     
-    # Replace the URL with a safe fallback URL
-    url = 'https://example.com'
+    # Check for suspicious words in the page content
+    if "click here to continue" in html.body.text:
+        return True
+    elif "sign up now" in html.body.text:
+        return True
+    elif "get started" in html.body.text:
+        return True
     
-    # Redirect to the fallback URL
-    response = redirect(url)
+    # Check for suspicious URLs in the page content
+    if re.search(r"^https://www\.google\.com/", url):
+        return True
+    elif re.search(r"^https://www\.facebook\.com/", url):
+        return True
+    elif re.search(r"^https://www\.twitter\.com/", url):
+        return True
+    
+    # If none of the above patterns are found, it's likely not a phishing s[1D[K
+site
+    return False
