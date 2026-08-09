@@ -1,29 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-09 12:35:44.524071
+# Generated 2026-08-09 13:43:48.921197
 
 import re
-from urllib.parse import urlparse
+import urllib.parse
+from email.message import EmailMessage
 
-def is_phishing_url(url):
-    parsed = urlparse(url)
-    hostname = '{}:{}'.format(parsed.hostname, parsed.port or 80)
-    if not re.match('^https?://', hostname):
+def is_phishing_attempt(email):
+    message = EmailMessage.from_string(email)
+    uri = urllib.parse.urlparse(message.get('From'))
+    domain = uri.netloc.lower()
+    if not domain or domain == 'localhost' or domain.endswith('.local'):
         return False
-    if 'google' in hostname:
-        return False
-    if 'yandex' in hostname:
-        return False
-    if 'baidu' in hostname:
-        return False
-    if 'bing' in hostname:
-        return False
-    if 'duckduckgo' in hostname:
-        return False
-    return True
+    if message.get('Subject').lower().startswith('fwd:'):
+        return True
+    if re.match(r'.*@([\d]{1,3}\.){3}[\d]{1,3}', message.get('From')):
+        return True
+    if re.search(r'http://|https://|www\.|\.com$', message.get('Link')):
+        return True
+    if re.match(r'.*@([\d]{1,3}\.){3}[\d]{1,3}', message.get('TextBody')):
+        return True
+    return False
 
-def mitigate_phishing(url):
-    if is_phishing_url(url):
-        print('Possible phishing attack detected!')
+def mitigate_phishing_attempt(email):
+    message = EmailMessage.from_string(email)
+    if is_phishing_attempt(message):
+        print("Phishing attempt detected!")
+        # TODO: Add further mitigation steps here
     else:
-        print('No phishing attacks detected.')
+        print("No phishing attempt detected.")
