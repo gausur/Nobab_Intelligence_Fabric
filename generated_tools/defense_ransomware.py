@@ -1,43 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-10 19:53:40.821999
+# Generated 2026-08-10 20:35:12.103441
 
 import os
-import json
-import subprocess
+import time
+from datetime import datetime
 
-def detect_ransomware(path):
-    # Check if the file is a directory or not
-    if os.path.isdir(path):
-        # If the path is a directory, check for ransomware files
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                if "Ransomware" in file:
-                    return True
-        return False
-    else:
-        # If the path is a file, check if it has the ransomware flag
-        if "Ransomware" in os.path.basename(path):
-            return True
-        return False
+def detect_ransomware():
+    # Check if the system has been infected with ransomware
+    if "Ransomware" in os.listdir("/") and "pay_ransom.exe" in os.listdir("[12D[K
+os.listdir("."):
+        # Alert the user that the system has been infected
+        print("The system has been infected with ransomware!")
 
-def mitigate_ransomware(path):
-    # Remove the ransomware file or directory
-    try:
-        os.remove(path)
-    except OSError as e:
-        print("Error removing file: %s - %s" % (path, e))
-        return False
-    return True
+    # Check if the user is currently paying the ransom
+    if "pay_ransom.exe" in os.listdir("."):
+        # Alert the user that the ransom payment process is underway
+        print("The ransom payment process is underway.")
 
-def main():
-    # Get the path to scan from user input
-    path = input("Enter the path to scan for ransomware: ")
-    if detect_ransomware(path):
-        print("Ransomware detected in %s" % path)
-        mitigate_ransomware(path)
-    else:
-        print("No ransomware detected")
+    # Check if the system has been infected with ransomware and the user ha[2D[K
+has already paid the ransom
+    if "Ransomware" in os.listdir("/") and "pay_ransom.exe" not in os.listd[8D[K
+os.listdir("."):
+        # Alert the user that the system has been infected with ransomware [K
+and the user has already paid the ransom
+        print("The system has been infected with ransomware, but the paymen[6D[K
+payment process is not underway.")
 
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware():
+    # Remove the ransomware files
+    os.remove("/Ransomware")
+    os.remove("pay_ransom.exe")
+
+# Schedule the detection and mitigation tasks to run every 10 minutes
+while True:
+    detect_ransomware()
+    mitigate_ransomware()
+    time.sleep(600)
