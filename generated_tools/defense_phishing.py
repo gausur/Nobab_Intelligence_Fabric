@@ -1,37 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 07:17:21.507799
+# Generated 2026-08-10 09:11:34.339875
 
 import re
-import socket
-from urllib.parse import urlparse
+import urllib
 
+# Define list of known phishing domains
+phishing_domains = ["example1.com", "example2.com"]
+
+# Define function to check if URL is phishing
 def is_phishing(url):
-    parsed = urlparse(url)
-    hostname = parsed.hostname
-    if not hostname:
-        return False
-    try:
-        addrinfo = socket.getaddrinfo(hostname, None)[0]
-        ipaddress = addrinfo[4][0]
-        if ipaddress in PHISHING_IPS:
-            return True
-        else:
-            return False
-    except (socket.gaierror, IndexError):
-        return False
+    parsed_url = urllib.parse.urlsplit(url)
+    hostname = parsed_url.hostname
+    return hostname in phishing_domains
 
-def mitigate(url):
-    parsed = urlparse(url)
-    hostname = parsed.hostname
-    if not hostname:
-        return url
-    try:
-        addrinfo = socket.getaddrinfo(hostname, None)[0]
-        ipaddress = addrinfo[4][0]
-        if ipaddress in PHISHING_IPS:
-            return "https://www." + hostname + parsed.path
-        else:
-            return url
-    except (socket.gaierror, IndexError):
-        return url
+# Define function to mitigate phishing attack
+def mitigate_phishing(url):
+    if is_phishing(url):
+        # Redirect user to a known safe website
+        urllib.request.urlopen("https://example3.com")
+    else:
+        # Load URL in web browser
+        urllib.request.urlopen(url)
+
+# Get user input and check if it's a phishing URL
+user_input = input("Enter a URL: ")
+if is_phishing(user_input):
+    mitigate_phishing(user_input)
+else:
+    # Load URL in web browser
+    urllib.request.urlopen(user_input)
