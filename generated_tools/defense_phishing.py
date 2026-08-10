@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 11:04:18.485472
+# Generated 2026-08-10 11:49:55.792543
 
 import re
-import socket
+import requests
+from urllib import parse
 
-class PhishingDetector:
-    def __init__(self, url):
-        self.url = url
-
-    def is_phishing(self):
-        # Check if the URL is a valid HTTP or HTTPS URL
-        if not re.match(r'^https?://', self.url):
-            return False
-
-        # Resolve the hostname of the URL and check if it is an IP address
-        try:
-            ip_address = socket.gethostbyname(self.url)
-        except socket.gaierror:
-            return False
-
-        if not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip_address[10D[K
-ip_address):
-            return False
-
-        # Check if the URL is a known phishing website
-        with open('phishing_websites.txt') as f:
-            for line in f:
-                if self.url.endswith(line.strip()):
-                    return True
-
-        # No match found, therefore not a phishing website
+def is_phishing(url):
+    if not re.match(r'^https?://', url):
         return False
+    try:
+        response = requests.get(url)
+        html = response.text
+        title = re.search(r'<title>(.*?)</title>', html)
+        if title is None or not title.group(1).lower().startswith('phishing[43D[K
+title.group(1).lower().startswith('phishing'):
+            return False
+    except requests.exceptions.RequestException:
+        pass
+    return True
+
+def mitigate_phishing(url):
+    parsed = parse.urlparse(url)
+    if is_phishing(parsed.netloc + '://' + parsed.path):
+        print('Phishing attempt detected!')
+        print('Please report this incident to your IT department.')
+    else:
+        print('No phishing attempt detected.')
