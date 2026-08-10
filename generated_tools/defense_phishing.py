@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 11:49:55.792543
+# Generated 2026-08-10 12:51:46.217019
 
 import re
-import requests
-from urllib import parse
 
 def is_phishing(url):
-    if not re.match(r'^https?://', url):
-        return False
-    try:
-        response = requests.get(url)
-        html = response.text
-        title = re.search(r'<title>(.*?)</title>', html)
-        if title is None or not title.group(1).lower().startswith('phishing[43D[K
-title.group(1).lower().startswith('phishing'):
-            return False
-    except requests.exceptions.RequestException:
-        pass
-    return True
+    """
+    Check if the URL is a phishing attempt.
+    """
+    pattern = r"(?i)https?://([a-z0-9.-]*\.)?(facebook|google|twitter)\.(co[61D[K
+r"(?i)https?://([a-z0-9.-]*\.)?(facebook|google|twitter)\.(com|co\.uk)"
+    return re.match(pattern, url) is not None
 
 def mitigate_phishing(url):
-    parsed = parse.urlparse(url)
-    if is_phishing(parsed.netloc + '://' + parsed.path):
-        print('Phishing attempt detected!')
-        print('Please report this incident to your IT department.')
+    """
+    Mitigate a phishing attack by redirecting the user to a secure page.
+    """
+    if is_phishing(url):
+        print("Redirecting to secure page...")
+        return "https://example.com/secure-page"
     else:
-        print('No phishing attempt detected.')
+        return url
+
+if __name__ == "__main__":
+    url = input("Enter URL: ")
+    mitigated_url = mitigate_phishing(url)
+    print(f"Mitigated URL: {mitigated_url}")
