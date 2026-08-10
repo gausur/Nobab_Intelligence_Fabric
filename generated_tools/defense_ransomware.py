@@ -1,30 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-10 14:16:27.668622
+# Generated 2026-08-10 15:56:34.523635
 
 import os
-import time
+import sys
+import json
 import hashlib
+import base64
+from datetime import datetime, timedelta
 
-def check_for_ransomware():
-    # Check if the file exists in the current directory
-    if not os.path.isfile("my_important_file.txt"):
+class RansomwareDetector:
+    def __init__(self):
+        self.data = None
+        self.hashes = []
+
+    def read_data(self):
+        try:
+            with open('data.json', 'r') as f:
+                self.data = json.load(f)
+        except FileNotFoundError:
+            pass
+
+    def generate_hashes(self, files=[]):
+        for file in files:
+            with open(file, 'rb') as f:
+                hash = base64.b64encode(hashlib.sha256(f.read()).digest())
+                self.hashes.append((file, hash))
+
+    def check_for_ransomware(self):
+        for file, hash in self.hashes:
+            if hash not in self.data['known_good']:
+                print('Ransomware detected!')
+                return True
         return False
 
-    # Hash the file's contents
-    with open("my_important_file.txt", "rb") as f:
-        file_contents = f.read()
-        file_hash = hashlib.sha256(file_contents).hexdigest()
+    def mitigate_ransomware(self):
+        if not self.check_for_ransomware():
+            return
+        print('Mitigating ransomware...')
+        for file, hash in self.hashes:
+            if hash not in self.data['known_good']:
+                try:
+                    os.remove(file)
+                    print(f'Deleted {file}')
+                except FileNotFoundError:
+                    pass
+        sys.exit()
 
-    # Check if the hash has been modified
-    if file_hash != "8d1a434c6f54b75f0067f978df2244bcb2dcee9a":
-        return True
+def main():
+    detector = RansomwareDetector()
+    detector.read_data()
+    files = os.listdir('.')
+    detector.generate_hashes(files)
+    if detector.check_for_ransomware():
+        detector.mitigate_ransomware()
 
-    return False
-
-def mitigate_ransomware():
-    # Remove the file
-    os.remove("my_important_file.txt")
-
-if check_for_ransomware():
-    mitigate_ransomware()
+if __name__ == '__main__':
+    main()

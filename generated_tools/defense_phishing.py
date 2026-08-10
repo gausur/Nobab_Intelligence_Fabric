@@ -1,40 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 14:18:49.632340
+# Generated 2026-08-10 15:55:14.802804
 
 import re
-from urllib.parse import urlparse
+import urllib.parse
 
-def is_phishing_url(url):
-    parsed = urlparse(url)
+def is_phishing(url):
+    parsed = urllib.parse.urlparse(url)
     domain = parsed.netloc
-    if not (parsed.scheme == "http" or parsed.scheme == "https"):
+    if not re.match("^[a-z0-9]+([\\.-][a-z0-9]+)*$", domain):
+        return True
+    else:
         return False
-    if domain[-1] == ".":
-        domain = domain[:-1]
-    if domain == "localhost" or domain == "127.0.0.1":
-        return False
-    if any(char not in ("a" <= char <= "z" or char in ["-", "_"]) for char [K
-in domain):
-        return False
-    if len(domain) < 4 or len(domain) > 63:
-        return False
-    return True
 
-def is_phishing_ip(ip):
-    if ip == "0.0.0.0" or ip == "127.0.0.1":
-        return False
-    if any(char not in ("0" <= char <= "9") for char in ip):
-        return False
-    if len(ip) != 15:
-        return False
-    return True
-
-def mitigate_phishing(url, ip):
-    if is_phishing_url(url):
-        print("Phishing URL detected!")
-    if is_phishing_ip(ip):
-        print("Phishing IP detected!")
-
-if __name__ == "__main__":
-    mitigate_phishing("http://example.com", "192.168.0.1")
+def mitigate_phishing(url):
+    if is_phishing(url):
+        print("This URL may be a phishing attack. Please proceed with cauti[5D[K
+caution.")
+    else:
+        print("This URL is safe to visit.")
