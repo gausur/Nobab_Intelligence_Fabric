@@ -1,59 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-10 15:56:34.523635
+# Generated 2026-08-10 16:47:34.588715
 
 import os
 import sys
-import json
-import hashlib
-import base64
-from datetime import datetime, timedelta
-
-class RansomwareDetector:
-    def __init__(self):
-        self.data = None
-        self.hashes = []
-
-    def read_data(self):
-        try:
-            with open('data.json', 'r') as f:
-                self.data = json.load(f)
-        except FileNotFoundError:
-            pass
-
-    def generate_hashes(self, files=[]):
-        for file in files:
-            with open(file, 'rb') as f:
-                hash = base64.b64encode(hashlib.sha256(f.read()).digest())
-                self.hashes.append((file, hash))
-
-    def check_for_ransomware(self):
-        for file, hash in self.hashes:
-            if hash not in self.data['known_good']:
-                print('Ransomware detected!')
-                return True
-        return False
-
-    def mitigate_ransomware(self):
-        if not self.check_for_ransomware():
-            return
-        print('Mitigating ransomware...')
-        for file, hash in self.hashes:
-            if hash not in self.data['known_good']:
-                try:
-                    os.remove(file)
-                    print(f'Deleted {file}')
-                except FileNotFoundError:
-                    pass
-        sys.exit()
+import subprocess
+import shlex
 
 def main():
-    detector = RansomwareDetector()
-    detector.read_data()
-    files = os.listdir('.')
-    detector.generate_hashes(files)
-    if detector.check_for_ransomware():
-        detector.mitigate_ransomware()
+    # Check for ransomware infection
+    if is_infected():
+        # Mitigate the attack
+        mitigate()
 
-if __name__ == '__main__':
+def is_infected():
+    # Check for presence of ransomware files
+    ransomware_files = ['/var/lib/ransomware.exe', '/tmp/ransomware.bin']
+    for file in ransomware_files:
+        if os.path.exists(file):
+            return True
+    return False
+
+def mitigate():
+    # Restore backups and remove ransomware files
+    subprocess.run(['restic', 'unlock'])
+    for file in ransomware_files:
+        if os.path.exists(file):
+            os.remove(file)
+
+if __name__ == "__main__":
     main()
