@@ -1,35 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 01:05:51.212009
+# Generated 2026-08-10 03:49:49.684026
 
 import re
-from urllib.parse import urlparse
 
 def is_phishing_attempt(url):
-    """
-    Detects if the given URL is a phishing attempt.
-
-    :param url: The URL to check.
-    :return: True if the URL is a phishing attempt, False otherwise.
-    """
-    # Check if the URL contains any suspicious patterns
-    if re.search(r'phishing|scam', url):
+    # Check if the URL contains any suspicious characters
+    if not re.match(r"^[A-Za-z0-9://\._-]*$", url):
         return True
-
-    # Parse the URL and extract the domain
-    parsed_url = urlparse(url)
-    domain = parsed_url.netloc
-
-    # Check if the domain is a known phishing domain
-    if domain in PHISHING_DOMAINS:
+    
+    # Check if the URL is for a known phishing domain
+    if "phishingdomain.com" in url:
         return True
-
-    # Check if the URL contains any suspicious parameters
-    query_params = urlparse(url).query
-    for param in query_params.split('&'):
-        key, value = param.split('=')
-        if key == 'redirect' and re.search(r'phishing|scam', value):
-            return True
-
-    # No suspicious patterns found, so it's likely not a phishing attempt
+    
     return False
+
+def mitigate_phishing_attempt(url):
+    # Redirect the user to a safe URL
+    print("Please visit the following URL instead:")
+    print(f"https://example.com/safe-url?source={url}")
+
+if __name__ == "__main__":
+    url = input("Enter URL: ")
+    if is_phishing_attempt(url):
+        mitigate_phishing_attempt(url)
