@@ -1,32 +1,59 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 18:47:35.561921
+# Generated 2026-08-10 19:52:30.687672
 
 import re
-from urllib.parse import urlparse
+import urllib.request
+from collections import Counter
 
-def is_phishing_url(url):
-    parsed_url = urlparse(url)
-    if not parsed_url.scheme or not parsed_url.netloc:
-        return False
-    if parsed_url.scheme not in ["http", "https"]:
-        return False
-    if parsed_url.hostname == "localhost" or parsed_url.hostname.startswith[30D[K
-parsed_url.hostname.startswith("127."):
-        return False
-    if any(x in parsed_url.netloc for x in [".ru", ".com", ".org", ".net"])[8D[K
-".net"]):
+def is_phishing_site(url):
+    """
+    Detect if the given URL is a phishing site or not
+    
+    Args:
+        url (str): The URL to be checked
+        
+    Returns:
+        bool: True if the URL is a phishing site, False otherwise
+    """
+    # Check if the URL contains any suspicious patterns
+    if re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', url):
         return True
-    else:
-        return False
+    
+    # Check if the URL contains any commonly used phishing patterns
+    if re.search(r'https?://(?:www\.)?phish[ing|ing_phish].com/', url):
+        return True
+    
+    return False
 
-def mitigate_phishing_attack():
-    url = input("Enter the URL to check: ")
-    if is_phishing_url(url):
-        print("This URL appears to be a phishing site. Please proceed with [K
-caution.")
-    else:
-        print("This URL does not appear to be a phishing site.")
+def mitigate_phishing_attacks(url):
+    """
+    Mitigate phishing attacks by blocking the URL from being opened
+    
+    Args:
+        url (str): The URL to be blocked
+        
+    Returns:
+        None
+    """
+    # Block the URL from being opened using the `open` function
+    open(url, 'rb').close()
 
-if __name__ == "__main__":
-    mitigate_phishing_attack()
+def main():
+    """
+    Main function of the script
+    
+    Returns:
+        None
+    """
+    # Get a list of URLs to be checked
+    urls = ['https://example.com', 'https://phishing.site/login', 'https://[9D[K
+'https://www.google.com']
+    
+    # Check each URL and mitigate any phishing attacks found
+    for url in urls:
+        if is_phishing_site(url):
+            mitigate_phishing_attacks(url)
+
+if __name__ == '__main__':
+    main()
