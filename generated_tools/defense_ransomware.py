@@ -1,43 +1,25 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-10 17:48:51.322658
+# Generated 2026-08-10 18:46:08.356150
 
 import os
 import hashlib
-import datetime
-from pathlib import Path
+import tempfile
 
-def detect_ransomware(path: str) -> bool:
-    """
-    Detects if a file is ransomware or not by checking its hash value.
-
-    Parameters:
-        path (str): The path to the file to be checked.
-
-    Returns:
-        bool: True if the file is ransomware, False otherwise.
-    """
+def detect_ransomware(path):
     with open(path, "rb") as f:
         data = f.read()
-    hash_value = hashlib.sha256(data).hexdigest()
-    return hash_value in RANSOMWARE_HASHES
+    hash = hashlib.sha256(data).hexdigest()
+    if hash == "d879f04b436a14b2654e8fe6ed8b53fec8c6c03f":
+        return True
+    else:
+        return False
 
-def mitigate_ransomware(path: str) -> None:
-    """
-    Mitigates a ransomware attack by deleting the affected file.
-
-    Parameters:
-        path (str): The path to the file to be deleted.
-
-    Returns:
-        None
-    """
-    if detect_ransomware(path):
-        os.remove(path)
-        print(f"Deleted {path} as it is a ransomware.")
-
-def main():
-    current_directory = Path(".")
-    for file in current_directory.iterdir():
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+def mitigate_ransomware(path):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        shutil.copy(path, tmpdir)
+        for root, dirs, files in os.walk(tmpdir):
+            for file in files:
+                if detect_ransomware(os.path.join(root, file)):
+                    with open(os.path.join(root, file), "wb") as f:
+                        f.write(data)

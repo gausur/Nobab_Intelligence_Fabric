@@ -1,40 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 17:46:04.716504
+# Generated 2026-08-10 18:47:35.561921
 
 import re
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from urllib.parse import urlparse
 
-def send_email(recipient, subject, body):
-    sender = "noreply@example.com"
-    message = MIMEMultipart("alternative")
-    message["Subject"] = subject
-    message["From"] = sender
-    message["To"] = recipient
-    message.attach(MIMEText(body, "plain"))
-    smtp_server = smtplib.SMTP("smtp.example.com", 587)
-    smtp_server.starttls()
-    smtp_server.login(sender, "password")
-    smtp_server.sendmail(sender, recipient, message.as_string())
-    smtp_server.quit()
-
-def detect_phishing(url):
-    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if re.search(pattern, url):
-        return "The URL appears to be a valid email address."
+def is_phishing_url(url):
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        return False
+    if parsed_url.scheme not in ["http", "https"]:
+        return False
+    if parsed_url.hostname == "localhost" or parsed_url.hostname.startswith[30D[K
+parsed_url.hostname.startswith("127."):
+        return False
+    if any(x in parsed_url.netloc for x in [".ru", ".com", ".org", ".net"])[8D[K
+".net"]):
+        return True
     else:
-        return "The URL does not appear to be a valid email address."
+        return False
 
-def mitigate_phishing(url):
-    send_email("admin@example.com", "Possible Phishing Attack Detected", f"[2D[K
-f"A potential phishing attack was detected on {url}. Please investigate fur[3D[K
-further.")
+def mitigate_phishing_attack():
+    url = input("Enter the URL to check: ")
+    if is_phishing_url(url):
+        print("This URL appears to be a phishing site. Please proceed with [K
+caution.")
+    else:
+        print("This URL does not appear to be a phishing site.")
 
-url = input("Enter URL: ")
-result = detect_phishing(url)
-if result == "The URL does not appear to be a valid email address.":
-    mitigate_phishing(url)
-else:
-    print(result)
+if __name__ == "__main__":
+    mitigate_phishing_attack()
