@@ -1,32 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-10 09:11:34.339875
+# Generated 2026-08-10 11:04:18.485472
 
 import re
-import urllib
+import socket
 
-# Define list of known phishing domains
-phishing_domains = ["example1.com", "example2.com"]
+class PhishingDetector:
+    def __init__(self, url):
+        self.url = url
 
-# Define function to check if URL is phishing
-def is_phishing(url):
-    parsed_url = urllib.parse.urlsplit(url)
-    hostname = parsed_url.hostname
-    return hostname in phishing_domains
+    def is_phishing(self):
+        # Check if the URL is a valid HTTP or HTTPS URL
+        if not re.match(r'^https?://', self.url):
+            return False
 
-# Define function to mitigate phishing attack
-def mitigate_phishing(url):
-    if is_phishing(url):
-        # Redirect user to a known safe website
-        urllib.request.urlopen("https://example3.com")
-    else:
-        # Load URL in web browser
-        urllib.request.urlopen(url)
+        # Resolve the hostname of the URL and check if it is an IP address
+        try:
+            ip_address = socket.gethostbyname(self.url)
+        except socket.gaierror:
+            return False
 
-# Get user input and check if it's a phishing URL
-user_input = input("Enter a URL: ")
-if is_phishing(user_input):
-    mitigate_phishing(user_input)
-else:
-    # Load URL in web browser
-    urllib.request.urlopen(user_input)
+        if not re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', ip_address[10D[K
+ip_address):
+            return False
+
+        # Check if the URL is a known phishing website
+        with open('phishing_websites.txt') as f:
+            for line in f:
+                if self.url.endswith(line.strip()):
+                    return True
+
+        # No match found, therefore not a phishing website
+        return False
