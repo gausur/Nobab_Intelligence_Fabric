@@ -1,37 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-11 16:50:06.166022
+# Generated 2026-08-11 17:53:05.421851
 
 import re
-import socket
+from urllib.parse import urlparse
 
-def is_phishing(url):
-    # Check if the URL is valid
-    try:
-        socket.gethostbyname(url)
-    except socket.gaierror:
+def is_phishing_url(url):
+    parsed = urlparse(url)
+    if parsed.scheme != "http" and parsed.scheme != "https":
+        return False
+    if not parsed.netloc:
+        return False
+    if re.search(r"\.(com|org|gov|edu)$", parsed.netloc):
+        return True
+    else:
         return False
 
-    # Check if the URL contains common phishing indicators
-    for indicator in ['youtu', 'youtube', 'discordapp', 'twitter']:
-        if re.search(indicator, url):
-            return True
-
-    # Check if the URL is from a known phishing domain
-    for domain in ['fakebank.com', 'evilmailserver.com', 'badwebsite.net']:[18D[K
-'badwebsite.net']:
-        if url.endswith(domain):
-            return True
-
-    # If none of the above conditions are met, assume it's safe
-    return False
-
-def mitigate_phishing(url):
-    # Check if the URL is a phishing attack
-    if is_phishing(url):
-        # Display an error message and exit
-        print("Phishing attempt detected!")
-        sys.exit(1)
-    else:
-        # Proceed with the request
-        pass
+def mitigate_phishing_attack():
+    print("Phishing attack detected!")
+    # TODO: Add logic to block the user from accessing the phishing site
