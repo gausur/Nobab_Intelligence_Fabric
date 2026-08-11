@@ -1,52 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-11 10:44:08.587897
+# Generated 2026-08-11 11:42:54.105299
 
 import re
-from urllib.parse import urlparse
+from email.message import EmailMessage
 
-def is_phishing_attack(url):
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
-    if not hostname:
+def is_phishing(email):
+    if not isinstance(email, EmailMessage):
         return False
-    # Check for common phishing tlds
-    if hostname.endswith(".ru"):
+    
+    # Check for common phishing URL patterns in the subject and body of the[3D[K
+the email
+    pattern = r'(?i)((?:https?|ftp)://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[A-Za-[61D[K
+r'(?i)((?:https?|ftp)://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[A-Za-z0-9+&@#/%=~_(r'(?i)((?:https?|ftp)://[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[A-Za-0-9+&@#/%=~_()|])'
+    if re.search(pattern, email.subject) or re.search(pattern, email.body):[12D[K
+email.body):
         return True
-    elif hostname.endswith(".co.uk"):
+    
+    # Check for common phishing sender domains
+    sender_domain = email.sender.split('@')[1]
+    if sender_domain in ('yahoo.com', 'outlook.com', 'gmail.com', 'hotmail.[9D[K
+'hotmail.com'):
         return True
-    elif hostname.endswith(".gov"):
-        return True
-    # Check for common phishing domains
-    if hostname == "fakebankofamerica.com":
-        return True
-    elif hostname == "fakegmail.com":
-        return True
-    elif hostname == "fakefacebook.com":
-        return True
-    # Check for patterns in the url
-    if re.search(r"\/phishing\.html", url):
-        return True
-    else:
-        return False
-
-def mitigate_phishing_attack(url):
-    print("Possible phishing attack detected.")
-    print("The following URL was flagged for suspicious activity:")
-    print(url)
-    print("Please be cautious and verify the authenticity of this site befo[4D[K
-before proceeding with any actions.")
-
-# Test cases
-urls = [
-    "https://bankofamerica.com",
-    "https://gmail.com",
-    "https://facebook.com",
-    "https://fakebankofamerica.com",
-    "https://fakegmail.com",
-    "https://fakefacebook.com",
-    "https://www.phishing.html"
-]
-for url in urls:
-    if is_phishing_attack(url):
-        mitigate_phishing_attack(url)
+    
+    return False
