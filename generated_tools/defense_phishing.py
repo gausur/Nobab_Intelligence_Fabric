@@ -1,41 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-11 08:06:59.699089
+# Generated 2026-08-11 09:56:27.388367
 
 import re
-import smtplib
-from email.parser import Parser
+import urllib.request
+from collections import deque
 
-def is_phishing(email):
-    # Check for common phishing patterns in the subject line
-    if re.search(r'[Ff]ree[\s]*[\w\W]+[Ee]mail', email['subject']):
-        return True
-    elif re.search(r'[Uu]pgrade[\s]*to[\s]*[\w\W]+[Ee]mail', email['subject[14D[K
-email['subject']):
-        return True
-    elif re.search(r'[Cc]oupon[\s]*[\w\W]+[Ee]mail', email['subject']):
-        return True
-    # Check for common phishing patterns in the body of the email
-    if re.search(r'http://www\.example\.com', email['body']):
-        return True
-    elif re.search(r'www\.example\.com', email['body']):
-        return True
-    # Check for common phishing patterns in the sender's email address
-    if email['from'].endswith('@example.com'):
-        return True
-    # If none of the above patterns are found, it is likely not a phishing [K
-email
+def is_phishing(url):
+    # Check if the URL is a valid HTTPS URL
+    if not url.startswith("https://"):
+        return False
+    
+    # Fetch the HTML content of the page
+    try:
+        response = urllib.request.urlopen(url)
+        html = response.read()
+    except Exception as e:
+        print(f"Error fetching URL {url}: {e}")
+        return False
+    
+    # Check if the HTML content contains any suspicious strings
+    for pattern in [r'<script>', r'</script>', r'eval']:
+        if re.search(pattern, html.decode('utf-8')):
+            return True
+    
+    # Check if the URL is a known phishing site
+    with open("phishing_sites.txt", "r") as f:
+        for line in f:
+            if url == line.strip():
+                return True
+    
+    # If none of the above conditions are met, return False
     return False
-
-def mitigate_phishing(email):
-    # Send a copy of the email to an admin's email address for review
-    with smtplib.SMTP('smtp.example.com', 25) as server:
-        server.sendmail('admin@example.com', 'admin@example.com', f'Subject[9D[K
-f'Subject: Phishing attempt detected\n\nOriginal message:\n{email}')
-
-# Example usage
-with open('phishing_emails.txt', 'r') as file:
-    emails = file.readlines()
-for email in emails:
-    if is_phishing(Parser().parsestr(email)):
-        mitigate_phishing(email)
