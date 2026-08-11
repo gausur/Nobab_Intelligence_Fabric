@@ -1,34 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-11 09:56:27.388367
+# Generated 2026-08-11 10:44:08.587897
 
 import re
-import urllib.request
-from collections import deque
+from urllib.parse import urlparse
 
-def is_phishing(url):
-    # Check if the URL is a valid HTTPS URL
-    if not url.startswith("https://"):
+def is_phishing_attack(url):
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+    if not hostname:
         return False
-    
-    # Fetch the HTML content of the page
-    try:
-        response = urllib.request.urlopen(url)
-        html = response.read()
-    except Exception as e:
-        print(f"Error fetching URL {url}: {e}")
+    # Check for common phishing tlds
+    if hostname.endswith(".ru"):
+        return True
+    elif hostname.endswith(".co.uk"):
+        return True
+    elif hostname.endswith(".gov"):
+        return True
+    # Check for common phishing domains
+    if hostname == "fakebankofamerica.com":
+        return True
+    elif hostname == "fakegmail.com":
+        return True
+    elif hostname == "fakefacebook.com":
+        return True
+    # Check for patterns in the url
+    if re.search(r"\/phishing\.html", url):
+        return True
+    else:
         return False
-    
-    # Check if the HTML content contains any suspicious strings
-    for pattern in [r'<script>', r'</script>', r'eval']:
-        if re.search(pattern, html.decode('utf-8')):
-            return True
-    
-    # Check if the URL is a known phishing site
-    with open("phishing_sites.txt", "r") as f:
-        for line in f:
-            if url == line.strip():
-                return True
-    
-    # If none of the above conditions are met, return False
-    return False
+
+def mitigate_phishing_attack(url):
+    print("Possible phishing attack detected.")
+    print("The following URL was flagged for suspicious activity:")
+    print(url)
+    print("Please be cautious and verify the authenticity of this site befo[4D[K
+before proceeding with any actions.")
+
+# Test cases
+urls = [
+    "https://bankofamerica.com",
+    "https://gmail.com",
+    "https://facebook.com",
+    "https://fakebankofamerica.com",
+    "https://fakegmail.com",
+    "https://fakefacebook.com",
+    "https://www.phishing.html"
+]
+for url in urls:
+    if is_phishing_attack(url):
+        mitigate_phishing_attack(url)
