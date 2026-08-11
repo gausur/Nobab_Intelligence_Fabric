@@ -1,42 +1,22 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-11 01:05:33.340980
+# Generated 2026-08-11 03:30:10.239918
 
 import re
-import requests
-from urllib.parse import urlparse
 
 def is_phishing(url):
-    # Check if the URL is valid
-    try:
-        result = urlparse(url)
-        if not all([result.scheme, result.netloc]):
-            return False
-    except ValueError:
-        return False
-    
-    # Check if the domain is on the PhishTank database
-    api_key = "YOUR_API_KEY"
-    url_hash = hashlib.sha1(url.encode('utf-8')).hexdigest()
-    response = requests.get(f"https://api.phishtank.org/v1/phishlike?uri={u[60D[K
-requests.get(f"https://api.phishtank.org/v1/phishlike?uri={url}&api_key={aprequests.get(f"https://api.phishtank.org/v1/phishlike?uri={ul}&api_key={api_key}")
-    data = json.loads(response.content)
-    
-    if "status" in data and data["status"] == "success":
-        if "data" in data:
-            return True
-        else:
-            return False
+    pattern = r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,[61D[K
+r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$'
+    match = re.search(pattern, url)
+    if match:
+        return True
     else:
         return False
 
 def mitigate_phishing(url):
-    # Check if the URL is a phishing attack
     if is_phishing(url):
-        # Redirect to a safe page or display an error message
-        print("This website is a phishing attack. Please visit a legitimate[10D[K
-legitimate website.")
-        return False
-    
-    # Proceed with normal behavior
-    return True
+        print("Possible phishing site!")
+    else:
+        print("Not a phishing site.")
+
+mitigate_phishing("https://www.example.com")
