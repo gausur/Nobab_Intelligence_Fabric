@@ -1,39 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-11 12:48:52.996567
+# Generated 2026-08-11 14:17:27.446381
 
 import os
-import subprocess
+import shutil
 
-def detect_ransomware():
-    # Check if the current process has been executed with elevated privileg[8D[K
-privileges
-    if not os.geteuid() == 0:
-        print("Error: This script must be run as root or an administrator")[15D[K
-administrator")
-        exit(1)
+def is_ransomware(file):
+    # Check if the file is a directory or not
+    if os.path.isdir(file):
+        return False
+    
+    # Check if the file has a .exe extension
+    if not file.endswith('.exe'):
+        return False
+    
+    # Check if the file size is less than 10 MB
+    if os.path.getsize(file) > 10 * 1024 ** 2:
+        return False
+    
+    # Check if the file has any read-only attribute set
+    if not os.access(file, os.R_OK):
+        return False
+    
+    # Check if the file is owned by the current user
+    if not os.stat(file).st_uid == os.getuid():
+        return False
+    
+    return True
 
-    # Check if the system is vulnerable to ransomware attacks
-    vulnerabilities = subprocess.check_output(["ransomware-detector", "--vu[5D[K
-"--vulnerability-check"])
-    if b"VULNERABLE" in vulnerabilities:
-        print("Error: Your system is vulnerable to ransomware attacks")
-        exit(1)
+def mitigate_ransomware(path):
+    # Iterate over all files and directories in the specified path
+    for root, dirs, files in os.walk(path):
+        # Skip hidden files and directories
+        for file in files:
+            if not is_ransomware(os.path.join(root, file)):
+                continue
+            
+            # Remove the ransomware file or directory
+            os.remove(os.path.join(root, file))
+    
+    # Recursively remove any empty directories
+    for root, dirs, files in os.walk(path):
+        if not files and not dirs:
+            os.rmdir(root)
 
-    # Check if the system has been compromised by ransomware
-    ransomware_presence = subprocess.check_output(["ransomware-detector", "[1D[K
-"--ransomware-presence"])
-    if b"PRESENT" in ransomware_presence:
-        print("Error: Your system has been compromised by ransomware")
-        exit(1)
-
-    # Check if the system is currently experiencing a ransomware attack
-    ransomware_attack = subprocess.check_output(["ransomware-detector", "--[3D[K
-"--ransomware-attack"])
-    if b"ATTACK" in ransomware_attack:
-        print("Error: Your system is currently experiencing a ransomware at[2D[K
-attack")
-        exit(1)
-
-if __name__ == "__main__":
-    detect_ransomware()
+if __name__ == '__main__':
+    mitigate_ransomware(os.getcwd())
