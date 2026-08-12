@@ -1,32 +1,42 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-12 17:54:22.117562
+# Generated 2026-08-12 18:52:49.422931
 
 import os
+import re
 import subprocess
+from pathlib import Path
 
-def detect_ransomware():
-    # Check if the system has been infected with ransomware by looking for [K
-the existence of a specific file or folder
-    if not os.path.exists("/root/.ransomware"):
-        return False
-    
-    # Check if the system is running a vulnerable version of Windows
-    result = subprocess.run(["systeminfo"], stdout=subprocess.PIPE)
-    if "Windows 10" in result.stdout:
-        return True
-    else:
-        return False
+# Define the directories to be scanned
+scan_dirs = ['/', '/home']
 
-def mitigate_ransomware():
-    # Restore the system to a previous state by rolling back changes made b[1D[K
-by ransomware
-    subprocess.run(["rollback /t"])
-    
-    # Delete the ransomware files and folders
-    os.remove("/root/.ransomware")
-    os.rmdir("/root/.ransomware/data")
+# Define the files and extensions to be searched
+search_files = ['*.docx', '*.xlsx', '*.pptx', '*.pdf', '*.txt']
 
-def main():
-    if detect_ransomware():
-        mitigate_ransomware()
+# Define the ransomware signature file
+ransomware_sig = 'ransomware.sig'
+
+# Function to scan a directory for ransomware files
+def scan_directory(dir):
+    # Loop through each file in the directory
+    for file in os.listdir(dir):
+        # Check if the file is a valid extension
+        if file.endswith(search_files):
+            # Check if the file has the ransomware signature
+            with open(file, 'rb') as f:
+                if re.search(ransomware_sig, f.read()):
+                    print(f'Ransomware detected in {file}')
+                    # Mitigate the ransomware attack by renaming the file
+                    os.rename(file, file + '.bak')
+                    # Remove the file from the directory
+                    os.remove(file)
+                    print('Mitigation successful')
+        else:
+            continue
+
+# Function to scan all directories in a list
+def scan_directories(dirs):
+    for dir in dirs:
+        scan_directory(dir)
+
+scan_directories(scan_dirs)
