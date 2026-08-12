@@ -1,28 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-12 12:49:45.588692
+# Generated 2026-08-12 14:17:55.589512
 
 import re
-from urllib.parse import urlparse
+import ssl
+from urllib import request
 
-def is_phishing_attempt(url):
-    parsed = urlparse(url)
-    if not parsed.scheme or not parsed.netloc:
+def is_phishing_site(url):
+    # Check if the URL starts with "http" or "https"
+    if not (url.startswith("http") or url.startswith("https")):
         return False
-    if not parsed.path:
-        return False
-    if "://" in parsed.netloc:
-        return True
+    
+    # Get the domain name of the URL
+    domain = re.search(r'^(?:https?:\/\/)?([^\/]+)(?:\/|$)', url).group(1)
+    
+    # Check if the domain is in the list of known phishing sites
+    with open("phishing_sites.txt", "r") as f:
+        for line in f:
+            if line.strip() == domain:
+                return True
+    
+    # If the domain is not in the list, check if it has an SSL certificate
+    try:
+        response = request.urlopen(url)
+        if response.code == 200 and ssl.get_server_certificate(response):
+            return False
+    except Exception as e:
+        print(e)
+    
+    # If the domain has an SSL certificate, check if it is valid
+    try:
+        cert = ssl.get_server_certificate((domain, 443))
+        if cert and ssl.cert_time_to_expire(cert):
+            return True
+    except Exception as e:
+        print(e)
+    
+    # If the domain has a valid SSL certificate, it is not a phishing site
     return False
-
-def mitigate_phishing_attempt(url):
-    parsed = urlparse(url)
-    new_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
-    return new_url
-
-urls = ["https://www.example.com", "http://www.example2.com"]
-for url in urls:
-    if is_phishing_attempt(url):
-        mitigated_url = mitigate_phishing_attempt(url)
-        print(f"Phishing attempt detected for URL {url}. Mitigating...")
-        print(f"Mitigated URL: {mitigated_url}")
