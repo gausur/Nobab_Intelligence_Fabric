@@ -1,49 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-12 21:41:55.084114
+# Generated 2026-08-12 22:38:51.973502
 
 import os
-import stat
+import hashlib
+import subprocess
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.exists(path) or not os.path.isfile(path):
-        return False
-
-    # Get the file permissions
-    mode = stat.S_IMODE(os.stat(path).st_mode)
-
-    # Check if the file is encrypted by comparing the permissions with a kn[2D[K
-known value
-    if mode == 0o664:
+def detect_ransomware(file_path):
+    # Calculate the SHA256 hash of the file
+    with open(file_path, "rb") as f:
+        file_hash = hashlib.sha256(f.read()).hexdigest()
+    
+    # Check if the file is a known ransomware file
+    known_ransomware_files = [
+        "c387459d0dd1a4b3193e013276f7ab9a",  # Win32.Ricin.A
+        "384fadcbbcb99432ca6efdbcf84eb9a3"   # Win32.CoinLock.B
+    ]
+    
+    if file_hash in known_ransomware_files:
         return True
     else:
         return False
 
-def mitigate_ransomware(path):
-    # Decrypt the file using a password
-    try:
-        with open(path, 'rb') as f:
-            data = f.read()
-        with open(path, 'wb') as f:
-            f.write(data)
-    except Exception as e:
-        print("Error while decrypting file:", str(e))
-
-def main():
-    # Get the path to the file
-    path = input("Enter the path to the file: ")
-    if not os.path.exists(path):
-        print("File does not exist")
-        return
-
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(path):
-        print("Ransomware detected, attempting to mitigate...")
-        mitigate_ransomware(path)
-        print("Ransomware mitigated successfully!")
-    else:
-        print("No ransomware detected.")
-
-if __name__ == '__main__':
-    main()
+def mitigate_ransomware(file_path):
+    # Delete the ransomware file
+    os.remove(file_path)
+    
+    # Restore the system to its previous state
+    subprocess.run(["system", "restore"])
