@@ -1,43 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-12 16:50:43.680259
+# Generated 2026-08-12 17:55:06.393654
 
 import re
-import urllib
-import smtplib
+from urllib.parse import urlparse
 
-def detect_phishing(url, email):
-    # Check if the URL is a valid HTTPS URL
-    if not re.match(r'^https://', url):
-        return False
-    
-    # Extract the domain name from the URL
-    domain = urllib.parse.urlparse(url).netloc
-    
-    # Check if the domain name is a valid email address
-    try:
-        smtplib.SMTP('localhost', 25).sendmail('test@example.com', 'test@ex[8D[K
-'test@example.com', '')
-    except (smtplib.SMTPException, socket.gaierror):
-        return False
-    
-    # Check if the email address is from a known phishing domain
-    if domain in [
-            'phishmail.com',
-            'fakeemail.co',
-            'fakemail.org',
-            'mail.m3.net',
-            'mailinator.com',
-            'safemail.be'
-        ]:
+def is_phishing_url(url):
+    # Check if the URL has any suspicious parameters
+    parsed_url = urlparse(url)
+    params = dict(parse_qsl(parsed_url.query))
+    for key, value in params.items():
+        if key == "redirect" and not re.match("^https://", value):
+            return True
+    # Check if the URL has a suspicious domain name
+    domain = parsed_url.netloc
+    if not re.match("^[a-z0-9.-]+\.[a-z]{2,}$", domain):
         return True
-    
-    # Check if the email contains a link to the domain in the subject or bo[2D[K
-body
-    if re.search(r'\b' + domain + r'\b', email['subject'] + email['body'], [K
-re.IGNORECASE):
-        return True
-    
-    # If none of the above conditions are met, assume the email is not a ph[2D[K
-phishing attack
     return False
+
+def mitigate_phishing(url):
+    # Redirect to a safe URL
+    new_url = "https://www.example.com"
+    return new_url
+
+if __name__ == "__main__":
+    url = input("Enter the URL: ")
+    if is_phishing_url(url):
+        mitigate_phishing(url)
