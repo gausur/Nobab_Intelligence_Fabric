@@ -1,35 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-11 23:33:04.801392
+# Generated 2026-08-12 01:12:35.352912
 
 import os
-import shutil
-import subprocess
+import sys
 import time
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    try:
-        subprocess.check_output(["ransomware-detect", "--help"])
-    except subprocess.CalledProcessError:
-        return False
-    else:
-        return True
-
-def mitigate_ransomware():
-    # Remove ransomware files and restore system to normal operation
-    try:
-        shutil.rmtree("./ransomware")
-        subprocess.check_output(["systemctl", "restart"])
-    except Exception as e:
-        print("Failed to mitigate ransomware attack: {}".format(e))
-
 def main():
-    # Check if the system is infected with ransomware
-    if detect_ransomware():
-        mitigate_ransomware()
-    else:
-        print("System is not infected with ransomware")
+    # Initialize variables
+    start_time = time.time()
+    process_name = "ransomware"
+    flagged_processes = []
 
-if __name__ == "__main__":
-    main()
+    # Get a list of all processes running on the system
+    process_list = psutil.get_process_list()
+
+    # Iterate through the list of processes and check for ransomware
+    for process in process_list:
+        if process.name == process_name:
+            flagged_processes.append(process)
+
+    # If any ransomware processes are found, attempt to terminate them
+    if len(flagged_processes) > 0:
+        for process in flagged_processes:
+            try:
+                process.terminate()
+            except psutil.NoSuchProcess as e:
+                print("Could not terminate ransomware process:", str(e))
+
+    # Calculate the duration of the script's execution
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    # Print the results of the script's execution
+    print("Script executed in", elapsed_time, "seconds")
+    if len(flagged_processes) > 0:
+        print("Detected and mitigated ransomware attacks.")
+    else:
+        print("No ransomware attacks detected.")
