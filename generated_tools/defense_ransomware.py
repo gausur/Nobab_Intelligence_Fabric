@@ -1,33 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-12 07:14:14.998803
+# Generated 2026-08-12 09:07:00.667914
 
 import os
-import socket
+import shutil
+import subprocess
 
-def detect_ransomware(filename):
-    with open(filename, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            print("Possible ransomware attack detected!")
-            return True
-        else:
-            return False
+def detect_ransomware():
+    try:
+        # Check if the "ransomware" file exists in the current directory
+        with open("ransomware", "r") as f:
+            pass
+    except FileNotFoundError:
+        # If the file does not exist, it is likely that we are not under at[2D[K
+attack
+        return False
 
-def mitigate_ransomware(filename):
-    with open(filename, "wb") as f:
-        data = b""
-        for i in range(len(data)):
-            if data[i] == 0x00:
-                data[i] = 0xFF
-        f.write(data)
+    # If the file exists, check if it has been modified recently
+    mtime = os.path.getmtime("ransomware")
+    now = time.time()
+    if (now - mtime) < 60 * 10:
+        # If the file was modified less than 10 minutes ago, it is likely t[1D[K
+that we are under attack
+        return True
 
-def main():
-    filename = "malicious_file.exe"
-    if detect_ransomware(filename):
-        mitigate_ransomware(filename)
-    else:
-        print("No ransomware attack detected.")
+    return False
 
-if __name__ == "__main__":
-    main()
+def mitigate_ransomware():
+    try:
+        # Delete the "ransomware" file to prevent further attacks
+        os.unlink("ransomware")
+    except FileNotFoundError:
+        pass
+
+    # Run the "chattr" command to set the immutable flag on the affected fi[2D[K
+files
+    subprocess.run(["chattr", "+i", "/path/to/infected/files"])
+
+if detect_ransomware():
+    mitigate_ransomware()
