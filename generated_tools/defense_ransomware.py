@@ -1,40 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-12 01:12:35.352912
+# Generated 2026-08-12 03:59:49.485178
 
 import os
-import sys
-import time
+import shutil
 
-def main():
-    # Initialize variables
-    start_time = time.time()
-    process_name = "ransomware"
-    flagged_processes = []
+def detect_ransomware(path):
+    """Detects whether the given path is infected with ransomware"""
+    files = os.listdir(path)
+    for file in files:
+        if not (file.endswith(".txt") or file.endswith(".pdf")):
+            continue
+        try:
+            with open(os.path.join(path, file), "rb") as f:
+                data = f.read()
+                if b"RANSOMWARE" in data:
+                    return True
+        except Exception:
+            pass
+    return False
 
-    # Get a list of all processes running on the system
-    process_list = psutil.get_process_list()
-
-    # Iterate through the list of processes and check for ransomware
-    for process in process_list:
-        if process.name == process_name:
-            flagged_processes.append(process)
-
-    # If any ransomware processes are found, attempt to terminate them
-    if len(flagged_processes) > 0:
-        for process in flagged_processes:
-            try:
-                process.terminate()
-            except psutil.NoSuchProcess as e:
-                print("Could not terminate ransomware process:", str(e))
-
-    # Calculate the duration of the script's execution
-    end_time = time.time()
-    elapsed_time = end_time - start_time
-
-    # Print the results of the script's execution
-    print("Script executed in", elapsed_time, "seconds")
-    if len(flagged_processes) > 0:
-        print("Detected and mitigated ransomware attacks.")
-    else:
-        print("No ransomware attacks detected.")
+def mitigate_ransomware(path):
+    """Mitigates the ransomware infection by restoring the affected files""[7D[K
+files"""
+    for file in os.listdir(path):
+        if not (file.endswith(".txt") or file.endswith(".pdf")):
+            continue
+        try:
+            with open(os.path.join(path, file), "rb") as f:
+                data = f.read()
+                if b"RANSOMWARE" in data:
+                    shutil.copy2(os.path.join(path, file), os.path.join(pat[16D[K
+os.path.join(path, "restored_" + file))
+        except Exception:
+            pass
