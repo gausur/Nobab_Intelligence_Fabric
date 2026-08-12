@@ -1,42 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-12 18:52:49.422931
+# Generated 2026-08-12 19:59:28.846612
 
 import os
 import re
-import subprocess
-from pathlib import Path
+import json
 
-# Define the directories to be scanned
-scan_dirs = ['/', '/home']
+def detect_ransomware(file):
+    with open(file, "rb") as f:
+        content = f.read()
+        if b"RANSOMWARE" in content:
+            return True
+    return False
 
-# Define the files and extensions to be searched
-search_files = ['*.docx', '*.xlsx', '*.pptx', '*.pdf', '*.txt']
+def mitigate_ransomware(file):
+    with open(file, "wb") as f:
+        f.write(b"")
 
-# Define the ransomware signature file
-ransomware_sig = 'ransomware.sig'
+def main():
+    files = os.listdir()
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
-# Function to scan a directory for ransomware files
-def scan_directory(dir):
-    # Loop through each file in the directory
-    for file in os.listdir(dir):
-        # Check if the file is a valid extension
-        if file.endswith(search_files):
-            # Check if the file has the ransomware signature
-            with open(file, 'rb') as f:
-                if re.search(ransomware_sig, f.read()):
-                    print(f'Ransomware detected in {file}')
-                    # Mitigate the ransomware attack by renaming the file
-                    os.rename(file, file + '.bak')
-                    # Remove the file from the directory
-                    os.remove(file)
-                    print('Mitigation successful')
-        else:
-            continue
-
-# Function to scan all directories in a list
-def scan_directories(dirs):
-    for dir in dirs:
-        scan_directory(dir)
-
-scan_directories(scan_dirs)
+if __name__ == "__main__":
+    main()
