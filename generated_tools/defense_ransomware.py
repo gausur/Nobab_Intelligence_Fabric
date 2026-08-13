@@ -1,34 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-13 19:54:19.068926
+# Generated 2026-08-13 20:34:37.992926
 
-import os
-import hashlib
-import time
+import socket, subprocess
 
-def detect_ransomware(file_path):
-    """Detects if the file is a ransomware by checking its SHA-256 hash."""[8D[K
-hash."""
-    with open(file_path, "rb") as f:
-        data = f.read()
-        sha256 = hashlib.sha256(data).hexdigest()
-        if sha256 == "98234019230491204912049120491204912049120491204912049[54D[K
-"982340192304912049120491204912049120491204912049120491204912049":
+def check_ransomware(host):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((host, 80))
+        sock.sendall(b"GET / HTTP/1.1\r\nHost: " + host + "\r\n\r\n")
+        response = sock.recv(4096)
+        if b"<html>" in response:
             return True
-        else:
-            return False
+    except socket.error as e:
+        pass
+    return False
 
-def mitigate_ransomware(file_path):
-    """Mitigates the ransomware by renaming the file and adding a timestamp[9D[K
-timestamp."""
-    if detect_ransomware(file_path):
-        new_name = f"{os.path.basename(file_path)}_{time.strftime('%Y-%m-%d[56D[K
-f"{os.path.basename(file_path)}_{time.strftime('%Y-%m-%d_%H:%M:%S')}"
-        os.rename(file_path, new_name)
-        print(f"Ransomware detected and mitigated: {new_name}")
-    else:
-        print("No ransomware detected.")
+def mitigate_ransomware(host):
+    try:
+        subprocess.check_call(["ping", host])
+    except subprocess.CalledProcessError as e:
+        print("Host is not reachable.")
+        return
+    try:
+        subprocess.check_call(["nmap", "-P0", host])
+    except subprocess.CalledProcessError as e:
+        print("Could not run nmap.")
+        return
+    try:
+        subprocess.check_call(["ufw", "allow", "http"])
+    except subprocess.CalledProcessError as e:
+        print("Could not allow http traffic.")
+        return
+    try:
+        subprocess.check_call(["iptables", "-A", "INPUT", "-p", "tcp", "-m"[4D[K
+"-m", "multiport", "--dports", "80,443", "-j", "ACCEPT"])
+    except subprocess.CalledProcessError as e:
+        print("Could not allow http traffic.")
+        return
 
 if __name__ == "__main__":
-    file_path = "/path/to/file.txt"
-    mitigate_ransomware(file_path)
+    if len(sys.argv) < 2:
+        print("Usage: python ransomware_detector.py <host>")
+        sys.exit(1)
+    host = sys.argv[1]
+    if check_ransomware(host):
+        mitigate_ransomware(host)

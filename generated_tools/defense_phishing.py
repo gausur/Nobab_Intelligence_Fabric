@@ -1,43 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-13 19:56:45.341886
+# Generated 2026-08-13 20:36:14.893819
 
 import re
+import smtplib
+from email.mime.text import MIMEText
+from urllib.parse import urlparse
 
 def is_phishing_url(url):
-    # Check if the URL contains any suspicious patterns
-    pattern = r"^https?://((([a-zA-Z0-9$_.+!*(),;?&=-]+\.?)*)|(\w+$))"
-    match = re.search(pattern, url)
-    if not match:
+    # Check if the URL is a phishing website
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+    if "google" in hostname:
+        return True
+    elif "facebook" in hostname:
+        return True
+    elif "twitter" in hostname:
+        return True
+    else:
         return False
 
-    # Check if the URL contains any suspicious query parameters
-    for parameter in urlparse.urlsplit(url).query:
-        value = urlparse.parse_qs(parameter)[parameter]
-        if value and isinstance(value, str):
-            value = value.lower()
-            if "click here" in value or "visit the website" in value:
-                return True
+def send_email(recipient, subject, body):
+    # Send an email to the recipient with the phishing URL
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    s = smtplib.SMTP("localhost")
+    s.sendmail("no-reply@example.com", [recipient], msg.as_string())
+    s.quit()
 
-    # Check if the URL contains any suspicious fragments
-    for fragment in urlparse.urlsplit(url).fragment:
-        value = urlparse.parse_qs(fragment)[fragment]
-        if value and isinstance(value, str):
-            value = value.lower()
-            if "click here" in value or "visit the website" in value:
-                return True
+def main():
+    # Get the URL from the command line arguments
+    url = sys.argv[1]
 
-    # Check if the URL contains any suspicious path components
-    for component in urlparse.urlsplit(url).path.split("/"):
-        if component == "login" or component == "signup":
-            return True
-
-    # No suspicious patterns found, consider the URL safe
-    return False
-
-def mitigate_phishing_attack(url):
-    # Redirect to a warning page if the URL is determined to be phishing
     if is_phishing_url(url):
-        return redirect("https://example.com/phishing-warning")
-    else:
-        return None
+        # Send an email to the recipient with the phishing URL
+        send_email("recipient@example.com", "Phishing Attempt Detected", f"[2D[K
+f"The following URL was detected as a phishing attempt: {url}")
+
+if __name__ == "__main__":
+    main()
