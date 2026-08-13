@@ -1,36 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-13 14:21:23.395594
+# Generated 2026-08-13 15:54:38.531730
 
 import os
-import subprocess
+import shutil
+import json
+from datetime import datetime
 
-def detect_ransomware():
-    # Check if any suspicious files or processes exist
-    suspicious_files = ["*.exe", "*.dll", "*.bat", "*.ps1"]
-    for file in suspicious_files:
-        if glob.glob(file):
-            return True
-    suspicious_processes = ["ransom*", "*hware"]
-    for process in suspicious_processes:
-        if any(process in line for line in subprocess.check_output("tasklis[32D[K
-subprocess.check_output("tasklist", shell=True).decode().splitlines()):
-            return True
-    # If no suspicious files or processes are found, assume no ransomware i[1D[K
-is present
+def detect_ransomware(file_path):
+    # Check if the file is a valid JSON file
+    try:
+        with open(file_path, 'r') as f:
+            data = json.load(f)
+            if "encrypted" in data and data["encrypted"] == True:
+                return True
+    except ValueError:
+        pass
     return False
 
-def mitigate_ransomware():
-    # Disable network connectivity
-    subprocess.run(["ipconfig", "/release"], shell=True)
-    subprocess.run(["ipconfig", "/renew"], shell=True)
-    # Lock down the system to prevent further attacks
-    subprocess.run(["netsh", "advfirewall", "set", "currentprofile", "state[6D[K
-"state", "off"])
-    subprocess.run(["netsh", "advfirewall", "set", "allprofiles", "state", [K
-"off"])
-    # Restart the system to clear any malicious processes or files
-    subprocess.run(["shutdown", "/r", "/t", "0"], shell=True)
+def mitigate_ransomware(file_path):
+    # Remove the encrypted file
+    os.remove(file_path)
 
-if detect_ransomware():
-    mitigate_ransomware()
+# Main function to detect and mitigate ransomware attacks
+def main():
+    # Get a list of all files in the current directory
+    for file in os.listdir("."):
+        file_path = os.path.join(".", file)
+        if detect_ransomware(file_path):
+            mitigate_ransomware(file_path)
+            print(f"Mitigated ransomware attack on {file}")
+
+# Call the main function to start the script
+if __name__ == "__main__":
+    main()
