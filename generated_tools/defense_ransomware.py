@@ -1,31 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-13 12:52:01.928939
+# Generated 2026-08-13 14:21:23.395594
 
 import os
-import shutil
-import hashlib
+import subprocess
 
-def detect_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        data = f.read()
-        md5sum = hashlib.md5(data).hexdigest()
-        if md5sum == "983f0e24477d067b18c11794acdca2a5":
+def detect_ransomware():
+    # Check if any suspicious files or processes exist
+    suspicious_files = ["*.exe", "*.dll", "*.bat", "*.ps1"]
+    for file in suspicious_files:
+        if glob.glob(file):
             return True
+    suspicious_processes = ["ransom*", "*hware"]
+    for process in suspicious_processes:
+        if any(process in line for line in subprocess.check_output("tasklis[32D[K
+subprocess.check_output("tasklist", shell=True).decode().splitlines()):
+            return True
+    # If no suspicious files or processes are found, assume no ransomware i[1D[K
+is present
     return False
 
-def mitigate_ransomware(filepath):
-    with open(filepath, "rb") as f:
-        data = f.read()
-        md5sum = hashlib.md5(data).hexdigest()
-        if md5sum == "983f0e24477d067b18c11794acdca2a5":
-            shutil.move(filepath, f"{filepath}.backup")
-    return False
+def mitigate_ransomware():
+    # Disable network connectivity
+    subprocess.run(["ipconfig", "/release"], shell=True)
+    subprocess.run(["ipconfig", "/renew"], shell=True)
+    # Lock down the system to prevent further attacks
+    subprocess.run(["netsh", "advfirewall", "set", "currentprofile", "state[6D[K
+"state", "off"])
+    subprocess.run(["netsh", "advfirewall", "set", "allprofiles", "state", [K
+"off"])
+    # Restart the system to clear any malicious processes or files
+    subprocess.run(["shutdown", "/r", "/t", "0"], shell=True)
 
-def main():
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            filepath = os.path.join(root, file)
-            if detect_ransomware(filepath):
-                mitigate_ransomware(filepath)
-    return True
+if detect_ransomware():
+    mitigate_ransomware()
