@@ -1,48 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-13 20:34:37.992926
+# Generated 2026-08-13 21:39:24.562489
 
-import socket, subprocess
+import os
+import re
+import shutil
+from pathlib import Path
 
-def check_ransomware(host):
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((host, 80))
-        sock.sendall(b"GET / HTTP/1.1\r\nHost: " + host + "\r\n\r\n")
-        response = sock.recv(4096)
-        if b"<html>" in response:
-            return True
-    except socket.error as e:
-        pass
+def detect_ransomware(path):
+    """Detects if a file or directory is infected with ransomware"""
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            if re.search(r'[0-9]{3}-[0-9]{3}', file): # check for unique st[2D[K
+string pattern
+                return True
     return False
 
-def mitigate_ransomware(host):
-    try:
-        subprocess.check_call(["ping", host])
-    except subprocess.CalledProcessError as e:
-        print("Host is not reachable.")
-        return
-    try:
-        subprocess.check_call(["nmap", "-P0", host])
-    except subprocess.CalledProcessError as e:
-        print("Could not run nmap.")
-        return
-    try:
-        subprocess.check_call(["ufw", "allow", "http"])
-    except subprocess.CalledProcessError as e:
-        print("Could not allow http traffic.")
-        return
-    try:
-        subprocess.check_call(["iptables", "-A", "INPUT", "-p", "tcp", "-m"[4D[K
-"-m", "multiport", "--dports", "80,443", "-j", "ACCEPT"])
-    except subprocess.CalledProcessError as e:
-        print("Could not allow http traffic.")
-        return
+def mitigate_ransomware(path):
+    """Mitigates a ransomware infection"""
+    if detect_ransomware(path):
+        shutil.rmtree(path) # remove the infected file or directory
+        print('Ransomware mitigated successfully!')
+    else:
+        print('No ransomware detected.')
 
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python ransomware_detector.py <host>")
-        sys.exit(1)
-    host = sys.argv[1]
-    if check_ransomware(host):
-        mitigate_ransomware(host)
+if __name__ == '__main__':
+    path = '/path/to/infected/file/or/directory'
+    mitigate_ransomware(path)

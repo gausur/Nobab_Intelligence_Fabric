@@ -1,41 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-13 20:36:14.893819
+# Generated 2026-08-13 21:37:04.152921
 
 import re
-import smtplib
-from email.mime.text import MIMEText
+import requests
 from urllib.parse import urlparse
 
-def is_phishing_url(url):
-    # Check if the URL is a phishing website
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
-    if "google" in hostname:
-        return True
-    elif "facebook" in hostname:
-        return True
-    elif "twitter" in hostname:
-        return True
+def is_phishing_site(url):
+    parsed = urlparse(url)
+    hostname = parsed.netloc
+    if "www." in hostname:
+        hostname = hostname[4:]
+    return hostname not in ["google", "gmail"]
+
+def mitigate_phishing_attack(url):
+    if is_phishing_site(url):
+        print("Phishing site detected!")
+        raise ValueError("Phishing site detected!")
     else:
-        return False
+        print("No phishing site detected.")
 
-def send_email(recipient, subject, body):
-    # Send an email to the recipient with the phishing URL
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    s = smtplib.SMTP("localhost")
-    s.sendmail("no-reply@example.com", [recipient], msg.as_string())
-    s.quit()
-
-def main():
-    # Get the URL from the command line arguments
-    url = sys.argv[1]
-
-    if is_phishing_url(url):
-        # Send an email to the recipient with the phishing URL
-        send_email("recipient@example.com", "Phishing Attempt Detected", f"[2D[K
-f"The following URL was detected as a phishing attempt: {url}")
-
-if __name__ == "__main__":
-    main()
+mitigate_phishing_attack("https://www.example.com")
