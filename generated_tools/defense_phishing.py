@@ -1,55 +1,64 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-13 16:49:45.896037
+# Generated 2026-08-13 17:53:50.630060
 
 import re
-import smtplib
-from email.message import EmailMessage
-from typing import List, Tuple
+import urllib.parse
+from collections import deque
 
-class PhishingDetector:
-    def __init__(self, emails: List[str], patterns: List[Tuple[str, str]]):[7D[K
-str]]):
-        self.emails = emails
-        self.patterns = patterns
-
-    def detect_phishing(self) -> bool:
-        for email in self.emails:
-            if not self._is_valid_email(email):
-                continue
-            subject = self._get_subject(email)
-            body = self._get_body(email)
-            for pattern, replacement in self.patterns:
-                if re.search(pattern, subject) or re.search(pattern, body):[6D[K
-body):
-                    print("Phishing detected! Subject:", subject, "Bo[3D[K
-"Body:", body)
-                    return True
+def is_phishing(url):
+    # Check if the URL is valid
+    try:
+        parsed_url = urllib.parse.urlparse(url)
+    except ValueError:
         return False
 
-    def _is_valid_email(self, email: str) -> bool:
-        try:
-            smtplib.SMTP('localhost').sendmail('', '')
+    # Check if the domain is in the Public Suffix List
+    if not parsed_url.netloc or parsed_url.netloc[-1] != ".":
+        return False
+
+    public_suffix = urllib.parse.publicsuffix(parsed_url.netloc)
+    if public_suffix is None:
+        return False
+
+    # Check if the URL contains any suspicious patterns
+    for pattern in SUSPICIOUS_PATTERNS:
+        if re.search(pattern, url):
             return True
-        except Exception as e:
-            print("Invalid email address:", email)
-            return False
 
-    def _get_subject(self, email: str) -> str:
-        with open(email, 'r') as f:
-            for line in f:
-                if line.startswith('Subject:'):
-                    return line[9:]
-        return ''
+    return False
 
-    def _get_body(self, email: str) -> str:
-        with open(email, 'r') as f:
-            for line in f:
-                if line.startswith('From'):
-                    break
-            return ''.join(f.readlines())
+def mitigate_phishing(url):
+    # Remove any suspicious query parameters
+    parsed_url = urllib.parse.urlparse(url)
+    new_query = {}
+    for key, value in parse.parse_qs(parsed_url.query).items():
+        if key not in SUSPICIOUS_QUERY_PARAMETERS:
+            new_query[key] = value
 
-if __name__ == '__main__':
-    detector = PhishingDetector(['test@example.com'], [('phishy', 'phishing[9D[K
-'phishing')])
-    print(detector.detect_phishing())
+    new_url = parsed_url._replace(query=urllib.parse.urlencode(new_query, d[1D[K
+doseq=True))
+    return urllib.parse.urlunparse(new_url)
+
+def main():
+    # Load the Public Suffix List and suspicious patterns
+    with open("psl.txt", "r") as f:
+        psl = [line.strip() for line in f]
+    with open("suspicious_patterns.txt", "r") as f:
+        suspicious_patterns = [re.compile(line) for line in f]
+
+    # Create a queue of URLs to check
+    urls = deque([url])
+
+    # Iterate over the queue and check each URL
+    while len(urls) > 0:
+        url = urls.popleft()
+        if is_phishing(url):
+            mitigated_url = mitigate_phishing(url)
+            print(f"Phishing attempt detected for {url}. Mitigating...")
+            print(f"Mitigated URL: {mitigated_url}")
+        else:
+            print(f"URL is safe: {url}")
+
+if __name__ == "__main__":
+    main()
