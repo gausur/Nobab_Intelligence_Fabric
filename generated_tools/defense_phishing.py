@@ -1,28 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-13 04:04:14.884365
+# Generated 2026-08-13 06:13:29.899871
 
 import re
-import smtplib
-from email.message import EmailMessage
+import urllib.parse
+from urllib.request import urlopen
 
-# Define the list of phishing domains to block
-phishing_domains = ["example1.com", "example2.com"]
+def is_phishing_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    if not parsed_url.scheme:
+        return False
+    if parsed_url.netloc.startswith('www.'):
+        return False
+    if parsed_url.netloc.endswith('.com'):
+        return True
+    return False
 
-# Define the function to check if an email is from a phishing domain
-def is_phishing(email):
-    return any(domain in email["From"].lower() for domain in phishing_domai[14D[K
-phishing_domains)
+def get_domain(url):
+    parsed_url = urllib.parse.urlparse(url)
+    return parsed_url.netloc
 
-# Define the function to send an alert email if a phishing attack is detect[6D[K
-detected
-def send_alert(email):
-    msg = EmailMessage()
-    msg.set_content("Phishing attack detected: " + str(email))
-    smtplib.sendmail("your-email@example.com", "admin-email@example.com", m[1D[K
-msg.as_string())
+def is_valid_domain(domain, allowed_domains):
+    if domain in allowed_domains:
+        return True
+    else:
+        return False
 
-# Check if an email is from a phishing domain and send an alert if it is
-for email in emails:
-    if is_phishing(email):
-        send_alert(email)
+def mitigate_phishing_attack(url, allowed_domains):
+    if is_phishing_url(url):
+        domain = get_domain(url)
+        if not is_valid_domain(domain, allowed_domains):
+            raise ValueError('Phishing attack detected!')
+
+def main():
+    url = 'http://www.example.com'
+    allowed_domains = ['example.com']
+    mitigate_phishing_attack(url, allowed_domains)
+
+if __name__ == '__main__':
+    main()
