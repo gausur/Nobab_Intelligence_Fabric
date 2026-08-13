@@ -1,59 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-13 18:53:11.947385
+# Generated 2026-08-13 19:56:45.341886
 
 import re
-import smtplib
-from email.message import EmailMessage
 
-def is_phishing_attack(email):
-    sender = email["From"]
-    recipient = email["To"]
-    subject = email["Subject"]
-    body = email.get_payload()
-    
-    # Check if the sender is a known spammer
-    spammers = ["spammer1@example.com", "spammer2@example.com"]
-    if sender in spammers:
-        return True
-    
-    # Check if the recipient is not a legitimate user
-    if recipient not in ["user1@example.com", "user2@example.com"]:
-        return True
-    
-    # Check if the subject contains suspicious keywords
-    for keyword in ["phishing", "scam", "fraud"]:
-        if keyword in subject:
+def is_phishing_url(url):
+    # Check if the URL contains any suspicious patterns
+    pattern = r"^https?://((([a-zA-Z0-9$_.+!*(),;?&=-]+\.?)*)|(\w+$))"
+    match = re.search(pattern, url)
+    if not match:
+        return False
+
+    # Check if the URL contains any suspicious query parameters
+    for parameter in urlparse.urlsplit(url).query:
+        value = urlparse.parse_qs(parameter)[parameter]
+        if value and isinstance(value, str):
+            value = value.lower()
+            if "click here" in value or "visit the website" in value:
+                return True
+
+    # Check if the URL contains any suspicious fragments
+    for fragment in urlparse.urlsplit(url).fragment:
+        value = urlparse.parse_qs(fragment)[fragment]
+        if value and isinstance(value, str):
+            value = value.lower()
+            if "click here" in value or "visit the website" in value:
+                return True
+
+    # Check if the URL contains any suspicious path components
+    for component in urlparse.urlsplit(url).path.split("/"):
+        if component == "login" or component == "signup":
             return True
-    
-    # Check if the body contains suspicious links or attachments
-    links = re.findall(r"https?://\S+", body)
-    for link in links:
-        if not link.startswith("http://www.example.com/"):
-            return True
-    
-    # Check if the email contains malware
-    if is_malware(body):
-        return True
-    
+
+    # No suspicious patterns found, consider the URL safe
     return False
 
-def is_malware(body):
-    for keyword in ["virus", "ransomware", "spyware"]:
-        if keyword in body:
-            return True
-    return False
-
-def mitigate_phishing_attack(email):
-    # Remove the email from the inbox and move it to a spam folder
-    email.remove()
-    email.move("Spam")
-    
-# Test the function
-sender = "spammer@example.com"
-recipient = "user@example.com"
-subject = "Phishing Attack"
-body = "Click here to download a file."
-email = EmailMessage(sender, recipient, subject, body)
-if is_phishing_attack(email):
-    mitigate_phishing_attack(email)
+def mitigate_phishing_attack(url):
+    # Redirect to a warning page if the URL is determined to be phishing
+    if is_phishing_url(url):
+        return redirect("https://example.com/phishing-warning")
+    else:
+        return None
