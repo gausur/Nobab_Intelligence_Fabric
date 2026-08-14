@@ -1,53 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-14 19:48:45.250771
+# Generated 2026-08-14 20:26:45.589732
 
 import re
-import smtplib
+import urllib.parse
 
-def check_phishing_url(url):
-    """Check if the URL is a phishing site."""
-    if re.match(r"https?://[^\.]+\.[^\.]+", url):
+def detect_phishing(url):
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    if domain.endswith(".gov"):
+        return True
+    elif domain.endswith(".edu"):
+        return True
+    elif domain.endswith(".mil"):
         return True
     else:
         return False
 
-def check_phishing_email(email):
-    """Check if the email is a phishing email."""
-    if re.match(r"^[^\.]+\.[^\.]+@[^\.]+\.[^\.]+$", email):
-        return True
+def mitigate_phishing(url):
+    if detect_phishing(url):
+        return "Phishing attempt detected!"
     else:
-        return False
+        return "No phishing attempt detected."
 
-def check_phishing_message(message):
-    """Check if the message contains phishing content."""
-    if re.search(r"https?://[^\.]+\.[^\.]+", message):
-        return True
-    else:
-        return False
-
-def mitigate_phishing_attack(message):
-    """Mitigate the phishing attack."""
-    if check_phishing_message(message):
-        # Send a warning message to the user's email address
-        send_warning_message(message)
-
-        # Block the user's email address
-        block_email_address(message)
-
-def send_warning_message(message):
-    """Send a warning message to the user's email address."""
-    # Use the smtplib library to send the message
-    server = smtplib.SMTP('smtp.example.com')
-    server.sendmail('no-reply@example.com', message, 'Warning: Potential ph[2D[K
-phishing attack detected')
-    server.quit()
-
-def block_email_address(email):
-    """Block the user's email address."""
-    # Use the email library to block the email address
-    import email
-    email.block_email_address(email)
-
-if __name__ == '__main__':
-    mitigate_phishing_attack('https://www.example.com')
+url = input("Enter a URL: ")
+print(mitigate_phishing(url))
