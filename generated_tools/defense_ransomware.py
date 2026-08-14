@@ -1,43 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-14 15:46:12.424644
+# Generated 2026-08-14 16:44:08.551152
 
 import os
+import shutil
 import subprocess
-import sys
+import time
+import datetime
 
-def detect_ransomware(file_path):
-    # Check if file exists
-    if not os.path.isfile(file_path):
-        print("File does not exist")
-        return
+def detect_ransomware(path):
+    # Check if the file is encrypted
+    if os.path.isfile(path):
+        with open(path, "rb") as f:
+            data = f.read()
+            if b"@RnSoMwArE" in data:
+                return True
+    return False
 
-    # Check if file is encrypted
-    result = subprocess.run(["strings", file_path], stdout=subprocess.PIPE)[23D[K
-stdout=subprocess.PIPE)
-    if b"encrypted" not in result.stdout:
-        print("File is not encrypted")
-        return
+def mitigate_ransomware(path):
+    # Decrypt the file
+    if detect_ransomware(path):
+        cmd = f"openssl aes-256-cbc -d -in {path} -out {path} -k 'password'[10D[K
+'password'"
+        subprocess.call(cmd, shell=True)
+        return True
+    return False
 
-    # Check if file has a ransomware signature
-    result = subprocess.run(["strings", file_path], stdout=subprocess.PIPE)[23D[K
-stdout=subprocess.PIPE)
-    if b"ransomware" not in result.stdout:
-        print("File does not have a ransomware signature")
-        return
+def monitor_directory(directory):
+    # Loop through all files in the directory
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            path = os.path.join(root, file)
+            # Detect and mitigate ransomware
+            if detect_ransomware(path):
+                mitigate_ransomware(path)
+                print(f"Ransomware detected and mitigated in {path}")
+            else:
+                print(f"No ransomware detected in {path}")
 
-    # Mitigate the ransomware attack
-    print("Mitigating ransomware attack")
-    subprocess.run(["rm", file_path])
-    print("Removed file")
+def main():
+    # Monitor the directory for ransomware attacks
+    directory = "/path/to/directory"
+    monitor_directory(directory)
+    print(f"Ransomware monitor started at {datetime.datetime.now()}")
+    while True:
+        time.sleep(10)
 
-# Check if file path is given as a command line argument
-if len(sys.argv) < 2:
-    print("Usage: python ransomware_detector.py <file_path>")
-    sys.exit(1)
-
-# Get file path from command line argument
-file_path = sys.argv[1]
-
-# Detect and mitigate ransomware attack
-detect_ransomware(file_path)
+if __name__ == "__main__":
+    main()
