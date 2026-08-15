@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-15 19:19:06.494915
+# Generated 2026-08-15 20:14:36.327360
 
 import os
 import sys
-import subprocess
+import time
 
-def detect_ransomware(file):
-    try:
-        subprocess.check_output(["strings", file], universal_newlines=True)[24D[K
-universal_newlines=True)
-        return True
-    except subprocess.CalledProcessError:
-        return False
+def detect_ransomware(file_path):
+    with open(file_path, "r") as f:
+        contents = f.read()
+        if "ransomware" in contents:
+            print("Ransomware detected!")
+            return True
+        else:
+            print("No ransomware detected.")
+            return False
 
-def mitigate_ransomware(file):
-    if detect_ransomware(file):
-        subprocess.run(["rm", file])
-        print("Removed ransomware file:", file)
-    else:
-        print("No ransomware detected in file:", file)
-
-def main():
-    for file in sys.argv[1:]:
-        mitigate_ransomware(file)
+def mitigate_ransomware(file_path):
+    with open(file_path, "r") as f:
+        contents = f.read()
+        if "ransomware" in contents:
+            print("Ransomware detected!")
+            with open(file_path, "w") as f:
+                f.write(contents.replace("ransomware", "normal"))
+                print("Ransomware mitigated.")
+        else:
+            print("No ransomware detected.")
 
 if __name__ == "__main__":
-    main()
+    if detect_ransomware(sys.argv[1]):
+        mitigate_ransomware(sys.argv[1])
+    else:
+        print("No ransomware detected.")
