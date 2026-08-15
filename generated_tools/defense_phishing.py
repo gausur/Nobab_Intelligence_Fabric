@@ -1,44 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-15 03:36:36.271287
+# Generated 2026-08-15 04:25:44.988656
 
 import re
 import smtplib
+from email.mime.text import MIMEText
 
-def detect_phishing_attack(email):
-    # Check if the email is from a known phishing sender
-    if email.get('from') in ['phishing@example.com', 'social.media.phishing[22D[K
-'social.media.phishing@example.com']:
+def detect_phishing_attacks(email_message):
+    # Check if the email is from a legitimate source
+    if email_message.get('From') not in ['example@example.com', 'support@ex[11D[K
+'support@example.com']:
+        return False
+
+    # Check if the email contains a phishing link
+    if re.search(r'https://example\.com/.*?phishing\.html', email_message.g[15D[K
+email_message.get('Body')):
         return True
 
-    # Check if the email has a suspicious subject line
-    if re.search(r'^Phishing Email:', email.get('subject')):
-        return True
+    # Check if the email contains a suspicious attachment
+    if len(email_message.get('Attachments')) > 0:
+        for attachment in email_message.get('Attachments'):
+            if attachment.get('Content-Type') == 'application/pdf':
+                return True
 
-    # Check if the email has a suspicious body
-    if re.search(r'Click here to confirm your account', email.get('body')):[19D[K
-email.get('body')):
-        return True
-
+    # If none of the above conditions are met, the email is likely legitima[8D[K
+legitimate
     return False
 
-def mitigate_phishing_attack(email):
-    # Mark the email as spam
-    email['flags'] = 'spam'
+def mitigate_phishing_attacks(email_message):
+    # Remove the phishing link from the email body
+    email_message.set('Body', re.sub(r'https://example\.com/.*?phishing\.ht[45D[K
+re.sub(r'https://example\.com/.*?phishing\.html', '', email_message.get('Bo[21D[K
+email_message.get('Body')))
 
-    # Delete the email
-    smtplib.delete(email)
+    # Remove the suspicious attachment from the email
+    email_message.set('Attachments', [])
 
-def main():
-    # Read the email from the input stream
-    email = input()
+    # Send the email to the recipient
+    smtplib.sendmail(email_message.get('From'), email_message.get('To'), em[2D[K
+email_message.as_string())
 
-    # Detect and mitigate the phishing attack
-    if detect_phishing_attack(email):
-        mitigate_phishing_attack(email)
+# Load the email message from a file
+with open('email.txt', 'r') as f:
+    email_message = f.read()
 
-    # Print the modified email
-    print(email)
-
-if __name__ == '__main__':
-    main()
+# Detect and mitigate any phishing attacks in the email
+if detect_phishing_attacks(email_message):
+    mitigate_phishing_attacks(email_message)
