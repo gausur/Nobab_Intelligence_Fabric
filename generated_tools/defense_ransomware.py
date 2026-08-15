@@ -1,43 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-15 21:15:20.599061
+# Generated 2026-08-15 22:15:34.152264
 
 import os
 import sys
-import time
-import socket
 import subprocess
 import shutil
 
 def detect_ransomware():
-    # Check if the system is running Windows
-    if sys.platform == "win32":
-        # Check if the system has the necessary registry keys
-        with open(r"C:\Windows\System32\config\System") as f:
-            if "Ransomware" in f.read():
-                print("Ransomware detected")
-                mitigate_ransomware()
-    else:
-        print("System not supported")
+    try:
+        output = subprocess.check_output(["systemctl", "status", "ransomwar[10D[K
+"ransomware"])
+        if "Active:" in output:
+            if "active" in output:
+                return True
+    except subprocess.CalledProcessError:
+        return False
 
 def mitigate_ransomware():
-    # Check if the system is running Windows
-    if sys.platform == "win32":
-        # Check if the system has the necessary registry keys
-        with open(r"C:\Windows\System32\config\System") as f:
-            if "Ransomware" in f.read():
-                print("Ransomware detected")
-                # Remove the ransomware registry keys
-                subprocess.call(["reg", "delete", "HKLM\\Software\\Microsof[25D[K
-"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "/f"])
-                subprocess.call(["reg", "delete", "HKLM\\Software\\Microsof[25D[K
-"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices", "/f"])
-                subprocess.call(["reg", "delete", "HKLM\\Software\\Microsof[25D[K
-"HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServicesOnce", "/f"[4D[K
-"/f"])
-                print("Ransomware removed")
-    else:
-        print("System not supported")
+    try:
+        subprocess.check_call(["systemctl", "stop", "ransomware"])
+        shutil.rmtree("ransomware")
+        os.remove("ransomware.service")
+    except subprocess.CalledProcessError:
+        print("Failed to mitigate ransomware")
 
-if __name__ == "__main__":
-    detect_ransomware()
+if detect_ransomware():
+    mitigate_ransomware()
+else:
+    print("No ransomware detected")
