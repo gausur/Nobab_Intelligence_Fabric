@@ -1,41 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-15 17:15:45.622289
+# Generated 2026-08-15 19:19:06.494915
 
 import os
-import hashlib
-import json
+import sys
 import subprocess
 
-def detect_ransomware(path):
-    # Hash the file to check if it's been tampered with
-    with open(path, 'rb') as f:
-        file_hash = hashlib.sha256(f.read()).hexdigest()
-
-    # Check if the file is known to be a ransomware sample
-    with open('ransomware_hashes.json', 'r') as f:
-        known_hashes = json.load(f)
-
-    if file_hash in known_hashes:
+def detect_ransomware(file):
+    try:
+        subprocess.check_output(["strings", file], universal_newlines=True)[24D[K
+universal_newlines=True)
         return True
+    except subprocess.CalledProcessError:
+        return False
 
-    return False
+def mitigate_ransomware(file):
+    if detect_ransomware(file):
+        subprocess.run(["rm", file])
+        print("Removed ransomware file:", file)
+    else:
+        print("No ransomware detected in file:", file)
 
-def mitigate_ransomware(path):
-    # Run a file system scan to detect any other infections
-    subprocess.run(['clamscan', '-r', path])
+def main():
+    for file in sys.argv[1:]:
+        mitigate_ransomware(file)
 
-    # Remove the infected file
-    os.remove(path)
-
-    # Run a full system scan to detect any other infections
-    subprocess.run(['clamscan', '-r', '/'])
-
-    # Restart the system to ensure all infections are removed
-    subprocess.run(['reboot'])
-
-if __name__ == '__main__':
-    path = '/path/to/file'
-
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+if __name__ == "__main__":
+    main()
