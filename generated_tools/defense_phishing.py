@@ -1,36 +1,47 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-15 05:23:49.818750
+# Generated 2026-08-15 06:25:08.600937
 
 import re
-import requests
-import urllib.parse
+import smtplib
+from email.message import EmailMessage
 
-# Define a list of phishing URLs
-phishing_urls = [
-    "https://www.phishing-site.com",
-    "https://www.phishing-site.com/login",
-    "https://www.phishing-site.com/register",
-    "https://www.phishing-site.com/verify"
-]
+def detect_phishing_attack(email_message):
+    """
+    Detect phishing attacks in an email message using regular expressions.
+    """
+    pattern = r"(https?://)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,[61D[K
+r"(https?://)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0r"(https?://)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)"
+    if re.search(pattern, email_message):
+        return True
+    else:
+        return False
 
-# Define a list of valid URL patterns
-valid_url_patterns = [
-    r"^https?://",
-    r"^https?://www\.",
-    r"^https?://www\.phishing-site\.com",
-    r"^https?://www\.phishing-site\.com/login",
-    r"^https?://www\.phishing-site\.com/register",
-    r"^https?://www\.phishing-site\.com/verify"
-]
+def mitigate_phishing_attack(email_message):
+    """
+    Mitigate a phishing attack by sending an email to the sender with a war[3D[K
+warning.
+    """
+    sender = email_message.get("From")
+    subject = "Phishing Attack Warning"
+    body = "We have detected a phishing attack on your account. Please do n[1D[K
+not click on any links or provide any personal information."
+    msg = EmailMessage()
+    msg["From"] = "no-reply@example.com"
+    msg["To"] = sender
+    msg["Subject"] = subject
+    msg.set_content(body)
+    smtp = smtplib.SMTP("smtp.example.com")
+    smtp.send_message(msg)
+    smtp.quit()
 
-# Iterate through the phishing URLs and check if they match any of the vali[4D[K
-valid URL patterns
-for url in phishing_urls:
-    url_parsed = urllib.parse.urlparse(url)
-    for pattern in valid_url_patterns:
-        if re.match(pattern, url_parsed.netloc + url_parsed.path):
-            print(f"Phishing URL detected: {url}")
-            # Mitigate the phishing attack by redirecting the user to a saf[3D[K
-safe page
-            return "https://www.example.com/safe-page"
+def main():
+    email_message = EmailMessage()
+    email_message.set_content(sys.stdin.read())
+    if detect_phishing_attack(email_message):
+        mitigate_phishing_attack(email_message)
+    else:
+        print("No phishing attack detected.")
+
+if __name__ == "__main__":
+    main()
