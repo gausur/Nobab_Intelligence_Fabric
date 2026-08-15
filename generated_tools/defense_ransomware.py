@@ -1,55 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-15 15:14:34.849457
+# Generated 2026-08-15 16:16:53.991490
 
 import os
-import socket
-import time
+import json
+import shutil
+import hashlib
+import subprocess
 
-def detect_ransomware(hostname):
-    # Check if the hostname is resolvable
-    try:
-        socket.gethostbyname(hostname)
-    except socket.gaierror:
-        return False
-
-    # Check if the hostname is a known ransomware domain
-    if hostname.endswith('.ransomware.com'):
-        return True
-
-    # Check if the hostname is a known ransomware IP address
-    if hostname.startswith('127.0.0.1'):
-        return True
-
-    # Check if the hostname is in a known ransomware CIDR range
-    if any(cidr.startswith(hostname) for cidr in ['10.0.0.0/8', '172.16.0.0[11D[K
-'172.16.0.0/12', '192.168.0.0/16']):
-        return True
-
+def detect_ransomware(file):
+    # Calculate the file's hash
+    file_hash = hashlib.sha256(open(file, "rb").read()).hexdigest()
+    # Check if the file is known to be a ransomware
+    with open("ransomware_hashes.json", "r") as f:
+        known_hashes = json.load(f)
+        if file_hash in known_hashes:
+            return True
     return False
 
-def mitigate_ransomware(hostname):
-    # Kill all processes on the host
-    os.system('pkill -9 -x')
+def mitigate_ransomware(file):
+    # Backup the file
+    backup_file = f"{file}.bak"
+    shutil.copy(file, backup_file)
+    # Restore the file from backup
+    shutil.copy(backup_file, file)
+    # Remove the backup file
+    os.remove(backup_file)
 
-    # Remove all files and directories on the host
-    os.system('rm -rf /')
+def main():
+    # Check all files in the current directory
+    for file in os.listdir("."):
+        # Skip hidden files
+        if file.startswith("."):
+            continue
+        # Check if the file is a ransomware
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
-    # Delete the host's IP address from the network
-    os.system('ip addr del <host_ip_address> dev <interface>')
-
-    # Disable the host's network interface
-    os.system('ip link set <interface> down')
-
-    # Disconnect the host from the network
-    os.system('ip link set <interface> nomaster')
-
-    # Remove the host's IP address from the DNS
-    os.system('host del <host_ip_address>')
-
-if __name__ == '__main__':
-    hostname = socket.gethostbyname(socket.gethostname())
-    if detect_ransomware(hostname):
-        mitigate_ransomware(hostname)
-    else:
-        print('No ransomware detected.')
+if __name__ == "__main__":
+    main()
