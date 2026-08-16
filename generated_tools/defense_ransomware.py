@@ -1,40 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-16 17:15:06.735559
+# Generated 2026-08-16 18:18:07.197342
 
 import os
-import re
-import subprocess
+import shutil
+import time
 
-# Define the list of ransomware extensions
-ransomware_extensions = [".ransomware", ".cryptolocker", ".locker", ".decry[7D[K
-".decryptor"]
+def detect_ransomware(path):
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+        if b"RANSOMWARE" in data:
+            return True
+    except Exception:
+        pass
+    return False
 
-# Define the list of suspicious files
-suspicious_files = []
+def mitigate_ransomware(path):
+    try:
+        shutil.move(path, f"{path}.bak")
+    except Exception:
+        pass
 
-# Iterate over the files in the current directory
-for file in os.listdir():
-    # Check if the file has a ransomware extension
-    if any(file.endswith(ext) for ext in ransomware_extensions):
-        # Add the file to the suspicious files list
-        suspicious_files.append(file)
+def scan_directory(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            path = os.path.join(root, file)
+            if detect_ransomware(path):
+                mitigate_ransomware(path)
 
-# Check if any suspicious files were found
-if len(suspicious_files) > 0:
-    # Print a warning message
-    print("WARNING: Possible ransomware attack detected!")
-    print("Suspicious files:", ", ".join(suspicious_files))
+def main():
+    while True:
+        scan_directory("/")
+        time.sleep(3600)
 
-    # Ask the user if they want to continue with the attack
-    decision = input("Continue with the attack? [Y/n]: ")
-    if decision.lower() != "y":
-        # If the user doesn't want to continue, exit the script
-        print("Aborting attack...")
-        exit(1)
-
-# Otherwise, continue with the attack
-print("Continuing with attack...")
-
-# Launch the ransomware attack
-subprocess.run(["ransomware", "attack"])
+if __name__ == "__main__":
+    main()
