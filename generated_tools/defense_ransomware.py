@@ -1,45 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-16 09:21:00.817244
+# Generated 2026-08-16 10:18:28.161711
 
 import os
+import time
+import json
 import subprocess
+import shutil
 
 def detect_ransomware(file_path):
-    """
-    Detects if a file or directory is infected with ransomware by checking [K
-for the presence of the ransomware's encryption key.
-
-    :param file_path: The path to the file or directory to check.
-    :return: True if the file or directory is infected with ransomware, Fal[3D[K
-False otherwise.
-    """
+    # Check if file is locked by other process
     try:
-        subprocess.run(["openssl", "rsa", "-in", file_path, "-check"], stdo[4D[K
-stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        open(file_path, 'r').close()
+    except:
         return True
-    except subprocess.CalledProcessError:
-        return False
+    return False
 
 def mitigate_ransomware(file_path):
-    """
-    Removes the ransomware's encryption key from a file or directory.
+    # Delete file
+    os.remove(file_path)
 
-    :param file_path: The path to the file or directory to mitigate.
-    """
-    subprocess.run(["openssl", "rsa", "-in", file_path, "-out", file_path],[11D[K
-file_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+def scan_files(directory):
+    # Iterate over files in directory
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            # Check if file is a ransomware
+            if detect_ransomware(os.path.join(root, file)):
+                # Mitigate ransomware
+                mitigate_ransomware(os.path.join(root, file))
 
 def main():
-    """
-    The main function that runs the script.
-    """
-    file_path = input("Enter the file path to check: ")
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-        print("Ransomware detected and mitigated.")
-    else:
-        print("No ransomware detected.")
+    # Get directory to scan
+    directory = input("Enter directory to scan: ")
+    # Scan files in directory
+    scan_files(directory)
 
 if __name__ == "__main__":
     main()
