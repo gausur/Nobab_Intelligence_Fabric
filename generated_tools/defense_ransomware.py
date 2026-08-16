@@ -1,38 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-16 04:32:28.867975
+# Generated 2026-08-16 05:23:49.158509
 
 import os
+import shutil
 import subprocess
-import json
 
-def detect_ransomware(file_path):
-    try:
-        output = subprocess.check_output(["/path/to/ransomware/detection/to[58D[K
-subprocess.check_output(["/path/to/ransomware/detection/tool", file_path])
-        output = json.loads(output)
-        if output["is_ransomware"]:
-            print(f"Ransomware detected in {file_path}")
-            mitigate_ransomware(file_path)
-    except subprocess.CalledProcessError:
-        print(f"Error running ransomware detection tool")
+def detect_ransomware(path):
+    # Check if the file or directory is encrypted
+    if os.path.isfile(path) and shutil.get_archive_formats():
+        with open(path, "rb") as f:
+            if b"RANSOMWARE" in f.read(1024):
+                return True
+    return False
 
-def mitigate_ransomware(file_path):
-    try:
-        output = subprocess.check_output(["/path/to/ransomware/mitigation/t[58D[K
-subprocess.check_output(["/path/to/ransomware/mitigation/tool", file_path])[11D[K
-file_path])
-        output = json.loads(output)
-        if output["mitigated"]:
-            print(f"Ransomware mitigated in {file_path}")
+def mitigate_ransomware(path):
+    # Check if the file or directory is encrypted
+    if detect_ransomware(path):
+        # Delete the file or directory
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
         else:
-            print(f"Error mitigating ransomware in {file_path}")
-    except subprocess.CalledProcessError:
-        print(f"Error running ransomware mitigation tool")
+            raise Exception("Unknown file or directory")
 
 def main():
-    file_path = "/path/to/file"
-    detect_ransomware(file_path)
+    # Get the file or directory path from the command line
+    path = sys.argv[1]
+    # Detect and mitigate ransomware
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+    else:
+        print("No ransomware detected")
 
 if __name__ == "__main__":
     main()
