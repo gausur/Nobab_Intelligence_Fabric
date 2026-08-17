@@ -1,34 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-17 20:19:55.703585
+# Generated 2026-08-17 21:20:15.033589
 
 import re
-import json
-import requests
-from urllib.parse import urlparse
+import email
 
-def detect_phishing(url):
-    parsed_url = urlparse(url)
-    hostname = parsed_url.netloc
-    response = requests.get(f"https://api.mythic-beasts.com/v2/hostname/{ho[60D[K
-requests.get(f"https://api.mythic-beasts.com/v2/hostname/{hostname}")
-    if response.status_code == 200:
-        data = json.loads(response.content)
-        if data["status"] == "safe":
-            return True
-        else:
-            return False
+def is_phishing_url(url):
+    # Check if the URL is a phishing site
+    if re.search(r'https?://[^.]+\.phishing\.site', url):
+        return True
     else:
         return False
 
-def mitigate_phishing(url):
-    if detect_phishing(url):
-        print("This is a phishing website. Please do not enter any personal[8D[K
-personal information.")
+def is_phishing_email(email_content):
+    # Check if the email contains a phishing link
+    if re.search(r'https?://[^.]+\.phishing\.site', email_content):
+        return True
     else:
-        print("This website is safe. You can enter your personal informatio[10D[K
-information.")
+        return False
 
-if __name__ == "__main__":
-    url = input("Enter the URL: ")
-    mitigate_phishing(url)
+def mitigate_phishing_attack(email_content):
+    # Remove any links to phishing sites
+    re.sub(r'https?://[^.]+\.phishing\.site', '', email_content)
+
+def main():
+    # Read the email from stdin
+    email_content = input()
+
+    # Check if the email contains a phishing link
+    if is_phishing_email(email_content):
+        # Mitigate the phishing attack
+        mitigate_phishing_attack(email_content)
+
+        # Print the modified email
+        print(email_content)
+
+if __name__ == '__main__':
+    main()
