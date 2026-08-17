@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-17 13:35:49.190136
+# Generated 2026-08-17 14:21:53.642461
 
 import re
 import urllib.parse
+import requests
 
 def detect_phishing(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    if domain.endswith('.onion'):
-        return 'phishing'
+    # Check if the URL is valid
+    try:
+        urllib.parse.urlparse(url)
+    except ValueError:
+        return False
+
+    # Check if the URL is a HTTP or HTTPS URL
+    scheme = urllib.parse.urlparse(url).scheme
+    if scheme not in ["http", "https"]:
+        return False
+
+    # Check if the URL is a phishing site
+    try:
+        response = requests.get(url)
+        content = response.content.decode("utf-8")
+        if re.search(r"(phishing|scam|malware)", content, re.IGNORECASE):
+            return True
+    except requests.exceptions.RequestException:
+        pass
+
+    return False
+
+if __name__ == "__main__":
+    url = input("Enter a URL to check: ")
+    if detect_phishing(url):
+        print("The URL is a phishing site!")
     else:
-        return 'not phishing'
-
-def mitigate_phishing(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    if domain.endswith('.onion'):
-        return 'blocked'
-    else:
-        return 'not blocked'
-
-def main():
-    url = 'https://example.onion'
-    result = detect_phishing(url)
-    print(f'Result: {result}')
-    result = mitigate_phishing(url)
-    print(f'Result: {result}')
-
-if __name__ == '__main__':
-    main()
+        print("The URL is safe!")
