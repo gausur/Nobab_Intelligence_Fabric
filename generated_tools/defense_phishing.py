@@ -1,33 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-17 19:25:40.769085
+# Generated 2026-08-17 20:19:55.703585
 
 import re
-import smtplib
+import json
+import requests
+from urllib.parse import urlparse
 
-def is_valid_email(email):
-    regex = r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$"
-    return re.search(regex, email)
-
-def is_phishing_email(email):
-    if not is_valid_email(email):
+def detect_phishing(url):
+    parsed_url = urlparse(url)
+    hostname = parsed_url.netloc
+    response = requests.get(f"https://api.mythic-beasts.com/v2/hostname/{ho[60D[K
+requests.get(f"https://api.mythic-beasts.com/v2/hostname/{hostname}")
+    if response.status_code == 200:
+        data = json.loads(response.content)
+        if data["status"] == "safe":
+            return True
+        else:
+            return False
+    else:
         return False
-    smtp_server = smtplib.SMTP("smtp.gmail.com", 587)
-    try:
-        smtp_server.starttls()
-        smtp_server.login("your_email_address", "your_email_password")
-        smtp_server.sendmail("your_email_address", email, "Subject: Phishin[7D[K
-Phishing Email Detected")
-    except smtplib.SMTPSenderRefused:
-        return True
-    return False
 
-def mitigate_phishing_email(email):
-    if is_phishing_email(email):
-        return "Phishing Email Detected"
-    return "Email is valid"
+def mitigate_phishing(url):
+    if detect_phishing(url):
+        print("This is a phishing website. Please do not enter any personal[8D[K
+personal information.")
+    else:
+        print("This website is safe. You can enter your personal informatio[10D[K
+information.")
 
 if __name__ == "__main__":
-    email = input("Enter the email address: ")
-    result = mitigate_phishing_email(email)
-    print(result)
+    url = input("Enter the URL: ")
+    mitigate_phishing(url)
