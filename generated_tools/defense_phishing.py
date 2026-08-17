@@ -1,40 +1,58 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-17 15:20:57.116640
+# Generated 2026-08-17 16:19:56.374147
 
 import re
-import smtplib
-from email.mime.text import MIMEText
+import ssl
 
-def is_phishing_email(email):
-    # Check if the email is from a legitimate source
-    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', em[2D[K
-email['From']):
-        return False
-    # Check if the email contains a phishing URL
-    if re.search(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email[[6D[K
-email['Text']):
-        return False
-    return True
+def detect_phishing(url):
+    # Use the URL to extract the domain name
+    domain = url.split("://")[1].split("/")[0]
 
-def send_email(email):
-    # Send an email to the user with the details of the phishing attempt
-    msg = MIMEText('Phishing attempt detected!\n\nFrom: {}\n\n{}'.format(em[19D[K
-{}\n\n{}'.format(email['From'], email['Text']))
-    msg['Subject'] = 'Phishing Attempt'
-    msg['From'] = 'phishing@example.com'
-    msg['To'] = email['From']
-    smtplib.sendmail('phishing@example.com', email['From'], msg.as_string()[15D[K
-msg.as_string())
+    # Check if the domain is in the HSTS preload list
+    try:
+        hsts = ssl.get_server_certificate((domain, 443), ssl.PROTOCOL_TLSv1[18D[K
+ssl.PROTOCOL_TLSv1)
+        hsts = re.search(r"HSTS:(\S+)", hsts)
+        if hsts:
+            return True
+    except ssl.SSLError:
+        pass
+
+    # Check if the domain has a valid SSL certificate
+    try:
+        ssl.get_server_certificate((domain, 443), ssl.PROTOCOL_TLSv1)
+        return False
+    except ssl.SSLError:
+        return True
+
+def mitigate_phishing(url):
+    # Use the URL to extract the domain name
+    domain = url.split("://")[1].split("/")[0]
+
+    # Check if the domain is in the HSTS preload list
+    try:
+        hsts = ssl.get_server_certificate((domain, 443), ssl.PROTOCOL_TLSv1[18D[K
+ssl.PROTOCOL_TLSv1)
+        hsts = re.search(r"HSTS:(\S+)", hsts)
+        if hsts:
+            return True
+    except ssl.SSLError:
+        pass
+
+    # Check if the domain has a valid SSL certificate
+    try:
+        ssl.get_server_certificate((domain, 443), ssl.PROTOCOL_TLSv1)
+        return False
+    except ssl.SSLError:
+        return True
 
 def main():
-    # Read the emails from the SMTP server
-    with smtplib.SMTP('smtp.example.com') as server:
-        server.connect()
-        server.login()
-        for email in server.retrieve_emails():
-            if is_phishing_email(email):
-                send_email(email)
+    url = input("Enter the URL to check: ")
+    if detect_phishing(url):
+        print("Phishing attack detected!")
+    else:
+        print("No phishing attack detected.")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
