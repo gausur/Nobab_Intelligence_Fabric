@@ -1,44 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-18 07:34:13.781135
+# Generated 2026-08-18 08:28:52.858331
 
 import re
-import requests
-import json
+import smtplib
+from email.utils import getaddresses
 
-def is_phishing_url(url):
-    # Check if the URL is a valid HTTP or HTTPS URL
-    if not re.match(r'^https?://', url):
+def detect_phishing_attack(email_message):
+    # Extract the sender and recipient addresses from the email message
+    sender_address = getaddresses(email_message['From'])[0]
+    recipient_address = getaddresses(email_message['To'])[0]
+
+    # Check if the sender address is a valid email address
+    if not re.match(r'^.+@.+\..+$', sender_address):
+        print("Invalid sender address")
         return False
 
-    # Check if the URL is a known phishing site
-    try:
-        response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})[15D[K
-'Mozilla/5.0'})
-        content = response.content.decode()
-        if 'phishing' in content.lower():
-            return True
-        else:
-            return False
-    except requests.exceptions.RequestException:
+    # Check if the recipient address is a valid email address
+    if not re.match(r'^.+@.+\..+$', recipient_address):
+        print("Invalid recipient address")
         return False
 
-def mitigate_phishing_attack(url):
-    # Redirect the user to the homepage
-    return 'https://www.example.com'
+    # Check if the email message contains a suspicious subject line
+    if re.search(r'phishing|scam|fraud', email_message['Subject']):
+        print("Suspicious subject line")
+        return False
 
-# Main function
-def main():
-    # Get the URL from the user
-    url = input('Enter a URL: ')
+    # Check if the email message contains a suspicious attachment
+    if re.search(r'exe|dll|bat|vbs|scr|ps', email_message.get_content_maint[31D[K
+email_message.get_content_maintype()):
+        print("Suspicious attachment")
+        return False
 
-    # Check if the URL is a phishing site
-    if is_phishing_url(url):
-        # Mitigate the phishing attack
-        mitigate_phishing_attack(url)
-    else:
-        # Print a message indicating that the URL is not a phishing site
-        print('The URL is not a phishing site.')
+    return True
 
-if __name__ == '__main__':
-    main()
+# Example usage
+
+# Import the email package
+from email.message import EmailMessage
+
+# Create an email message
+message = EmailMessage()
+message['Subject'] = "Phishing attack!"
+message['From'] = "john.doe@example.com"
+message['To'] = "jane.doe@example.com"
+
+# Add a suspicious attachment to the email message
+with open('phishing.exe', 'rb') as f:
+    message.add_attachment(f.read(), 'application/octet-stream')
+
+# Check if the email message is a phishing attack
+if detect_phishing_attack(message):
+    print("Phishing attack detected")
+else:
+    print("Phishing attack not detected")
