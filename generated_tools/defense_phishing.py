@@ -1,58 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-17 23:17:27.098032
+# Generated 2026-08-18 00:46:27.419986
 
 import re
 import requests
 from urllib.parse import urlparse
+from bs4 import BeautifulSoup
 
-def is_phishing_url(url):
-    """
-    Check if the given URL is a phishing URL.
+def detect_phishing(url):
+    try:
+        # Parse the URL and extract the domain
+        url_parsed = urlparse(url)
+        domain = url_parsed.netloc
 
-    Args:
-        url (str): The URL to check.
+        # Check if the domain is in the list of known phishing domains
+        if domain in PHISHING_DOMAINS:
+            return True
 
-    Returns:
-        bool: Whether the URL is a phishing URL or not.
-    """
-    parsed_url = urlparse(url)
-    if parsed_url.scheme != 'https':
-        return True
-    if parsed_url.netloc.endswith('.onion'):
-        return True
-    if parsed_url.netloc.endswith('.pirate'):
-        return True
-    if parsed_url.netloc.endswith('.xxx'):
-        return True
-    if parsed_url.netloc.endswith('.phishing'):
-        return True
-    return False
+        # Fetch the HTML page and extract the links
+        html = requests.get(url).text
+        soup = BeautifulSoup(html, "html.parser")
+        links = [link["href"] for link in soup.find_all("a")]
 
-def mitigate_phishing_attacks(url):
-    """
-    Mitigate phishing attacks by redirecting the user to a safe URL.
+        # Check if any of the links are to a known phishing domain
+        for link in links:
+            if link.startswith("http"):
+                link_parsed = urlparse(link)
+                link_domain = link_parsed.netloc
+                if link_domain in PHISHING_DOMAINS:
+                    return True
 
-    Args:
-        url (str): The URL to check.
+        # If we reach this point, the URL is not a phishing site
+        return False
+    except requests.exceptions.RequestException:
+        # If we encounter any errors, return False
+        return False
 
-    Returns:
-        bool: Whether the URL is a phishing URL or not.
-    """
-    if is_phishing_url(url):
-        safe_url = 'https://www.example.com'
-        return safe_url
-    else:
-        return url
-
-def main():
-    url = 'http://www.example.com'
-    mitigated_url = mitigate_phishing_attacks(url)
-    if mitigated_url:
-        print(f'Redirecting to {mitigated_url}')
-        requests.get(mitigated_url)
-    else:
-        print('Not a phishing URL.')
-
-if __name__ == '__main__':
-    main()
+# List of known phishing domains
+PHISHING_DOMAINS = [
+    "example.com",
+    "example2.com",
+    "example3.com",
+    "example4.com",
+]
