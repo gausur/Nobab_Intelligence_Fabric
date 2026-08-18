@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-18 03:43:24.051783
+# Generated 2026-08-18 04:31:22.819892
 
 import os
 import sys
-import hashlib
-import time
 
-def detect_ransomware(directory):
-    # Iterate over all files in the directory
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            # Calculate the file hash
-            file_hash = hashlib.sha256(open(os.path.join(root, file), 'rb')[5D[K
-'rb').read()).hexdigest()
-            # Check if the file hash is in the known_ransomware_hashes list[4D[K
-list
-            if file_hash in known_ransomware_hashes:
-                # If the file is a ransomware, return the file path
-                return os.path.join(root, file)
-    # If no ransomware is detected, return None
-    return None
+def detect_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+        if b"$RANSOM" in data:
+            print("Ransomware detected!")
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(file_path):
-    # Delete the ransomware file
-    os.remove(file_path)
-    # Notify the user that the ransomware has been mitigated
-    print("Ransomware has been mitigated!")
-
-def main():
-    # Get the path to the directory to scan
-    directory = sys.argv[1]
-    # Detect and mitigate ransomware attacks
-    ransomware_path = detect_ransomware(directory)
-    if ransomware_path:
-        mitigate_ransomware(ransomware_path)
-    else:
-        print("No ransomware detected!")
+def mitigate_ransomware(file):
+    with open(file, "rb") as f:
+        data = f.read()
+        if b"$RANSOM" in data:
+            print("Removing ransomware from file...")
+            data = data.replace(b"$RANSOM", b"")
+            with open(file, "wb") as f:
+                f.write(data)
+            print("Ransomware removed!")
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        print("Usage: python ransomware_detector.py <file>")
+        sys.exit(1)
+    file = sys.argv[1]
+    if detect_ransomware(file):
+        mitigate_ransomware(file)
+    else:
+        print("No ransomware detected in file.")
