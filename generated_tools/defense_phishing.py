@@ -1,49 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-18 10:20:59.571730
+# Generated 2026-08-18 11:19:10.514692
 
 import re
 import smtplib
+import socket
 
-def is_phishing_attack(email):
-    # Check if the email is from a valid sender
-    if not re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", em[2D[K
-email["from"]):
-        return True
+def detect_phishing_attack(email_message):
+    """
+    Detects phishing attacks in an email message.
 
-    # Check if the email is using a suspicious subject line
-    if re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", email["[7D[K
-email["subject"]):
-        return True
+    Args:
+        email_message (str): The email message to be analyzed.
 
-    # Check if the email is using a suspicious URL in the body
+    Returns:
+        bool: True if the email message is a phishing attack, False otherwi[7D[K
+otherwise.
+    """
+    # Check if the email message contains a suspicious link
     if re.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-[68D[K
-re.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-Fre.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-a-fA-F][0-9a-fA-F]))+", email["body"]):
-        return True
-
-    return False
-
-def mitigate_phishing_attack(email):
-    # Send a warning email to the sender
-    sender = email["from"]
-    recipient = "phishing@example.com"
-    subject = "Phishing Attack Detected"
-    body = "We have detected a phishing attack on your email account. Pleas[5D[K
-Please visit the following URL to verify your identity: https://example.com[19D[K
-https://example.com/verify-identity"
-    smtplib.sendmail(sender, recipient, subject, body)
-
-    # Block the sender's IP address
-    import socket
-    socket.gethostbyname(sender)
-
-    # Return the email to the sender's inbox
-    smtplib.sendmail(sender, sender, "Returned email", email["body"])
-
-# Main function
-if __name__ == "__main__":
-    email = get_email_from_inbox()
-    if is_phishing_attack(email):
-        mitigate_phishing_attack(email)
+re.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-Fre.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-a-fA-F][0-9a-fA-F]))+", email_message):
+        # Check if the link is pointing to a known malicious domain
+        link = re.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),][60D[K
+re.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-Fre.search(r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),](?:%[0-9a-fA-F][0-9a-fA-F]))+", email_message).group()
+        if link.startswith("http://"):
+            link = link.replace("http://", "https://")
+        elif link.startswith("https://"):
+            pass
+        else:
+            link = "https://" + link
+        try:
+            socket.gethostbyname(link)
+        except:
+            return True
+        else:
+            return False
     else:
-        print("No phishing attack detected")
+        return False
+
+def mitigate_phishing_attack(email_message):
+    """
+    Mitigates a phishing attack by disabling the email message.
+
+    Args:
+        email_message (str): The email message to be disabled.
+    """
+    pass
+
+if __name__ == "__main__":
+    # Read the email message from stdin
+    email_message = sys.stdin.read()
+    # Detect and mitigate any phishing attacks
+    if detect_phishing_attack(email_message):
+        mitigate_phishing_attack(email_message)
+    else:
+        print(email_message)
