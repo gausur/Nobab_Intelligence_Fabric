@@ -1,56 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-19 07:35:12.070357
+# Generated 2026-08-19 08:28:08.042599
 
 import os
-import re
-import shutil
+import json
 import subprocess
 
-def detect_ransomware(directory):
-    # Check if the directory contains any suspicious files
-    suspicious_files = []
-    for file in os.listdir(directory):
-        if re.search(r"\.ransomware", file):
-            suspicious_files.append(file)
+def detect_ransomware(file):
+    try:
+        with open(file, 'r') as f:
+            contents = f.read()
+            if 'A' * 100 in contents:
+                return True
+            else:
+                return False
+    except FileNotFoundError:
+        return False
 
-    # If there are any suspicious files, remove them
-    if len(suspicious_files) > 0:
-        for file in suspicious_files:
-            os.remove(os.path.join(directory, file))
-
-def mitigate_ransomware(directory):
-    # Check if the directory is encrypted
-    if os.path.exists(os.path.join(directory, "encrypted")):
-        # Remove the encrypted directory
-        shutil.rmtree(os.path.join(directory, "encrypted"))
-
-    # Check if the directory contains any suspicious files
-    suspicious_files = []
-    for file in os.listdir(directory):
-        if re.search(r"\.ransomware", file):
-            suspicious_files.append(file)
-
-    # If there are any suspicious files, remove them
-    if len(suspicious_files) > 0:
-        for file in suspicious_files:
-            os.remove(os.path.join(directory, file))
+def mitigate_ransomware(file):
+    try:
+        with open(file, 'r') as f:
+            contents = f.read()
+            if detect_ransomware(file):
+                with open(file, 'w') as f:
+                    f.write(contents.replace('A' * 100, ''))
+    except FileNotFoundError:
+        pass
 
 def main():
-    # Parse the command-line arguments
-    args = sys.argv[1:]
+    for file in os.listdir('.'):
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
-    # Check if the user has specified a directory
-    if len(args) == 0:
-        print("Usage: python ransomware_detector.py <directory>")
-        return
-
-    # Get the directory path
-    directory = args[0]
-
-    # Detect and mitigate ransomware attacks
-    detect_ransomware(directory)
-    mitigate_ransomware(directory)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,22 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-19 07:33:31.683690
+# Generated 2026-08-19 08:29:44.363734
 
 import re
-import urllib
+import sys
 
-def detect_phishing(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    if re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", domain):
+class PhishingDetector:
+    def __init__(self, domain):
+        self.domain = domain
+
+    def is_phishing(self):
+        if not self.domain.endswith('.com'):
+            return False
         return True
-    else:
-        return False
 
-def mitigate_phishing(url):
-    if detect_phishing(url):
-        # Do something to mitigate the phishing attack
-        print("Phishing attack detected!")
+def main():
+    if len(sys.argv) != 2:
+        print('Usage: python phishing_detector.py <domain>')
+        return
+    domain = sys.argv[1]
+    detector = PhishingDetector(domain)
+    if detector.is_phishing():
+        print(f'The domain {domain} is a phishing site.')
     else:
-        # Do something else
-        print("This is not a phishing attack.")
+        print(f'The domain {domain} is not a phishing site.')
+
+if __name__ == '__main__':
+    main()
