@@ -1,36 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-19 08:28:08.042599
+# Generated 2026-08-19 09:29:34.111898
 
 import os
-import json
 import subprocess
+import json
 
-def detect_ransomware(file):
-    try:
-        with open(file, 'r') as f:
-            contents = f.read()
-            if 'A' * 100 in contents:
-                return True
-            else:
-                return False
-    except FileNotFoundError:
-        return False
+def detect_ransomware(file_path):
+    """
+    Detect ransomware in a given file.
+    """
+    # Use the `unzip` command to extract the file
+    unzip_output = subprocess.check_output(["unzip", file_path])
+    # Check if the file contains the ransomware signature
+    if b"Ransomware detected" in unzip_output:
+        print("Ransomware detected!")
+        # Remove the malicious file
+        os.remove(file_path)
+        # Notify the user
+        print("Please delete the file and restart your device.")
 
-def mitigate_ransomware(file):
-    try:
-        with open(file, 'r') as f:
-            contents = f.read()
-            if detect_ransomware(file):
-                with open(file, 'w') as f:
-                    f.write(contents.replace('A' * 100, ''))
-    except FileNotFoundError:
-        pass
+def mitigate_ransomware(file_path):
+    """
+    Mitigate a ransomware attack.
+    """
+    # Use the `unzip` command to extract the file
+    unzip_output = subprocess.check_output(["unzip", file_path])
+    # Check if the file contains the ransomware signature
+    if b"Ransomware detected" in unzip_output:
+        print("Ransomware detected!")
+        # Remove the malicious file
+        os.remove(file_path)
+        # Notify the user
+        print("Please delete the file and restart your device.")
 
 def main():
-    for file in os.listdir('.'):
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
+    """
+    Main function to detect and mitigate ransomware attacks.
+    """
+    # Get the file path from the user
+    file_path = input("Enter the file path: ")
+    # Detect ransomware in the file
+    detect_ransomware(file_path)
+    # Mitigate the ransomware attack
+    mitigate_ransomware(file_path)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
