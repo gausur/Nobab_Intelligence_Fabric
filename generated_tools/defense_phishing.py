@@ -1,29 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-20 16:25:10.372989
+# Generated 2026-08-20 17:25:19.873885
 
 import re
-import json
+import urllib.request
 
-def detect_phishing_attack(url):
-    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if not re.match(pattern, url):
-        return "Not a valid email address"
-    else:
-        return "Valid email address"
+def detect_phishing(url):
+    # Check if the URL is valid
+    if not urllib.request.urlparse(url).scheme:
+        return "Invalid URL"
 
-def mitigate_phishing_attack(url):
-    if url.startswith("http"):
-        return "Phishing attack detected"
-    else:
-        return "Not a phishing attack"
+    # Check if the URL is a phishing website
+    if re.search(r"(?i)phishing", url):
+        return "Phishing website detected"
 
-def main():
-    url = input("Enter the URL: ")
-    result = detect_phishing_attack(url)
-    if result == "Valid email address":
-        result = mitigate_phishing_attack(url)
-    print(result)
+    # Check if the URL is a malware website
+    if re.search(r"(?i)malware", url):
+        return "Malware website detected"
 
-if __name__ == "__main__":
-    main()
+    # Check if the URL is a scam website
+    if re.search(r"(?i)scam", url):
+        return "Scam website detected"
+
+    # Check if the URL is a spam website
+    if re.search(r"(?i)spam", url):
+        return "Spam website detected"
+
+    return "No phishing or malware detected"
+
+url = input("Enter the URL: ")
+result = detect_phishing(url)
+print(result)

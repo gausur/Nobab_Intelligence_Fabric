@@ -1,40 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-20 16:26:11.299186
+# Generated 2026-08-20 17:23:41.122397
 
+import socket
 import os
-import sys
 import subprocess
-import shutil
 
 def detect_ransomware():
-    # Check if the machine is infected with ransomware
     try:
-        # If the system is infected, the ransomware will try to encrypt the[3D[K
-the system
-        # This can be detected by checking if the system is running slowly
-        if subprocess.check_output(["systemctl", "status", "ransomware"]).d[16D[K
-"ransomware"]).decode("utf-8").strip() == "active":
-            # If the system is infected, it is likely that the ransomware i[1D[K
-is encrypting the system
-            return True
-    except subprocess.CalledProcessError:
-        # If the system is not infected, this error will be raised
-        return False
-
-def mitigate_ransomware():
-    # If the system is infected, the ransomware will try to encrypt the sys[3D[K
-system
-    # To mitigate this, we need to stop the ransomware and remove it from t[1D[K
-the system
-    try:
-        # Stop the ransomware service
-        subprocess.check_call(["systemctl", "stop", "ransomware"])
-        # Remove the ransomware from the system
-        shutil.rmtree("/ransomware")
-    except subprocess.CalledProcessError:
-        # If the system is not infected, this error will be raised
+        # Check for common ransomware file patterns
+        for file in os.listdir():
+            if file.endswith(".exe"):
+                with open(file, "rb") as f:
+                    data = f.read()
+                    if b"EKQ" in data:
+                        print("Ransomware detected!")
+                        return True
+            elif file.endswith(".dll"):
+                with open(file, "rb") as f:
+                    data = f.read()
+                    if b"UW2" in data:
+                        print("Ransomware detected!")
+                        return True
+    except Exception:
         pass
 
-if detect_ransomware():
-    mitigate_ransomware()
+def mitigate_ransomware():
+    try:
+        # Try to restore files from backups
+        for file in os.listdir():
+            if file.endswith(".bak"):
+                with open(file, "rb") as f:
+                    data = f.read()
+                    if b"EKQ" in data:
+                        print("Restoring file:", file)
+                        subprocess.run(["cp", file, file[:-4]])
+
+        # Try to restore from system backups
+        subprocess.run(["systemctl", "restore"])
+    except Exception:
+        pass
+
+if __name__ == "__main__":
+    if detect_ransomware():
+        mitigate_ransomware()
+        print("Ransomware mitigated!")
+    else:
+        print("No ransomware detected.")
