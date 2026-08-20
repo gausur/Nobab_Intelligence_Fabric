@@ -1,40 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-20 06:33:28.580366
+# Generated 2026-08-20 07:36:26.704749
 
 import re
 import smtplib
-from email.parser import Parser
-from email.policy import default
 
-def detect_phishing_attack(email_message):
-    # Check if the email is from a known phishing domain
-    if email_message["From"].split("@")[1] in ["phishingdomain1.com", "phis[5D[K
-"phishingdomain2.com"]:
+# Define a function to check if an email is a phishing attack
+def is_phishing_attack(email):
+    # Check if the email contains any suspicious keywords
+    if any(k in email for k in ["phishing", "scam", "fraud", "hack"]):
         return True
-    # Check if the email contains a link to a known phishing website
-    if re.search(r"http[s]?://[a-zA-Z0-9./]*", email_message.get_payload())[28D[K
-email_message.get_payload()):
+    # Check if the email address is from a known spam source
+    if email.endswith("@phishing.com"):
         return True
-    # Check if the email contains a known phishing phrase
-    if re.search(r"I love you more than I love myself", email_message.get_p[19D[K
-email_message.get_payload()):
+    # Check if the email contains any suspicious links
+    if any(l in email for l in ["https://phishing.com", "https://scam.com",[19D[K
+"https://scam.com", "https://fraud.com", "https://hack.com"]):
         return True
+    # Check if the email contains any suspicious content
+    if any(c in email for c in ["Click here to claim your prize!", "Click h[1D[K
+here to download the latest virus.", "Click here to access your account."])[11D[K
+account."]):
+        return True
+    # If none of the above conditions are met, the email is likely legitima[8D[K
+legitimate
     return False
 
-def mitigate_phishing_attack(email_message):
-    # Send a notification to the user's account holder
-    account_holder_email = email_message["To"]
-    notification_message = f"Phishing attack detected on {email_message['Su[18D[K
-{email_message['Subject']}.\nPlease check your email for more information."[13D[K
-information."
-    smtplib.sendmail(account_holder_email, "noreply@example.co[19D[K
-"noreply@example.com", notification_message)
+# Define a function to send an alert to an admin if a phishing attack is de[2D[K
+detected
+def send_alert(email):
+    # Use the smtplib library to send an email to an admin
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.ehlo()
+    server.starttls()
+    server.login("admin@example.com", "password")
+    server.sendmail("admin@example.com", "admin@example.com", "Phishing att[3D[K
+attack detected: " + email)
+    server.quit()
 
-# Load the email message from the input file
-email_message = Parser(policy=default).parse(open("email_message.txt", "r")[4D[K
-"r").read())
+# Use a regular expression to extract the email address from an input strin[5D[K
+string
+email_re = re.compile(r"[\w\.]+@[\w\.]+")
 
-# Detect and mitigate the phishing attack
-if detect_phishing_attack(email_message):
-    mitigate_phishing_attack(email_message)
+# Loop through all the emails in a given text file
+with open("emails.txt") as f:
+    for line in f:
+        # Extract the email address from the line
+        email = email_re.search(line).group()
+        # Check if the email is a phishing attack
+        if is_phishing_attack(email):
+            # Send an alert to an admin
+            send_alert(email)
