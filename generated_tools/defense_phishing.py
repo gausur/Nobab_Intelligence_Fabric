@@ -1,59 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-20 21:22:06.280867
+# Generated 2026-08-20 22:19:56.309770
 
 import re
+import urllib.parse
 
-def detect_phishing_attack(url):
-    # Check if the URL is a valid HTTPS URL
-    if not re.match(r"^https://", url):
-        return False
+def is_phishing_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    hostname = parsed_url.hostname
+    if hostname.endswith("example.com"):
+        return True
+    return False
 
-    # Check if the URL has a valid domain name
-    if not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", url):
-        return False
+def mitigate_phishing_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    hostname = parsed_url.hostname
+    if hostname.endswith("example.com"):
+        return "https://example.com"
+    return url
 
-    # Check if the URL has a valid TLD
-    if not re.match(r"^[a-zA-Z]{2,}$", url.split(".")[-1]):
-        return False
-
-    # Check if the URL has a valid path
-    if not re.match(r"^/[a-zA-Z0-9.-]+$", url.split("/")[-1]):
-        return False
-
-    # Check if the URL has a valid query string
-    if not re.match(r"^[a-zA-Z0-9=]+$", url.split("?")[-1]):
-        return False
-
-    return True
-
-def mitigate_phishing_attack(url):
-    # Check if the URL is a valid HTTPS URL
-    if not re.match(r"^https://", url):
-        return False
-
-    # Check if the URL has a valid domain name
-    if not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", url):
-        return False
-
-    # Check if the URL has a valid TLD
-    if not re.match(r"^[a-zA-Z]{2,}$", url.split(".")[-1]):
-        return False
-
-    # Check if the URL has a valid path
-    if not re.match(r"^/[a-zA-Z0-9.-]+$", url.split("/")[-1]):
-        return False
-
-    # Check if the URL has a valid query string
-    if not re.match(r"^[a-zA-Z0-9=]+$", url.split("?")[-1]):
-        return False
-
-    return True
+def main():
+    url = input("Enter a URL: ")
+    if is_phishing_url(url):
+        mitigated_url = mitigate_phishing_url(url)
+        print(f"Mitigated URL: {mitigated_url}")
+    else:
+        print(f"URL is not a phishing attack: {url}")
 
 if __name__ == "__main__":
-    url = "https://example.com"
-    if detect_phishing_attack(url):
-        print("Possible phishing attack detected")
-        mitigate_phishing_attack(url)
-    else:
-        print("No phishing attack detected")
+    main()
