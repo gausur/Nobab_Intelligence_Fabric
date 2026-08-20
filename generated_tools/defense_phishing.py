@@ -1,33 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-20 17:25:19.873885
+# Generated 2026-08-20 18:30:04.208054
 
 import re
-import urllib.request
+import requests
 
 def detect_phishing(url):
-    # Check if the URL is valid
-    if not urllib.request.urlparse(url).scheme:
-        return "Invalid URL"
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            return False
+        html = response.text
+        pattern = r"(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*[5D[K
+\.-]*)*\/?([^\.\s])?$"
+        if re.match(pattern, html):
+            return True
+        else:
+            return False
+    except requests.exceptions.RequestException:
+        return False
 
-    # Check if the URL is a phishing website
-    if re.search(r"(?i)phishing", url):
-        return "Phishing website detected"
+def mitigate_phishing(url):
+    if detect_phishing(url):
+        print("Phishing detected!")
+    else:
+        print("Phishing not detected.")
 
-    # Check if the URL is a malware website
-    if re.search(r"(?i)malware", url):
-        return "Malware website detected"
-
-    # Check if the URL is a scam website
-    if re.search(r"(?i)scam", url):
-        return "Scam website detected"
-
-    # Check if the URL is a spam website
-    if re.search(r"(?i)spam", url):
-        return "Spam website detected"
-
-    return "No phishing or malware detected"
-
-url = input("Enter the URL: ")
-result = detect_phishing(url)
-print(result)
+if __name__ == "__main__":
+    mitigate_phishing("https://example.com")
