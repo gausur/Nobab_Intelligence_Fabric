@@ -1,26 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-20 05:27:15.164282
+# Generated 2026-08-20 06:31:25.123008
 
 import os
+import shutil
 import subprocess
+import time
 
 def detect_ransomware():
-    """Detect if the system is infected with ransomware"""
-    try:
-        subprocess.check_output(['ls', '/ransomware'])
+    # Check if the file system is encrypted
+    if os.path.exists('/sys/fs/crypt':
         return True
-    except subprocess.CalledProcessError:
+    else:
         return False
 
 def mitigate_ransomware():
-    """Mitigate the ransomware attack"""
-    if detect_ransomware():
-        print("Ransomware detected!")
-        subprocess.call(['rm', '-rf', '/ransomware'])
-        print("Ransomware mitigated!")
-    else:
-        print("No ransomware detected.")
+    # Decrypt the file system
+    subprocess.run(['cryptsetup', 'luksOpen', '/dev/sda1', '/mnt/encrypted'[16D[K
+'/mnt/encrypted'])
+    # Copy the contents of the encrypted file system to a safe location
+    shutil.copytree('/mnt/encrypted', '/mnt/safe')
+    # Remove the encrypted file system
+    subprocess.run(['cryptsetup', 'luksClose', '/dev/sda1'])
+    # Mount the safe copy of the file system
+    subprocess.run(['mount', '/mnt/safe', '/mnt/safe'])
+
+def main():
+    while True:
+        # Check if the file system is encrypted
+        if detect_ransomware():
+            mitigate_ransomware()
+            break
+        else:
+            time.sleep(1)
 
 if __name__ == '__main__':
-    mitigate_ransomware()
+    main()
