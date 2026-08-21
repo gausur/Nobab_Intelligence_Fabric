@@ -1,40 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-21 05:29:49.418956
+# Generated 2026-08-21 06:32:57.373453
 
 import socket
-import sys
-import os
+import re
 
-def detect_ransomware(file):
-    try:
-        with open(file, 'r') as f:
-            contents = f.read()
-            if 'demand' in contents or 'extort' in contents:
-                return True
-            else:
-                return False
-    except:
-        return False
+def detect_ransomware(data):
+    if re.search(r"^([^<>&]{20})-([^<>&]{20})-([^<>&]{20})-([^<>&]{20})$", [K
+data):
+        return True
+    return False
 
-def mitigate_ransomware(file):
-    try:
-        with open(file, 'r') as f:
-            contents = f.read()
-            if 'demand' in contents or 'extort' in contents:
-                os.remove(file)
-                print('Ransomware detected and mitigated.')
-            else:
-                print('No ransomware detected.')
-    except:
-        print('Error mitigating ransomware.')
-
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        file = sys.argv[1]
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-        else:
-            print('No ransomware detected.')
+def mitigate_ransomware(data):
+    if detect_ransomware(data):
+        # Implement your mitigation logic here
+        pass
     else:
-        print('Usage: python ransomware_detector.py <file>')
+        raise ValueError("Invalid data")
+
+def handle_ransomware(data):
+    try:
+        mitigate_ransomware(data)
+    except ValueError:
+        print("Invalid data")
+
+if __name__ == "__main__":
+    data = input("Enter data: ")
+    handle_ransomware(data)
