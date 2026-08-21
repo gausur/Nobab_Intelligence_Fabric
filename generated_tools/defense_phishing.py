@@ -1,50 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-20 23:19:36.684619
+# Generated 2026-08-21 00:50:36.389108
 
 import re
+import socket
 import ssl
-import urllib.request
-import http.client
 
-def detect_phishing(url):
-    # Check if the URL is a valid HTTP/HTTPS URL
-    if not re.match(r"^https?://", url):
+def detect_phishing_attack(url):
+    # Check if the URL is valid
+    if not url or not url.startswith("http"):
         return False
 
-    # Check if the URL is a known phishing site
-    if url in PHISHING_SITES:
-        return True
+    # Extract the domain name from the URL
+    domain = url.split("://")[1].split("/")[0]
 
-    # Check if the URL has a valid SSL certificate
+    # Check if the domain name is a valid IP address
     try:
-        ssl_context = ssl.create_default_context()
-        conn = http.client.HTTPSConnection(url, context=ssl_context)
-        conn.request("HEAD", "/")
-        response = conn.getresponse()
-        if response.status == 200:
+        socket.inet_pton(socket.AF_INET, domain)
+    except socket.error:
+        try:
+            socket.inet_pton(socket.AF_INET6, domain)
+        except socket.error:
             return False
-        else:
-            return True
-    except ssl.SSLError:
-        return True
-    except http.client.HTTPException:
+
+    # Check if the domain name is a valid domain name
+    if not re.match(r"^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$", domain):
         return False
 
-def mitigate_phishing(url):
-    # Redirect the user to the phishing site
-    return "Location: {}".format(url)
+    # Check if the URL is using a valid SSL certificate
+    try:
+        ssl_info = ssl.get_server_certificate((domain, 443))
+        return ssl_info["valid"]
+    except ssl.SSLError:
+        return False
 
-PHISHING_SITES = [
-    "phishing-site-1.com",
-    "phishing-site-2.com",
-    "phishing-site-3.com",
-    # Add more phishing sites here
-]
-
-url = input("Enter the URL to detect and mitigate: ")
-if detect_phishing(url):
-    print("Phishing site detected!")
-    mitigate_phishing(url)
-else:
-    print("No phishing site detected.")
+def mitigate_phishing_attack(url):
+    # Check if the URL is a phishing attack
+    if detect_phishing_attack(url):
+        # Redirect the user to the homepage
+        return "https://example.com"
+    else:
+        # Return the original URL
+        return url
