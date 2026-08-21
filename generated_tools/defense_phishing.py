@@ -1,31 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-21 18:25:44.212338
+# Generated 2026-08-21 19:21:25.953454
 
 import re
-import smtplib
+import requests
+from urllib.parse import urlparse
 
-def detect_phishing_attacks(email_body):
-    # Check for common phishing patterns
-    if re.search(r'https?:\/\/[a-zA-Z0-9.]+\/[a-zA-Z0-9]+', email_body):
-        return True
-    elif re.search(r'[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[a-zA-Z0-9]+', email_body):[12D[K
-email_body):
-        return True
-    else:
+def is_phishing_attempt(url):
+    parsed_url = urlparse(url)
+    domain = parsed_url.netloc
+    if re.search(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", domain):
         return False
+    return True
 
-def mitigate_phishing_attacks(email_body):
-    # Send the email to a mail server to check if it's legitimate
-    smtplib.sendmail('mail.example.com', 'user@example.com', email_body)
+def mitigate_phishing_attempt(url):
+    if is_phishing_attempt(url):
+        print("Possible phishing attempt detected!")
+        return True
+    return False
 
 def main():
-    # Read the email body from stdin
-    email_body = sys.stdin.read()
+    url = input("Enter a URL: ")
+    mitigate_phishing_attempt(url)
 
-    # Detect and mitigate phishing attacks
-    if detect_phishing_attacks(email_body):
-        mitigate_phishing_attacks(email_body)
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
