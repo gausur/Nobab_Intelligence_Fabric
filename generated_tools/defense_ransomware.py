@@ -1,48 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-22 21:17:01.476200
+# Generated 2026-08-22 22:17:13.352171
 
-import sys
 import os
 import subprocess
-import json
 import shutil
+import hashlib
+
+def check_for_ransomware(file_path):
+    with open(file_path, "rb") as f:
+        data = f.read()
+    hash = hashlib.md5(data).hexdigest()
+    if hash == "d41d8cd98f00b204e9800998ecf8427e":
+        return True
+    return False
+
+def mitigate_ransomware(file_path):
+    if check_for_ransomware(file_path):
+        shutil.move(file_path, "/var/log/ransomware/")
+        subprocess.run(["chmod", "700", file_path])
+    else:
+        pass
 
 def main():
-    # Parse command line arguments
-    args = sys.argv[1:]
-    if len(args) < 2:
-        print("Usage: python ransomware_detector.py [input_file] [output_fi[10D[K
-[output_file]")
-        return
-    input_file = args[0]
-    output_file = args[1]
-
-    # Load input file
-    with open(input_file, "r") as f:
-        data = f.read()
-
-    # Parse input file
-    try:
-        data = json.loads(data)
-    except json.JSONDecodeError:
-        print("Invalid input file")
-        return
-
-    # Detect ransomware
-    if "ransomware" in data:
-        print("Ransomware detected")
-        return
-
-    # Mitigate ransomware
-    if "mitigate" in data:
-        print("Mitigating ransomware")
-        # Run mitigation script
-        subprocess.run(["python", "ransomware_mitigation.py"])
-        return
-
-    # No ransomware detected or mitigated
-    print("No ransomware detected or mitigated")
+    for file_path in os.listdir():
+        mitigate_ransomware(file_path)
 
 if __name__ == "__main__":
     main()
