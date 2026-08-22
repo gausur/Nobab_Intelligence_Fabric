@@ -1,33 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-22 10:15:41.343556
+# Generated 2026-08-22 11:14:54.594423
 
 import re
-import smtplib
+import socket
 
-def is_phishing_url(url):
-    return re.search(r"^http(s)?://[a-zA-Z0-9.-]+\.phishing\.com", url)
+def detect_phishing(url):
+    # Check if the URL is valid
+    if not url or not url.startswith('http'):
+        return False
+    
+    # Check if the URL is a phishing website
+    try:
+        # Connect to the website and get the HTML content
+        response = urllib.request.urlopen(url)
+        html = response.read()
+        
+        # Check if the HTML content contains suspicious patterns
+        if re.search(r'<script>|<iframe>|<object>', html):
+            return True
+        else:
+            return False
+    except Exception as e:
+        return False
 
-def is_phishing_email(email):
-    return re.search(r"^[a-zA-Z0-9.-]+\@phishing\.com", email)
-
-def is_phishing_message(message):
-    return is_phishing_url(message.get("url", "")) or is_phishing_email(mes[21D[K
-is_phishing_email(message.get("from", ""))
-
-def mitigate_phishing(message):
-    if is_phishing_message(message):
-        print("Phishing attack detected!")
-        smtplib.sendmail(
-            "spam-filter@example.com",
-            message["from"],
-            "Phishing attack detected!",
-        )
-
-def main():
-    while True:
-        message = input("Message: ")
-        mitigate_phishing(message)
-
-if __name__ == "__main__":
-    main()
+def mitigate_phishing(url):
+    # Check if the URL is a phishing website
+    if detect_phishing(url):
+        # Redirect the user to a safe website
+        response = redirect(url)
+        return response
+    else:
+        # Load the URL in the default web browser
+        response = open(url)
+        return response
