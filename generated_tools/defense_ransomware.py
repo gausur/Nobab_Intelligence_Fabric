@@ -1,30 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-22 17:16:46.055969
+# Generated 2026-08-22 18:22:03.305010
 
 import os
-import re
+import sys
 import shutil
+import subprocess
 
 def detect_ransomware(path):
-    with open(path, 'rb') as f:
-        data = f.read()
-        if re.search(r'[a-zA-Z]+\.exe', data):
-            return True
-        else:
-            return False
+    try:
+        # Use the `os.path.exists()` method to check if the path exists
+        if not os.path.exists(path):
+            print("Path does not exist")
+            return
 
-def mitigate_ransomware(path):
-    with open(path, 'rb') as f:
-        data = f.read()
-        if re.search(r'[a-zA-Z]+\.exe', data):
-            shutil.move(path, 'ransomware_detected')
+        # Use the `shutil.disk_usage()` method to get the disk usage of the[3D[K
+the path
+        usage = shutil.disk_usage(path)
 
-def main():
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            if detect_ransomware(os.path.join(root, file)):
-                mitigate_ransomware(os.path.join(root, file))
+        # Check if the disk usage is less than 85%
+        if usage.percent < 85:
+            print("Disk usage is less than 85%, no ransomware detected")
+            return
 
-if __name__ == '__main__':
-    main()
+        # Use the `subprocess.run()` method to run the `ls` command on the [K
+path
+        output = subprocess.run(["ls", "-alR", path], stdout=subprocess.PIP[21D[K
+stdout=subprocess.PIPE)
+
+        # Check if the output contains the string "ransomware"
+        if b"ransomware" in output.stdout:
+            print("Ransomware detected!")
+            return
+
+        print("No ransomware detected")
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+# Usage:
+#   python ransomware_detector.py <path>
+#
+# Examples:
+#   python ransomware_detector.py /home/user/Downloads
+#   python ransomware_detector.py /home/user/Documents
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python ransomware_detector.py <path>")
+        sys.exit(1)
+    path = sys.argv[1]
+    detect_ransomware(path)
