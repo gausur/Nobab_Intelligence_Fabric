@@ -1,61 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-23 06:31:16.543041
+# Generated 2026-08-23 07:30:00.748493
 
 import re
-import requests
+import urllib.parse
 
-# Define the list of phishing URLs
-phishing_urls = [
-    "https://www.phishingurl1.com",
-    "https://www.phishingurl2.com",
-    "https://www.phishingurl3.com"
-]
+def detect_phishing(url):
+    """
+    Detect phishing attacks by checking for suspicious patterns in the URL.[4D[K
+URL.
 
-# Define the list of legitimate URLs
-legitimate_urls = [
-    "https://www.legitimateurl1.com",
-    "https://www.legitimateurl2.com",
-    "https://www.legitimateurl3.com"
-]
+    Args:
+        url (str): The URL to check.
 
-# Define the function to check if a URL is phishing
-def is_phishing(url):
-    # Check if the URL is in the list of phishing URLs
-    if url in phishing_urls:
-        return True
-    # Check if the URL is in the list of legitimate URLs
-    elif url in legitimate_urls:
-        return False
-    # If the URL is not in either list, check if it matches any regular exp[3D[K
-expression in the list
-    else:
-        for regex in phishing_regexes:
-            if re.match(regex, url):
+    Returns:
+        bool: True if the URL is likely a phishing attack, False otherwise.[10D[K
+otherwise.
+    """
+    # Check for suspicious patterns in the URL
+    if re.search(r"[a-zA-Z0-9]+://[a-zA-Z0-9_-]+.[a-zA-Z0-9.]+/[a-zA-Z0-9_-[68D[K
+re.search(r"[a-zA-Z0-9]+://[a-zA-Z0-9_-]+.[a-zA-Z0-9.]+/[a-zA-Z0-9_-]+", ur[2D[K
+url):
+        # Check for suspicious query parameters
+        if "?" in url:
+            query_params = urllib.parse.urlparse(url).query
+            if "=" in query_params:
+                query_params = urllib.parse.parse_qs(query_params)
+                for key, value in query_params.items():
+                    if key == "username" or key == "password":
+                        return True
+        # Check for suspicious fragments
+        if "#" in url:
+            fragment = urllib.parse.urlparse(url).fragment
+            if fragment == "login":
                 return True
-        return False
+    return False
 
-# Define the function to mitigate a phishing attack
 def mitigate_phishing(url):
-    # Check if the URL is a phishing URL
-    if is_phishing(url):
-        # Block the URL
-        return False
-    # If the URL is not a phishing URL, allow it
-    return True
+    """
+    Mitigate phishing attacks by redirecting the user to a safe URL.
 
-# Define the main function to run the script
-def main():
-    # Get the list of URLs from the user
-    urls = input("Enter the list of URLs: ")
-    # Split the list of URLs into individual URLs
-    urls = urls.split(",")
-    # Iterate over the list of URLs and mitigate any phishing attacks
-    for url in urls:
-        if mitigate_phishing(url):
-            print("Mitigated phishing attack on", url)
-        else:
-            print("Could not mitigate phishing attack on", url)
+    Args:
+        url (str): The URL to check.
 
-# Run the main function
-main()
+    Returns:
+        str: The safe URL to redirect the user to.
+    """
+    if detect_phishing(url):
+        return "https://example.com/safe-url"
+    else:
+        return url
