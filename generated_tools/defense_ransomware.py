@@ -1,41 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-23 04:34:45.148822
+# Generated 2026-08-23 05:24:31.910666
 
 import os
-import shutil
+import socket
 import subprocess
-import sys
 
-def detect_ransomware():
-    # Check for common ransomware files
-    if os.path.exists("C:\\Windows\\System32\\ransomware.exe"):
-        return True
-    if os.path.exists("C:\\Program Files\\ransomware.exe"):
-        return True
-    if os.path.exists("C:\\Program Files (x86)\\ransomware.exe"):
-        return True
-    if os.path.exists("C:\\ransomware.exe"):
-        return True
+def detect_ransomware(ip_address):
+    # Check if the IP address is in the known ransomware IP address list
+    with open("ransomware_ip_list.txt", "r") as f:
+        ransomware_ip_list = f.read().splitlines()
+        if ip_address in ransomware_ip_list:
+            return True
     return False
 
-def mitigate_ransomware():
-    # Remove ransomware files
-    for file in ["C:\\Windows\\System32\\ransomware.exe", "C:\\Program File[4D[K
-Files\\ransomware.exe", "C:\\Program Files (x86)\\ransomware.exe", "C:\\ran[8D[K
-"C:\\ransomware.exe"]:
-        if os.path.exists(file):
-            os.remove(file)
-    # Disable ransomware processes
-    subprocess.run(["taskkill", "/IM", "ransomware.exe", "/F"])
-    # Restore system files
-    for file in ["C:\\Windows\\System32\\file1.exe", "C:\\Program Files\\fi[9D[K
-Files\\file2.exe", "C:\\Program Files (x86)\\file3.exe", "C:\\file4.exe"]:
-        if os.path.exists(file):
-            shutil.copy2(file, "C:\\Windows\\System32")
-    # Restart system
-    subprocess.run(["shutdown", "/r", "/t", "0"])
+def mitigate_ransomware(ip_address):
+    # Check if the IP address is in the known ransomware IP address list
+    if detect_ransomware(ip_address):
+        # Kill the ransomware process
+        subprocess.call(["killall", "ransomware"])
 
-if detect_ransomware():
-    mitigate_ransomware()
-    sys.exit(0)
+        # Remove the ransomware binary from the system
+        subprocess.call(["rm", "/bin/ransomware"])
+
+        # Remove the ransomware configuration file
+        subprocess.call(["rm", "/etc/ransomware.conf"])
+
+        # Remove the ransomware log files
+        subprocess.call(["rm", "/var/log/ransomware/*"])
+
+        # Restore the system to its previous state
+        subprocess.call(["systemctl", "restore", "default"])
+
+        # Reboot the system
+        subprocess.call(["reboot"])
+
+if __name__ == "__main__":
+    # Get the IP address of the system
+    ip_address = socket.gethostbyname(socket.gethostname())
+
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(ip_address):
+        mitigate_ransomware(ip_address)
