@@ -1,49 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-23 12:23:24.493334
+# Generated 2026-08-23 13:30:41.835700
 
 import os
+import re
 import subprocess
 
-def detect_ransomware():
-    # Check if the system is running Windows
-    if os.name != 'nt':
-        return False
-
-    # Get the list of currently running processes
-    processes = subprocess.check_output(['tasklist', '/fo', 'csv'])
-
-    # Check if any of the processes are known ransomware
-    for process in processes:
-        if process.lower() in ['locky.exe', 'not_a_ransomware.exe']:
+def detect_ransomware(file):
+    with open(file, "rb") as f:
+        contents = f.read()
+        if b"ransomware" in contents:
             return True
+        else:
+            return False
 
-    # If no ransomware is detected, return False
-    return False
+def mitigate_ransomware(file):
+    subprocess.run(["rm", file])
 
-def mitigate_ransomware():
-    # Check if the system is running Windows
-    if os.name != 'nt':
-        return False
-
-    # Get the list of currently running processes
-    processes = subprocess.check_output(['tasklist', '/fo', 'csv'])
-
-    # Check if any of the processes are known ransomware
-    for process in processes:
-        if process.lower() in ['locky.exe', 'not_a_ransomware.exe']:
-            # Terminate the process
-            subprocess.run(['taskkill', '/f', '/im', process])
-
-    # If no ransomware is detected, return False
-    return False
-
-# Main function
 def main():
-    # Detect ransomware
-    if detect_ransomware():
-        # Mitigate ransomware
-        mitigate_ransomware()
+    for file in os.listdir():
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
