@@ -1,44 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-23 05:24:31.910666
+# Generated 2026-08-23 06:27:26.877298
 
 import os
+import shutil
 import socket
-import subprocess
+import sys
+import time
 
-def detect_ransomware(ip_address):
-    # Check if the IP address is in the known ransomware IP address list
-    with open("ransomware_ip_list.txt", "r") as f:
-        ransomware_ip_list = f.read().splitlines()
-        if ip_address in ransomware_ip_list:
-            return True
-    return False
+def detect_ransomware():
+    # Check if the system is infected with ransomware
+    if "ransomware" in os.listdir(os.getcwd()):
+        return True
+    else:
+        return False
 
-def mitigate_ransomware(ip_address):
-    # Check if the IP address is in the known ransomware IP address list
-    if detect_ransomware(ip_address):
-        # Kill the ransomware process
-        subprocess.call(["killall", "ransomware"])
+def mitigate_ransomware():
+    # Remove ransomware files
+    for file in os.listdir(os.getcwd()):
+        if file.endswith(".ransomware"):
+            os.remove(file)
+    # Restart system
+    os.system("reboot")
 
-        # Remove the ransomware binary from the system
-        subprocess.call(["rm", "/bin/ransomware"])
-
-        # Remove the ransomware configuration file
-        subprocess.call(["rm", "/etc/ransomware.conf"])
-
-        # Remove the ransomware log files
-        subprocess.call(["rm", "/var/log/ransomware/*"])
-
-        # Restore the system to its previous state
-        subprocess.call(["systemctl", "restore", "default"])
-
-        # Reboot the system
-        subprocess.call(["reboot"])
+def main():
+    # Run detection script
+    if detect_ransomware():
+        mitigate_ransomware()
+    else:
+        print("No ransomware detected.")
 
 if __name__ == "__main__":
-    # Get the IP address of the system
-    ip_address = socket.gethostbyname(socket.gethostname())
-
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(ip_address):
-        mitigate_ransomware(ip_address)
+    main()
