@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-23 16:19:31.616446
+# Generated 2026-08-23 17:18:38.824325
 
 import re
+import urllib.parse
 import requests
 
 def detect_phishing(url):
-    # Use a regular expression to check if the URL is a phishing website
-    pattern = re.compile(r"^https?:\/\/www\.phishingwebsite\.com")
-    if pattern.match(url):
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    if domain.endswith("gmail.com"):
         return True
     else:
         return False
 
 def mitigate_phishing(url):
-    # Use the requests library to send a request to the website
-    response = requests.get(url)
-    # Check if the website is a phishing website
     if detect_phishing(url):
-        # If the website is a phishing website, raise an error
-        raise ValueError("Phishing website detected!")
+        requests.post("https://www.example.com/phishing_attack", data={"url[10D[K
+data={"url": url})
     else:
-        # If the website is not a phishing website, return the response
-        return response
+        pass
 
-# Example usage
-url = "https://www.example.com"
-response = mitigate_phishing(url)
-print(response.text)
+def main():
+    url = "https://www.example.com"
+    mitigate_phishing(url)
+
+if __name__ == "__main__":
+    main()
