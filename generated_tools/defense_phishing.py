@@ -1,33 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-23 11:15:12.946753
+# Generated 2026-08-23 12:26:15.497126
 
-import requests
 import re
+import smtplib
 
-def detect_phishing_attacks(url):
-    response = requests.get(url)
-    html = response.text
-    if re.search(r"phishing", html, re.IGNORECASE):
+def is_phishing_url(url):
+    # Check if the URL is a phishing URL
+    if re.match(r"https?://\w+.phishing.com/", url):
         return True
     else:
         return False
 
-def mitigate_phishing_attacks(url):
-    response = requests.get(url)
-    html = response.text
-    if re.search(r"phishing", html, re.IGNORECASE):
-        # Mitigation techniques can vary depending on the specific attack a[1D[K
-and the type of website being targeted.
-        # For example, a common mitigation technique is to display a warnin[6D[K
-warning message to the user before proceeding with the attack.
-        print("Warning: This website may be a phishing attempt. Proceed wit[3D[K
-with caution.")
-    else:
-        # If the website is not a phishing attempt, then it is likely safe [K
-to visit.
-        print("This website is not a phishing attempt.")
+def mitigate_phishing_attack(url):
+    # Send an email to the user to warn them of the phishing attack
+    smtplib.sendmail("user@example.com", "user@example.com", "Subject: Phis[4D[K
+Phishing Attack Detected", "Your email address has been detected as a phish[5D[K
+phishing attack. Please report this incident to your IT department immediat[8D[K
+immediately.")
 
-# Example usage:
-detect_phishing_attacks("https://www.example.com")
-mitigate_phishing_attacks("https://www.example.com")
+# Check if the URL is a phishing URL
+if is_phishing_url(url):
+    mitigate_phishing_attack(url)
