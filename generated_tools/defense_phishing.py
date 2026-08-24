@@ -1,28 +1,24 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-24 04:37:24.548489
+# Generated 2026-08-24 05:34:23.382261
 
 import re
-import urllib
 
-def is_phishing_url(url):
-    pattern = r"^https?://"
-    if re.match(pattern, url):
+def detect_phishing(url):
+    if re.match(r"^https?://", url):
+        return False
+    elif re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", url)[4D[K
+url):
         return True
     else:
         return False
 
-def mitigate_phishing_attack(url):
-    if is_phishing_url(url):
-        urllib.parse.urlencode(url, quote_via=urllib.parse.quote_plus)
-        urllib.parse.urlencode(url, safe=':/?@')
+def mitigate_phishing(url):
+    if detect_phishing(url):
+        print("This is a phishing website!")
     else:
-        return url
-
-def main():
-    url = input("Enter a URL: ")
-    mitigated_url = mitigate_phishing_attack(url)
-    print(f"Mitigated URL: {mitigated_url}")
+        print("This is a legitimate website.")
 
 if __name__ == "__main__":
-    main()
+    url = input("Enter the URL: ")
+    mitigate_phishing(url)
