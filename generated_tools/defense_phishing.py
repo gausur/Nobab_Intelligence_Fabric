@@ -1,46 +1,63 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-24 16:27:19.120684
+# Generated 2026-08-24 17:25:42.083369
 
 import re
-import smtplib
-import urllib.request
-from email.message import EmailMessage
+import requests
+from bs4 import BeautifulSoup
 
-def detect_phishing_attack(email_message):
-    # Check for suspicious headers
-    if re.search(r'X-Mailer: PHP/', email_message.get('X-Mailer', '')):
+def detect_phishing(url):
+    # Check if the URL is a valid HTTP/HTTPS URL
+    if not re.match(r"^https?://", url):
+        return False
+
+    # Send a HEAD request to the URL to check if it exists
+    try:
+        response = requests.head(url)
+    except requests.exceptions.RequestException:
+        return False
+
+    # Check if the response status code is 200
+    if response.status_code != 200:
+        return False
+
+    # Parse the HTML content of the page
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Check if the page contains any suspicious tags or attributes
+    if soup.find("script", type="text/javascript"):
         return True
-    if re.search(r'X-Originating-IP: [^ ]+', email_message.get('X-Originati[30D[K
-email_message.get('X-Originating-IP', '')):
+
+    if soup.find("script", type="application/ld+json"):
         return True
-    if re.search(r'Received: from [^ ]+ by [^ ]+ with SMTP', email_message.[14D[K
-email_message.as_string()):
+
+    if soup.find("link", rel="canonical"):
         return True
-    
-    # Check for suspicious content
-    if re.search(r'http://[^\s]+', email_message.get('Subject', '')):
-        return True
-    if re.search(r'http://[^\s]+', email_message.get('Body', '')):
-        return True
-    
+
     return False
 
-def mitigate_phishing_attack(email_message):
-    # Discard email
+def mitigate_phishing(url):
+    # Send a POST request to the URL to confirm the user's identity
+    try:
+        response = requests.post(url)
+    except requests.exceptions.RequestException:
+        return False
+
+    # Check if the response status code is 200
+    if response.status_code != 200:
+        return False
+
+    # Parse the HTML content of the page
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    # Check if the page contains any suspicious tags or attributes
+    if soup.find("script", type="text/javascript"):
+        return True
+
+    if soup.find("script", type="application/ld+json"):
+        return True
+
+    if soup.find("link", rel="canonical"):
+        return True
+
     return False
-
-def main():
-    # Read email from stdin
-    email_message = EmailMessage()
-    email_message.parse(sys.stdin)
-    
-    # Check for phishing attack
-    if detect_phishing_attack(email_message):
-        mitigate_phishing_attack(email_message)
-        print('Phishing attack detected and mitigated.')
-    else:
-        print('No phishing attack detected.')
-
-if __name__ == '__main__':
-    main()
