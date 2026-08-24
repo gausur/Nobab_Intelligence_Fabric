@@ -1,48 +1,21 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-24 10:33:32.055579
+# Generated 2026-08-24 11:23:15.812187
 
 import re
-import socket
-import requests
+import smtplib
 
 def is_phishing_url(url):
-    # Check if the URL is a phishing website
-    if re.search(r"//phishing\.website", url):
-        return True
-    else:
-        return False
+    return re.search(r"phishing\.com", url) is not None
 
-def is_phishing_domain(domain):
-    # Check if the domain is a phishing domain
-    if re.search(r"\.phishing\.com", domain):
-        return True
-    else:
-        return False
+def is_phishing_email(email):
+    return re.search(r"@phishing\.com", email) is not None
 
-def is_phishing_ip(ip):
-    # Check if the IP is a phishing IP
-    if re.search(r"\b216\.58\.194\b", ip):
-        return True
-    else:
-        return False
-
-def mitigate_phishing(url):
-    # Mitigate the phishing attack by blocking the URL
-    requests.get(url)
+def mitigate_phishing(url, email):
     if is_phishing_url(url):
-        return "Phishing URL detected and blocked"
-    elif is_phishing_domain(domain):
-        return "Phishing domain detected and blocked"
-    elif is_phishing_ip(ip):
-        return "Phishing IP detected and blocked"
-    else:
-        return "No phishing detected"
-
-def main():
-    # Test the function with a phishing URL
-    url = "http://phishing.website/page"
-    print(mitigate_phishing(url))
+        smtplib.sendmail(email, "phishing@example.com")
+    elif is_phishing_email(email):
+        smtplib.sendmail(url, "phishing@example.com")
 
 if __name__ == "__main__":
-    main()
+    mitigate_phishing("https://phishing.com", "john.doe@phishing.com")

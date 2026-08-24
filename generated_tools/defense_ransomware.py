@@ -1,64 +1,44 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-24 10:31:46.753633
+# Generated 2026-08-24 11:20:36.849512
 
 import os
-import sys
 import hashlib
-import json
+import base64
 
-# Define a list of known ransomware hashes
-known_hashes = [
-    "225348662332452345234523452345",
-    "452345234523452345234523452345",
-    "675234523452345234523452345234"
-]
+def detect_ransomware(file_path):
+    # Calculate the file's SHA256 hash
+    with open(file_path, "rb") as f:
+        file_hash = hashlib.sha256(f.read()).hexdigest()
 
-# Define a function to calculate the hash of a file
-def hash_file(filepath):
-    with open(filepath, "rb") as f:
-        return hashlib.md5(f.read()).hexdigest()
-
-# Define a function to compare the hash of a file to the list of known hash[4D[K
-hashes
-def check_hash(filepath):
-    file_hash = hash_file(filepath)
-    for known_hash in known_hashes:
-        if file_hash == known_hash:
-            return True
+    # Compare the hash to known ransomware hashes
+    with open("ransomware_hashes.txt", "r") as f:
+        for line in f:
+            if file_hash == line.strip():
+                return True
     return False
 
-# Define a function to mitigate a ransomware attack
-def mitigate_ransomware(filepath):
-    # Calculate the hash of the file
-    file_hash = hash_file(filepath)
+def mitigate_ransomware(file_path):
+    # Decrypt the file
+    with open(file_path, "rb") as f:
+        decrypted_file = base64.b64decode(f.read())
 
-    # Check if the hash is in the list of known hashes
-    if check_hash(filepath):
-        # If the hash is in the list, delete the file
-        os.remove(filepath)
-    else:
-        # If the hash is not in the list, notify the user
-        print("File is not a ransomware file")
+    # Save the decrypted file
+    with open(file_path + ".decrypted", "wb") as f:
+        f.write(decrypted_file)
 
-# Main function to detect and mitigate ransomware attacks
+# Main function
 def main():
-    # Get the path to the file to check
-    filepath = input("Enter the path to the file: ")
+    # Get the file path from the user
+    file_path = input("Enter the file path: ")
 
-    # Check if the file exists
-    if not os.path.exists(filepath):
-        print("File does not exist")
-        sys.exit(1)
-
-    # Check if the file is a ransomware file
-    if check_hash(filepath):
-        # If the file is a ransomware file, mitigate the attack
-        mitigate_ransomware(filepath)
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(file_path):
+        mitigate_ransomware(file_path)
+        print("Ransomware attack detected and mitigated!")
     else:
-        # If the file is not a ransomware file, notify the user
-        print("File is not a ransomware file")
+        print("No ransomware attack detected.")
 
-# Run the main function
+# Call the main function
 if __name__ == "__main__":
     main()
