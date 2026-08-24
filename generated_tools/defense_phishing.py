@@ -1,46 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-24 15:32:16.410823
+# Generated 2026-08-24 16:27:19.120684
 
 import re
-import ssl
+import smtplib
+import urllib.request
+from email.message import EmailMessage
 
-def detect_phishing_attacks(url):
-    # Check if the URL is using HTTPS
-    if not url.startswith("https"):
-        print("Phishing attack detected! The URL is not using HTTPS.")
-        return
+def detect_phishing_attack(email_message):
+    # Check for suspicious headers
+    if re.search(r'X-Mailer: PHP/', email_message.get('X-Mailer', '')):
+        return True
+    if re.search(r'X-Originating-IP: [^ ]+', email_message.get('X-Originati[30D[K
+email_message.get('X-Originating-IP', '')):
+        return True
+    if re.search(r'Received: from [^ ]+ by [^ ]+ with SMTP', email_message.[14D[K
+email_message.as_string()):
+        return True
+    
+    # Check for suspicious content
+    if re.search(r'http://[^\s]+', email_message.get('Subject', '')):
+        return True
+    if re.search(r'http://[^\s]+', email_message.get('Body', '')):
+        return True
+    
+    return False
 
-    # Check if the URL is from a valid domain
-    domain = url.split(".")[1]
-    if not re.match(r"[a-zA-Z0-9-]+[.][a-zA-Z0-9-]+[.][a-zA-Z]{2,}", domain[6D[K
-domain):
-        print("Phishing attack detected! The URL is not from a valid domain[6D[K
-domain.")
-        return
+def mitigate_phishing_attack(email_message):
+    # Discard email
+    return False
 
-    # Check if the URL is using a valid TLS certificate
-    try:
-        ssl.get_server_certificate((domain, 443))
-    except ssl.SSLError:
-        print("Phishing attack detected! The URL is not using a valid TLS c[1D[K
-certificate.")
-        return
+def main():
+    # Read email from stdin
+    email_message = EmailMessage()
+    email_message.parse(sys.stdin)
+    
+    # Check for phishing attack
+    if detect_phishing_attack(email_message):
+        mitigate_phishing_attack(email_message)
+        print('Phishing attack detected and mitigated.')
+    else:
+        print('No phishing attack detected.')
 
-    # Check if the URL is using a valid certificate authority
-    if not ssl.CERT_REQUIRED:
-        print("Phishing attack detected! The URL is not using a valid certi[5D[K
-certificate authority.")
-        return
-
-    # Check if the URL is using a valid SSL/TLS protocol version
-    if not ssl.PROTOCOL_SSLV3:
-        print("Phishing attack detected! The URL is not using a valid SSL/T[5D[K
-SSL/TLS protocol version.")
-        return
-
-    # If no phishing attacks were detected, print a message to the user
-    print("No phishing attacks detected.")
-
-# Example usage:
-detect_phishing_attacks("https://www.example.com")
+if __name__ == '__main__':
+    main()
