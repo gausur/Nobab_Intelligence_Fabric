@@ -1,29 +1,58 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-24 00:49:15.731954
+# Generated 2026-08-24 02:21:49.693654
 
-import os
+import socket
 import subprocess
-import shutil
+import os
 
-def detect_ransomware(file_path):
-    try:
-        subprocess.check_output(['file', file_path])
-    except subprocess.CalledProcessError:
-        return False
+# Define a function to scan the system for ransomware
+def scan_system():
+    # Get the list of running processes
+    processes = subprocess.check_output(['ps', 'aux']).decode().splitlines([28D[K
+'aux']).decode().splitlines()
+
+    # Iterate over the list of processes and check if any of them are ranso[5D[K
+ransomware
+    for process in processes:
+        # Check if the process name contains "ransomware"
+        if "ransomware" in process:
+            # If so, return a non-zero value to indicate that a ransomware [K
+attack is detected
+            return 1
+
+    # If no ransomware is detected, return a zero value
+    return 0
+
+# Define a function to mitigate a ransomware attack
+def mitigate_ransomware(ransomware_process):
+    # Kill the ransomware process
+    subprocess.run(['kill', str(ransomware_process.pid)])
+
+    # Remove the ransomware process from the system
+    subprocess.run(['rm', '-rf', str(ransomware_process.exe)])
+
+    # Restart the system to clear any remaining ransomware files
+    subprocess.run(['reboot'])
+
+# Define a function to handle the ransomware attack
+def handle_ransomware(ransomware_process):
+    # Mitigate the ransomware attack
+    mitigate_ransomware(ransomware_process)
+
+    # Notify the user of the attack
+    print("Ransomware attack detected and mitigated!")
+
+# Define a function to run the script
+def run_script():
+    # Scan the system for ransomware
+    ransomware_process = scan_system()
+
+    # If a ransomware attack is detected, handle it
+    if ransomware_process:
+        handle_ransomware(ransomware_process)
     else:
-        return True
+        print("No ransomware detected!")
 
-def mitigate_ransomware(file_path):
-    shutil.copy(file_path, file_path + '.bak')
-    shutil.move(file_path + '.bak', file_path)
-
-def main():
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                mitigate_ransomware(file_path)
-
-if __name__ == '__main__':
-    main()
+# Run the script
+run_script()
