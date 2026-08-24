@@ -1,44 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-24 11:20:36.849512
+# Generated 2026-08-24 12:31:27.642711
 
+import socket
 import os
-import hashlib
-import base64
+import sys
 
-def detect_ransomware(file_path):
-    # Calculate the file's SHA256 hash
-    with open(file_path, "rb") as f:
-        file_hash = hashlib.sha256(f.read()).hexdigest()
+def detect_ransomware(ip, port):
+    # Create a socket object
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    # Compare the hash to known ransomware hashes
-    with open("ransomware_hashes.txt", "r") as f:
-        for line in f:
-            if file_hash == line.strip():
-                return True
-    return False
+    # Connect to the remote server
+    sock.connect((ip, port))
 
-def mitigate_ransomware(file_path):
-    # Decrypt the file
-    with open(file_path, "rb") as f:
-        decrypted_file = base64.b64decode(f.read())
+    # Send a malicious request to the server
+    sock.send(b'GET / HTTP/1.1\r\nHost: ' + ip.encode() + b'\r\n\r\n')
 
-    # Save the decrypted file
-    with open(file_path + ".decrypted", "wb") as f:
-        f.write(decrypted_file)
+    # Receive the response from the server
+    response = sock.recv(1024)
 
-# Main function
-def main():
-    # Get the file path from the user
-    file_path = input("Enter the file path: ")
+    # Check if the response contains the ransomware marker
+    if b'ransomware' in response:
+        print('Ransomware detected!')
+        # Mitigate the attack by closing the socket
+        sock.close()
+        # Raise an alarm
+        raise RuntimeError('Ransomware attack detected!')
+    else:
+        print('No ransomware detected.')
+
+if __name__ == '__main__':
+    # Get the IP address and port from the command line arguments
+    ip = sys.argv[1]
+    port = int(sys.argv[2])
 
     # Detect and mitigate ransomware attacks
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-        print("Ransomware attack detected and mitigated!")
-    else:
-        print("No ransomware attack detected.")
-
-# Call the main function
-if __name__ == "__main__":
-    main()
+    detect_ransomware(ip, port)
