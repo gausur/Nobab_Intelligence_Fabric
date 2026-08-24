@@ -1,32 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-24 02:20:02.194312
+# Generated 2026-08-24 03:52:21.654984
 
 import re
+import requests
 
 def detect_phishing(url):
-    pattern = re.compile(
-        r"^(?:http|https)://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+([67D[K
-r"^(?:http|https)://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{r"^(?:http|https)://(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|"
-        r"localhost|"
-        r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})(?::\d+)?(?:/|[/?]\S+)$",
-        re.IGNORECASE,
-    )
-    if not pattern.match(url):
-        return "Invalid URL"
-    else:
-        return "Valid URL"
+    # Check if the URL is a valid HTTP/HTTPS URL
+    if not re.match(r"^https?://", url):
+        return False
+
+    # Send a request to the URL to see if it returns a 200 status code
+    try:
+        response = requests.head(url, timeout=5)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
+    except requests.exceptions.ConnectionError:
+        return False
 
 def mitigate_phishing(url):
-    if "http://" in url or "https://" in url:
-        return url.replace("http://", "https://")
+    # Check if the URL is a phishing website using the detect_phishing func[4D[K
+function
+    if detect_phishing(url):
+        # If the URL is a phishing website, block the user's request
+        return False
     else:
-        return url
+        # If the URL is not a phishing website, allow the user's request
+        return True
 
-url = input("Enter the URL: ")
-result = detect_phishing(url)
-if result == "Valid URL":
-    print("The URL is valid.")
-    print("The mitigated URL is:", mitigate_phishing(url))
+# Example usage:
+if mitigate_phishing("https://example.com"):
+    print("Phishing website detected!")
 else:
-    print("The URL is invalid.")
+    print("Not a phishing website.")
