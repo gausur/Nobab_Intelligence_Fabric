@@ -1,57 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-25 14:39:56.783608
+# Generated 2026-08-25 15:36:39.814340
 
 import re
-import smtplib
-from email.parser import Parser
-from email.message import Message
+import urllib.parse
 
-def detect_phishing_attacks(email_message):
-    # Check if the email is from a trusted sender
-    if not email_message.sender:
+def is_phishing_url(url):
+    """
+    Check if the given URL is a phishing URL.
+    """
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    domain_parts = domain.split('.')
+    if len(domain_parts) < 2:
         return False
+    top_level_domain = domain_parts[-1]
+    if top_level_domain not in ['com', 'org', 'edu', 'gov']:
+        return False
+    return True
 
-    # Check if the email contains a malicious link
-    if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-[68D[K
-re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-Fre.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-a-fA-F][0-9a-fA-F]))+', email_message.body):
-        return True
-
-    # Check if the email contains a suspicious attachment
-    if any(x.content_type == 'application/x-msdownload' or x.content_type =[1D[K
-== 'application/octet-stream' for x in email_message.attachments):
-        return True
-
-    return False
-
-def mitigate_phishing_attacks(email_message):
-    # If the email is from a trusted sender and does not contain any suspic[6D[K
-suspicious links or attachments, do not take any action
-    if not detect_phishing_attacks(email_message):
-        return
-
-    # If the email is from a trusted sender and contains a suspicious link,[5D[K
-link, block the link
-    if re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-[68D[K
-re.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-Fre.search(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-a-fA-F][0-9a-fA-F]))+', email_message.body):
-        return
-
-    # If the email is from a trusted sender and contains a suspicious attac[5D[K
-attachment, block the attachment
-    if any(x.content_type == 'application/x-msdownload' or x.content_type =[1D[K
-== 'application/octet-stream' for x in email_message.attachments):
-        return
-
-    # If the email is from an untrusted sender, do not take any action
-    return
+def mitigate_phishing_attack(url):
+    """
+    Mitigate a phishing attack by redirecting the user to a safe URL.
+    """
+    if is_phishing_url(url):
+        safe_url = 'https://example.com'
+        return safe_url
+    else:
+        return url
 
 def main():
-    # Parse the email message
-    email_message = Parser().parsestr(input())
-
-    # Detect and mitigate phishing attacks
-    detect_phishing_attacks(email_message)
-    mitigate_phishing_attacks(email_message)
+    url = input('Enter a URL: ')
+    mitigated_url = mitigate_phishing_attack(url)
+    print(f'Mitigated URL: {mitigated_url}')
 
 if __name__ == '__main__':
     main()
