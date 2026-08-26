@@ -1,46 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-26 10:27:56.020099
+# Generated 2026-08-26 11:23:30.530376
 
 import os
-import sys
-import stat
-import time
-import subprocess
+import re
 
-def detect_ransomware():
-    # Check if the system is running a known ransomware
-    ransomware_names = ['malware1', 'malware2', 'malware3']
-    for name in ransomware_names:
-        if name in os.uname():
+def detect_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        if re.search(r'\.ransomware$', file):
             return True
     return False
 
-def mitigate_ransomware():
-    # Check if the system is running a known ransomware
-    ransomware_names = ['malware1', 'malware2', 'malware3']
-    for name in ransomware_names:
-        if name in os.uname():
-            # Kill the ransomware process
-            subprocess.run(['killall', name])
-            # Remove the ransomware files
-            subprocess.run(['rm', '-rf', '/ransomware'])
-            # Restore the system to a clean state
-            subprocess.run(['cp', '/backup/system', '/'])
-            # Notify the user
-            print("Ransomware detected and mitigated!")
-            return True
-    return False
+def mitigate_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        if re.search(r'\.ransomware$', file):
+            os.remove(file)
 
-# Main function
 def main():
-    # Check if the system is running a known ransomware
-    if detect_ransomware():
-        # Mitigate the ransomware
-        mitigate_ransomware()
-    else:
-        # No ransomware detected
-        print("No ransomware detected!")
+    path = os.getcwd()
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
 
 if __name__ == '__main__':
     main()
