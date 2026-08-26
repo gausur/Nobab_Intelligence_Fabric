@@ -1,56 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-26 16:17:37.289655
+# Generated 2026-08-26 18:55:23.166327
 
-import sys
 import os
 import json
-import subprocess
+import hashlib
 
-def detect_ransomware(filepath):
-    # Check if the file is a ransomware file
-    if not os.path.exists(filepath):
+# Define the functions to detect and mitigate ransomware attacks
+def detect_ransomware(file):
+    with open(file, "r") as f:
+        data = f.read()
+    hash = hashlib.sha256(data.encode()).hexdigest()
+    if hash == "f16967e90feb87060f0401e19c6f8758363c865d1b545202106b1c1f951[60D[K
+"f16967e90feb87060f0401e19c6f8758363c865d1b545202106b1c1f95177d13":
+        return True
+    else:
         return False
 
-    # Open the file and read its contents
-    with open(filepath, 'r') as f:
-        contents = f.read()
+def mitigate_ransomware(file):
+    with open(file, "w") as f:
+        f.write("This is a mitigation message.")
 
-    # Check if the file contains a ransomware signature
-    for sig in ['ransomware', 'encrypt', 'demand', 'extort', 'threat']:
-        if sig in contents:
-            return True
+# Define the main function to run the detection and mitigation functions
+def main(files):
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
-    # Check if the file is a known ransomware file
-    for ext in ['.ransom', '.crypt', '.enc', '.pay', '.threat']:
-        if filepath.endswith(ext):
-            return True
-
-    return False
-
-def mitigate_ransomware(filepath):
-    # Remove the ransomware file
-    os.remove(filepath)
-
-    # Restore the backed up files
-    subprocess.run(['restore', '--all'])
-
-    # Remove the backup files
-    subprocess.run(['remove', '--backup'])
-
-# Main function
-def main():
-    # Parse the command line arguments
-    args = sys.argv[1:]
-
-    # Check if the file is a ransomware file
-    if detect_ransomware(args[0]):
-        # Mitigate the ransomware
-        mitigate_ransomware(args[0])
-        print("Ransomware mitigated")
-    else:
-        print("No ransomware detected")
-
-# Run the main function
+# Run the main function with the list of files to detect and mitigate
 if __name__ == "__main__":
-    main()
+    with open("files.json", "r") as f:
+        files = json.load(f)
+    main(files)
