@@ -1,55 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-26 06:36:22.766617
+# Generated 2026-08-26 13:47:47.187864
 
 import re
 import requests
-import urllib.parse
 
 def detect_phishing(url):
-    """
-    Detect phishing attacks by analyzing the URL.
-    """
-    # Check if the URL is valid
-    if not urllib.parse.urlparse(url).netloc:
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            content = response.content.decode("utf-8")
+            if re.search(r"[a-zA-Z0-9]{5,}", content):
+                print("Possible phishing attack detected!")
+                return True
+            else:
+                return False
+        else:
+            print("Error fetching URL")
+            return False
+    except requests.exceptions.ConnectionError:
+        print("Error connecting to the server")
         return False
 
-    # Check if the URL contains any suspicious keywords
-    if any(keyword in url for keyword in ["phishing", "malware", "scam"]):
-        return True
+def main():
+    url = input("Enter the URL to check: ")
+    if detect_phishing(url):
+        print("Phishing attack detected!")
+    else:
+        print("No phishing attack detected.")
 
-    # Check if the URL is from a known suspicious domain
-    suspicious_domains = ["example.com", "example.net", "example.org"]
-    if urllib.parse.urlparse(url).netloc in suspicious_domains:
-        return True
-
-    # Check if the URL is for a known phishing website
-    phishing_websites = ["www.phishingwebsite.com", "phishingwebsite.com"]
-    if url in phishing_websites:
-        return True
-
-    # Check if the URL is for a known malware website
-    malware_websites = ["www.malwarewebsite.com", "malwarewebsite.com"]
-    if url in malware_websites:
-        return True
-
-    # Check if the URL is for a known scam website
-    scam_websites = ["www.scamwebsite.com", "scamwebsite.com"]
-    if url in scam_websites:
-        return True
-
-    # If none of the above conditions are met, return False
-    return False
-
-def mitigate_phishing(url):
-    """
-    Mitigate phishing attacks by redirecting the user to a safe website.
-    """
-    # Redirect the user to a safe website
-    safe_website = "https://www.example.com"
-    return safe_website
-
-# Test the script
-url = "http://www.phishingwebsite.com/phishing.html"
-if detect_phishing(url):
-    mitigate_phishing(url)
+if __name__ == "__main__":
+    main()
