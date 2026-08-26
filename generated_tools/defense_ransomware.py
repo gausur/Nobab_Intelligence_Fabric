@@ -1,41 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-26 14:38:40.782769
+# Generated 2026-08-26 16:17:37.289655
 
+import sys
 import os
+import json
 import subprocess
-import shutil
 
-def detect_ransomware(path):
-    # Check if the file is a valid executable
-    if not os.path.isfile(path):
+def detect_ransomware(filepath):
+    # Check if the file is a ransomware file
+    if not os.path.exists(filepath):
         return False
 
-    # Check if the file is a Ransomware
-    cmd = "file -b --mime-type {}".format(path)
-    output = subprocess.check_output(cmd, shell=True)
-    if "application/x-executable" in output:
-        return True
+    # Open the file and read its contents
+    with open(filepath, 'r') as f:
+        contents = f.read()
+
+    # Check if the file contains a ransomware signature
+    for sig in ['ransomware', 'encrypt', 'demand', 'extort', 'threat']:
+        if sig in contents:
+            return True
+
+    # Check if the file is a known ransomware file
+    for ext in ['.ransom', '.crypt', '.enc', '.pay', '.threat']:
+        if filepath.endswith(ext):
+            return True
+
+    return False
+
+def mitigate_ransomware(filepath):
+    # Remove the ransomware file
+    os.remove(filepath)
+
+    # Restore the backed up files
+    subprocess.run(['restore', '--all'])
+
+    # Remove the backup files
+    subprocess.run(['remove', '--backup'])
+
+# Main function
+def main():
+    # Parse the command line arguments
+    args = sys.argv[1:]
+
+    # Check if the file is a ransomware file
+    if detect_ransomware(args[0]):
+        # Mitigate the ransomware
+        mitigate_ransomware(args[0])
+        print("Ransomware mitigated")
     else:
-        return False
+        print("No ransomware detected")
 
-def mitigate_ransomware(path):
-    # Remove the file
-    if os.path.isfile(path):
-        os.remove(path)
-
-def main(args):
-    # Check if the input is a directory or a file
-    if os.path.isdir(args[0]):
-        # Iterate over the files in the directory
-        for root, dirs, files in os.walk(args[0]):
-            for file in files:
-                file_path = os.path.join(root, file)
-                if detect_ransomware(file_path):
-                    mitigate_ransomware(file_path)
-    else:
-        if detect_ransomware(args[0]):
-            mitigate_ransomware(args[0])
-
+# Run the main function
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
