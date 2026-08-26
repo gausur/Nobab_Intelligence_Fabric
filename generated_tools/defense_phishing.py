@@ -1,42 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-26 02:23:36.685063
+# Generated 2026-08-26 03:48:43.621739
 
 import re
-import smtplib
+import requests
 
-def detect_phishing_attacks(email_message):
+def detect_phishing_attack(url):
     """
-    Detect phishing attacks in an email message using regular expressions.
+    Detects phishing attacks by checking if the URL is a valid domain
+    and if the URL contains any suspicious keywords.
     """
-    phishing_regex = re.compile(r"[^@]+@[^\.]+\.onion")
-    if phishing_regex.search(email_message):
+    # Check if the URL is a valid domain
+    if not url.startswith("http"):
+        return False
+
+    # Check if the URL contains any suspicious keywords
+    if re.search(r"[phishing|scam|malware|virus]", url):
         return True
-    else:
-        return False
 
-def mitigate_phishing_attacks(email_message):
-    """
-    Mitigate phishing attacks by blocking emails from suspicious senders.
-    """
-    suspicious_senders = ["example@phishingdomain.com", "another@phishingdo[19D[K
-"another@phishingdomain.com"]
-    for sender in suspicious_senders:
-        if sender in email_message:
-            return True
-    else:
-        return False
+    return False
 
+def mitigate_phishing_attack(url):
+    """
+    Mitigates phishing attacks by blocking the URL and
+    alerting the user to the potential threat.
+    """
+    # Block the URL
+    requests.get(url)
+
+    # Alert the user to the potential threat
+    print("WARNING: Phishing attack detected. Blocking URL...")
+
+# Main function
 def main():
-    """
-    Main function to detect and mitigate phishing attacks.
-    """
-    email_message = input("Enter the email message: ")
-    if detect_phishing_attacks(email_message):
-        print("Phishing attack detected!")
-        mitigate_phishing_attacks(email_message)
-    else:
-        print("No phishing attack detected.")
+    # Get the URL from the user
+    url = input("Enter the URL: ")
 
-if __name__ == "__main__":
-    main()
+    # Detect and mitigate the phishing attack
+    if detect_phishing_attack(url):
+        mitigate_phishing_attack(url)
+    else:
+        print("URL is safe.")
+
+# Call the main function
+main()
