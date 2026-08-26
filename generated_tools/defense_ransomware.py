@@ -1,51 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-26 13:49:18.581494
+# Generated 2026-08-26 14:38:40.782769
 
 import os
 import subprocess
-import re
-import json
-import time
+import shutil
 
-def main():
-    # Check for ransomware infection
-    if is_infected():
-        # Attempt to decrypt files
-        decrypt_files()
-        # Remove ransomware payload
-        remove_payload()
-        # Restart system to clear infection
-        restart_system()
+def detect_ransomware(path):
+    # Check if the file is a valid executable
+    if not os.path.isfile(path):
+        return False
 
-def is_infected():
-    # Check for ransomware payload
-    payload_found = False
-    for file in os.listdir():
-        if re.search(r'^ransomware\.(exe|dll|so|dylib)$', file):
-            payload_found = True
-            break
-    return payload_found
+    # Check if the file is a Ransomware
+    cmd = "file -b --mime-type {}".format(path)
+    output = subprocess.check_output(cmd, shell=True)
+    if "application/x-executable" in output:
+        return True
+    else:
+        return False
 
-def decrypt_files():
-    # Decrypt files using ransomware payload
-    for file in os.listdir():
-        if re.search(r'^[0-9a-f]{32}\.enc$', file):
-            decrypt_file(file)
+def mitigate_ransomware(path):
+    # Remove the file
+    if os.path.isfile(path):
+        os.remove(path)
 
-def decrypt_file(file):
-    # Use ransomware payload to decrypt file
-    subprocess.run(['ransomware.exe', '-d', '-i', file, '-o', file])
+def main(args):
+    # Check if the input is a directory or a file
+    if os.path.isdir(args[0]):
+        # Iterate over the files in the directory
+        for root, dirs, files in os.walk(args[0]):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if detect_ransomware(file_path):
+                    mitigate_ransomware(file_path)
+    else:
+        if detect_ransomware(args[0]):
+            mitigate_ransomware(args[0])
 
-def remove_payload():
-    # Remove ransomware payload
-    for file in os.listdir():
-        if re.search(r'^ransomware\.(exe|dll|so|dylib)$', file):
-            os.remove(file)
-
-def restart_system():
-    # Restart system to clear infection
-    subprocess.run(['shutdown', '/r', '/t', '0'])
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    main(sys.argv[1:])
