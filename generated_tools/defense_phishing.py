@@ -1,36 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-29 21:26:27.722265
+# Generated 2026-08-29 23:46:34.566529
 
 import re
-import requests
+import urllib.request
+import urllib.error
+import socket
 
-def detect_phishing_attacks(url):
-    # Check if the URL is a valid HTTPS URL
-    if not url.startswith("https://"):
-        return False
-
-    # Send a HEAD request to the URL and check the response status code
+def detect_phishing(url):
     try:
-        response = requests.head(url, allow_redirects=False)
-        if response.status_code == 200:
-            return True
-        else:
-            return False
-    except requests.exceptions.RequestException:
+        request = urllib.request.Request(url, headers={'User-Agent': 'Mozil[6D[K
+'Mozilla/5.0'})
+        response = urllib.request.urlopen(request)
+        data = response.read()
+    except (urllib.error.URLError, socket.error):
         return False
 
-def mitigate_phishing_attacks(url):
-    # Check if the URL is a phishing attack
-    if detect_phishing_attacks(url):
-        # Do something to mitigate the phishing attack, such as blocking th[2D[K
-the IP address or displaying a warning message
-        pass
-    else:
-        # Do something else, such as displaying a message that the URL is n[1D[K
-not a phishing attack
-        pass
+    # Check for suspicious keywords in the page source
+    for keyword in ['phishing', 'scam', 'fraud', 'malware']:
+        if keyword in data.decode('utf-8'):
+            return False
 
-# Example usage
-url = "https://example.com"
-mitigate_phishing_attacks(url)
+    # Check for suspicious HTTP headers
+    headers = response.info()
+    for header in ['Set-Cookie', 'Location', 'Refresh']:
+        if header in headers:
+            return False
+
+    return True
+
+def main():
+    url = input('Enter the URL: ')
+    if detect_phishing(url):
+        print('The URL is safe.')
+    else:
+        print('The URL is not safe.')
+
+if __name__ == '__main__':
+    main()

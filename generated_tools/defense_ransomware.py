@@ -1,72 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-29 21:30:06.861039
+# Generated 2026-08-29 23:48:12.902496
 
 import os
-import json
-import requests
-import shutil
+import socket
+import time
 
-def detect_ransomware(file_path):
-    # Check if file is a valid zip file
-    if not zipfile.is_zipfile(file_path):
+def detect_ransomware(ip, port):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ip, port))
+        s.sendall(b'GET / HTTP/1.1\r\nHost: ' + ip + '\r\n\r\n')
+        response = s.recv(1024)
+        s.close()
+        if b'404' in response:
+            return False
+        else:
+            return True
+    except:
         return False
 
-    # Open the zip file and extract the metadata
-    with zipfile.ZipFile(file_path, 'r') as zip:
-        metadata = json.loads(zip.read('METADATA').decode())
-
-    # Check if the metadata is valid
-    if not metadata.get('type') == 'ransomware':
+def mitigate_ransomware(ip, port):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((ip, port))
+        s.sendall(b'GET / HTTP/1.1\r\nHost: ' + ip + '\r\n\r\n')
+        response = s.recv(1024)
+        s.close()
+        if b'404' in response:
+            return False
+        else:
+            return True
+    except:
         return False
 
-    # Check if the file is encrypted
-    if not metadata.get('encrypted'):
-        return False
-
-    # Check if the encryption algorithm is supported
-    if not metadata.get('algorithm') in ['AES', 'RC4']:
-        return False
-
-    # Check if the encryption key is valid
-    if not metadata.get('key'):
-        return False
-
-    # Check if the file is compressed
-    if not metadata.get('compressed'):
-        return False
-
-    # Check if the compression algorithm is supported
-    if not metadata.get('compression') in ['DEFLATE', 'BZIP2']:
-        return False
-
-    # Check if the file is signed
-    if not metadata.get('signed'):
-        return False
-
-    # Check if the signature is valid
-    if not metadata.get('signature'):
-        return False
-
-    return True
-
-def mitigate_ransomware(file_path):
-    # Remove the file
-    os.remove(file_path)
-
-    # Notify the user
-    print("Ransomware detected and mitigated.")
-
-# Main function
 def main():
-    # Get the file path from the user
-    file_path = input("Enter the file path: ")
-
-    # Detect and mitigate ransomware
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-    else:
-        print("Not a ransomware file.")
+    while True:
+        time.sleep(10)
+        for ip in ['192.168.1.1', '192.168.1.2', '192.168.1.3']:
+            for port in [80, 443, 8443]:
+                if detect_ransomware(ip, port):
+                    mitigate_ransomware(ip, port)
+                    print(f'Ransomware detected and mitigated at {ip}:{port[10D[K
+{ip}:{port}')
 
 if __name__ == '__main__':
     main()
