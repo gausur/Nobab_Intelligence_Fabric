@@ -1,38 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-30 02:39:46.757194
+# Generated 2026-08-30 08:45:53.071653
 
 import re
+import smtplib
 
-def detect_phishing_attack(url):
-    # Regular expression to match URLs
-    url_regex = re.compile(
-        r'^(?:http|ftp)s?://' # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A[67D[K
-r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[AZ0-9-]{2,}\.?)|' #domain...
-        r'localhost|' #localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
-        r'(?::\d+)?' # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+def is_phishing_attack(email):
+    # Check if the email is from a known phishing domain
+    if re.match(r'@phishing\.com', email):
+        return True
+    # Check if the email contains a link to a known phishing website
+    if re.search(r'https?://www\.phishing\.com', email):
+        return True
+    # Check if the email contains a suspicious attachment
+    if re.search(r'application/pdf', email):
+        return True
+    # Check if the email contains a suspicious header
+    if re.search(r'X-Mailer: PHP', email):
+        return True
+    return False
 
-    # Check if the URL matches the regular expression
-    if not url_regex.match(url):
-        print("Invalid URL")
-        return
+def mitigate_phishing_attack(email):
+    # Remove the suspicious header
+    email = re.sub(r'X-Mailer: PHP', '', email)
+    # Remove the suspicious attachment
+    email = re.sub(r'application/pdf', '', email)
+    # Remove the link to the phishing website
+    email = re.sub(r'https?://www\.phishing\.com', '', email)
+    return email
 
-    # Check if the URL is from a trusted domain
-    if not "example.com" in url:
-        print("Untrusted domain")
-        return
-
-    # Check if the URL contains a phishing attack
-    if "phishing" in url:
-        print("Phishing attack detected")
-        return
-
-    # If the URL is valid, trusted, and not a phishing attack, proceed with[4D[K
-with the request
-    print("Valid URL")
-
-# Usage:
-detect_phishing_attack("https://example.com")
+if __name__ == '__main__':
+    email = input('Enter the email: ')
+    if is_phishing_attack(email):
+        print('Phishing attack detected!')
+        mitigate_phishing_attack(email)
+    else:
+        print('No phishing attack detected.')
