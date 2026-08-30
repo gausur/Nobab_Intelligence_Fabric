@@ -1,40 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-08-29 23:46:34.566529
+# Generated 2026-08-30 02:39:46.757194
 
 import re
-import urllib.request
-import urllib.error
-import socket
 
-def detect_phishing(url):
-    try:
-        request = urllib.request.Request(url, headers={'User-Agent': 'Mozil[6D[K
-'Mozilla/5.0'})
-        response = urllib.request.urlopen(request)
-        data = response.read()
-    except (urllib.error.URLError, socket.error):
-        return False
+def detect_phishing_attack(url):
+    # Regular expression to match URLs
+    url_regex = re.compile(
+        r'^(?:http|ftp)s?://' # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A[67D[K
+r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[AZ0-9-]{2,}\.?)|' #domain...
+        r'localhost|' #localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?' # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
-    # Check for suspicious keywords in the page source
-    for keyword in ['phishing', 'scam', 'fraud', 'malware']:
-        if keyword in data.decode('utf-8'):
-            return False
+    # Check if the URL matches the regular expression
+    if not url_regex.match(url):
+        print("Invalid URL")
+        return
 
-    # Check for suspicious HTTP headers
-    headers = response.info()
-    for header in ['Set-Cookie', 'Location', 'Refresh']:
-        if header in headers:
-            return False
+    # Check if the URL is from a trusted domain
+    if not "example.com" in url:
+        print("Untrusted domain")
+        return
 
-    return True
+    # Check if the URL contains a phishing attack
+    if "phishing" in url:
+        print("Phishing attack detected")
+        return
 
-def main():
-    url = input('Enter the URL: ')
-    if detect_phishing(url):
-        print('The URL is safe.')
-    else:
-        print('The URL is not safe.')
+    # If the URL is valid, trusted, and not a phishing attack, proceed with[4D[K
+with the request
+    print("Valid URL")
 
-if __name__ == '__main__':
-    main()
+# Usage:
+detect_phishing_attack("https://example.com")
