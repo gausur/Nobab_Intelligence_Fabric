@@ -1,35 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-08-31 14:43:30.171052
+# Generated 2026-08-31 20:32:42.760059
 
-import socket
 import os
-import re
+import sys
+import socket
+import logging
+import subprocess
 
-def detect_ransomware(data):
-    if re.search(r"encrypt", data) and re.search(r"pay", data):
-        return True
-    else:
+def detect_ransomware(path):
+    # Check if the file is executable
+    if not os.access(path, os.X_OK):
         return False
 
-def mitigate_ransomware(data):
-    if detect_ransomware(data):
-        os.system("sudo shutdown -r now")
-    else:
-        pass
+    # Check if the file has the ransomware signature
+    try:
+        subprocess.check_output(["strings", path])
+    except subprocess.CalledProcessError:
+        return False
+
+    return True
+
+def mitigate_ransomware(path):
+    # Remove the file
+    try:
+        os.remove(path)
+    except OSError:
+        return False
+
+    return True
 
 def main():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("localhost", 1234))
-    s.listen(1)
-    conn, addr = s.accept()
-    while True:
-        data = conn.recv(1024)
-        if data:
-            mitigate_ransomware(data)
-        else:
-            break
-    conn.close()
+    # Set up logging
+    logging.basicConfig(level=logging.DEBUG)
+
+    # Get the current directory
+    current_dir = os.getcwd()
+
+    # Iterate through all files in the current directory
+    for root, dirs, files in os.walk(current_dir):
+        for file in files:
+            # Check if the file is a ransomware
+            if detect_ransomware(os.path.join(root, file)):
+                # Mitigate the ransomware
+                mitigate_ransomware(os.path.join(root, file))
 
 if __name__ == "__main__":
     main()
