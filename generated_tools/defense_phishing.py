@@ -1,49 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-01 15:24:34.459435
+# Generated 2026-09-01 19:04:00.169322
 
 import re
-import urllib.parse
-import requests
 
-def detect_phishing_attack(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-
-    # Check if the domain is in the list of known phishing domains
-    if domain in PHISHING_DOMAINS:
-        return True
-
-    # Check if the URL is in the list of known phishing URLs
-    if url in PHISHING_URLS:
-        return True
-
-    # Check if the URL is a known redirect URL
-    if parsed_url.path.startswith('/redirect'):
-        return True
-
-    # Check if the URL is a known tracking URL
-    if parsed_url.path.startswith('/tracking'):
-        return True
-
-    # Check if the URL is a known spam URL
-    if parsed_url.path.startswith('/spam'):
-        return True
-
+def is_phishing_url(url):
+    """
+    Check if a URL is a phishing website.
+    """
+    # Check if the URL contains any suspicious keywords
+    keywords = ["free", "discount", "coupons", "gift", "survey", "win", "sc[3D[K
+"scam", "fake", "phishing"]
+    for keyword in keywords:
+        if keyword in url:
+            return True
     return False
 
 def mitigate_phishing_attack(url):
-    # Redirect the user to a safe URL
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    redirect_url = f"{domain}/safe"
-    return redirect_url
+    """
+    Mitigate a phishing attack by blocking the URL.
+    """
+    # Block the URL using a firewall
+    firewall = ["iptables", "-I", "INPUT", "DROP", "PROTO=tcp", "dport=80"][11D[K
+"dport=80"]
+    subprocess.run(firewall)
 
 def main():
-    url = "https://example.com/phishing"
-    if detect_phishing_attack(url):
-        print("Phishing attack detected!")
+    # Get the URL from the user
+    url = input("Enter the URL: ")
+
+    # Check if the URL is a phishing website
+    if is_phishing_url(url):
+        # Mitigate the phishing attack by blocking the URL
         mitigate_phishing_attack(url)
+        print("Phishing attack detected! URL blocked.")
     else:
         print("No phishing attack detected.")
 
