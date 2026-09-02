@@ -1,56 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-02 18:20:09.860685
+# Generated 2026-09-02 21:31:41.770909
 
 import re
-import requests
+import smtplib
+from email.message import EmailMessage
 
-def is_phishing_site(url):
-    """
-    Check if the given URL is a phishing site.
-    """
-    # Check if the URL is valid
-    if not re.match(r"^https?://", url):
+def detect_phishing_attacks(email_message):
+    # Check if the email is from a valid sender
+    sender = email_message.get('From')
+    if not sender or not re.match(r'^[^@]+@[^@]+\.[^@]+$', sender):
         return False
+    
+    # Check if the email is from a known sender
+    known_senders = ['example.com', 'example2.com']
+    if sender not in known_senders:
+        return False
+    
+    # Check if the email has a valid recipient
+    recipient = email_message.get('To')
+    if not recipient or not re.match(r'^[^@]+@[^@]+\.[^@]+$', recipient):
+        return False
+    
+    # Check if the email has a valid subject
+    subject = email_message.get('Subject')
+    if not subject or not re.match(r'^[a-zA-Z0-9 _-]+$', subject):
+        return False
+    
+    # Check if the email has a valid body
+    body = email_message.get('Body')
+    if not body or not re.match(r'^[a-zA-Z0-9 _-]+$', body):
+        return False
+    
+    return True
 
-    # Check if the URL is in the phishing database
-    with open("phishing_sites.txt", "r") as f:
-        for line in f:
-            if line.strip() == url:
-                return True
+def mitigate_phishing_attacks(email_message):
+    # Block the email
+    smtplib.SMTP('localhost').sendmail(email_message.get('From'), email_mes[9D[K
+email_message.get('To'), 'This email has been blocked.')
 
-    # Check if the URL is in the phishing list
-    try:
-        response = requests.get(url + "/robots.txt")
-        if "Disallow: /" in response.text:
-            return True
-    except requests.exceptions.RequestException:
-        pass
+# Parse the email message from the input
+email_message = EmailMessage.from_string(input())
 
-    # Check if the URL has a suspicious domain name
-    if any(word in url for word in ["fake", "scam", "phishing"]):
-        return True
-
-    return False
-
-def mitigate_phishing_attack(url):
-    """
-    Mitigate the phishing attack by blocking the URL.
-    """
-    # Check if the URL is a phishing site
-    if is_phishing_site(url):
-        # Block the URL
-        with open("blocked_urls.txt", "a") as f:
-            f.write(url + "\n")
-        print("Phishing site blocked:", url)
-
-# Main function
-if __name__ == "__main__":
-    # Get the URL to check
-    url = input("Enter the URL to check: ")
-
-    # Check if the URL is a phishing site
-    if is_phishing_site(url):
-        mitigate_phishing_attack(url)
-    else:
-        print("No phishing attack detected.")
+# Detect and mitigate phishing attacks
+if detect_phishing_attacks(email_message):
+    mitigate_phishing_attacks(email_message)
+else:
+    print('Invalid email.')
