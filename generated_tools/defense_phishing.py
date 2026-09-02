@@ -1,28 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-02 14:52:03.344248
+# Generated 2026-09-02 18:20:09.860685
 
 import re
+import requests
 
-def detect_phishing_attack(url):
-    pattern = r"(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,[61D[K
-r"(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0r"(https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*))"
-    if re.match(pattern, url):
-        return True
-    else:
+def is_phishing_site(url):
+    """
+    Check if the given URL is a phishing site.
+    """
+    # Check if the URL is valid
+    if not re.match(r"^https?://", url):
         return False
 
+    # Check if the URL is in the phishing database
+    with open("phishing_sites.txt", "r") as f:
+        for line in f:
+            if line.strip() == url:
+                return True
+
+    # Check if the URL is in the phishing list
+    try:
+        response = requests.get(url + "/robots.txt")
+        if "Disallow: /" in response.text:
+            return True
+    except requests.exceptions.RequestException:
+        pass
+
+    # Check if the URL has a suspicious domain name
+    if any(word in url for word in ["fake", "scam", "phishing"]):
+        return True
+
+    return False
+
 def mitigate_phishing_attack(url):
-    if detect_phishing_attack(url):
-        # TODO: Mitigate the phishing attack
-        pass
-    else:
-        # TODO: Handle non-phishing URLs
-        pass
+    """
+    Mitigate the phishing attack by blocking the URL.
+    """
+    # Check if the URL is a phishing site
+    if is_phishing_site(url):
+        # Block the URL
+        with open("blocked_urls.txt", "a") as f:
+            f.write(url + "\n")
+        print("Phishing site blocked:", url)
 
-def main():
-    url = "https://www.example.com"
-    mitigate_phishing_attack(url)
-
+# Main function
 if __name__ == "__main__":
-    main()
+    # Get the URL to check
+    url = input("Enter the URL to check: ")
+
+    # Check if the URL is a phishing site
+    if is_phishing_site(url):
+        mitigate_phishing_attack(url)
+    else:
+        print("No phishing attack detected.")
