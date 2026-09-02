@@ -1,51 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-02 10:17:04.310033
+# Generated 2026-09-02 14:53:04.288246
 
 import os
-import json
-import base64
+import time
+import subprocess
 
-def detect_ransomware(file_path):
-    # Check if the file is a valid image
-    if not os.path.isfile(file_path):
-        return False
-
-    # Read the file contents
-    with open(file_path, "rb") as f:
-        contents = f.read()
-
-    # Check if the file contains the ransomware encryption marker
-    marker = b"AES256_RANDOMIZER"
-    if marker in contents:
+def detect_ransomware():
+    try:
+        subprocess.check_output(["ransomware_detector"])
+    except subprocess.CalledProcessError:
         return True
-
     return False
 
-def mitigate_ransomware(file_path):
-    # Check if the file is a valid image
-    if not os.path.isfile(file_path):
-        return False
+def mitigate_ransomware():
+    subprocess.check_output(["ransomware_mitigator"])
 
-    # Read the file contents
-    with open(file_path, "rb") as f:
-        contents = f.read()
-
-    # Check if the file contains the ransomware encryption marker
-    marker = b"AES256_RANDOMIZER"
-    if marker in contents:
-        # Extract the encryption key
-        key = contents[len(marker):]
-
-        # Decrypt the file
-        with open(file_path, "wb") as f:
-            f.write(base64.b64decode(key))
-
-        return True
-
-    return False
-
-# Test the functions
-file_path = "image.jpg"
-if detect_ransomware(file_path):
-    mitigate_ransomware(file_path)
+while True:
+    if detect_ransomware():
+        mitigate_ransomware()
+        break
+    time.sleep(1)
