@@ -1,45 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-03 22:04:49.304789
+# Generated 2026-09-04 00:36:43.457922
 
 import os
 import subprocess
+import shutil
+import hashlib
 
 def detect_ransomware(path):
-    """
-    Detects ransomware attacks by checking for the presence of the ransomwa[8D[K
-ransomware's
-    executable file in the specified directory.
-
-    Args:
-        path (str): The path to the directory to check for ransomware attac[5D[K
-attacks.
-
-    Returns:
-        bool: True if a ransomware attack is detected, False otherwise.
-    """
-    return os.path.exists(os.path.join(path, "ransomware.exe"))
-
-def mitigate_ransomware(path):
-    """
-    Mitigates a ransomware attack by removing the ransomware's executable f[1D[K
-file
-    from the specified directory.
-
-    Args:
-        path (str): The path to the directory to remove the ransomware's
-            executable file from.
-    """
+    # Check if the file is encrypted
     try:
-        os.remove(os.path.join(path, "ransomware.exe"))
+        with open(path, "rb") as f:
+            file_data = f.read()
+            encryption_magic_bytes = b"\x30\x31\x32\x33"
+            if file_data.startswith(encryption_magic_bytes):
+                return True
     except FileNotFoundError:
         pass
 
+    return False
+
+def mitigate_ransomware(path):
+    # Check if the file is encrypted
+    if detect_ransomware(path):
+        # If the file is encrypted, decrypt it
+        with open(path, "rb") as f:
+            file_data = f.read()
+            encryption_magic_bytes = b"\x30\x31\x32\x33"
+            decrypted_data = file_data[len(encryption_magic_bytes):]
+            with open(path, "wb") as f:
+                f.write(decrypted_data)
+
 def main():
-    """
-    The main function of the script.
-    """
-    path = "/path/to/directory"
+    # Parse command line arguments
+    if len(sys.argv) != 2:
+        print("Usage: python ransomware_detector.py <path>")
+        exit(1)
+
+    path = sys.argv[1]
+
+    # Detect and mitigate ransomware attacks
     if detect_ransomware(path):
         mitigate_ransomware(path)
 
