@@ -1,39 +1,55 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-05 18:44:46.462801
+# Generated 2026-09-05 20:55:45.890205
 
 import re
-import urllib.parse
+import smtplib
+from email.utils import getaddresses
 
-def detect_phishing(url):
-    # Check if the URL is a valid HTTP/HTTPS URL
-    if not re.match(r"https?://", url):
-        return "Invalid URL"
-    
-    # Check if the URL contains any suspicious characters
-    if any(c in url for c in ["<", ">", "=", "?", "&"]):
-        return "Suspicious characters detected"
-    
-    # Check if the URL is a valid domain name
-    try:
-        domain = urllib.parse.urlparse(url).netloc
-        if not re.match(r"^[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*$", domain):
-            return "Invalid domain name"
-    except:
-        return "Invalid URL"
-    
-    # Check if the URL is a known phishing site
-    try:
-        with urllib.request.urlopen(url) as response:
-            html = response.read()
-            if b"phishing" in html or b"scam" in html:
-                return "Phishing site detected"
-    except:
-        pass
-    
-    return "No phishing detected"
+def detect_phishing_attacks(email_message):
+    # Check for suspicious words in the subject line
+    if re.search(r'\bphishing\b', email_message['Subject']):
+        return True
 
-# Example usage:
-url = "https://www.example.com"
-result = detect_phishing(url)
-print(result)
+    # Check for suspicious words in the body of the email
+    if re.search(r'\bphishing\b', email_message.get_payload()):
+        return True
+
+    # Check for suspicious links
+    if re.search(r'http[s]?://', email_message.get_payload()):
+        return True
+
+    # Check for suspicious IP addresses
+    if re.search(r'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}', email_m[7D[K
+email_message.get_payload()):
+        return True
+
+    # Check for suspicious domains
+    if re.search(r'@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', email_message.get_payloa[24D[K
+email_message.get_payload()):
+        return True
+
+    # Check for suspicious attachment files
+    if re.search(r'[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', email_message.get_payload[25D[K
+email_message.get_payload()):
+        return True
+
+    return False
+
+def mitigate_phishing_attacks(email_message):
+    # Send the email to a phishing report email address
+    email_report_address = 'phishing.reports@example.com'
+    smtplib.sendmail(email_message['From'], email_report_address, email_mes[9D[K
+email_message.as_string())
+
+    # Send a confirmation email to the sender
+    email_confirmation_address = 'phishing.confirmation@example.com'
+    smtplib.sendmail(email_message['From'], email_confirmation_address, 'Ph[3D[K
+'Phishing attack detected and mitigated')
+
+# Get the email message from the email server
+email_message = smtplib.SMTP('localhost').retr(1)
+
+# Detect and mitigate phishing attacks
+if detect_phishing_attacks(email_message):
+    mitigate_phishing_attacks(email_message)
