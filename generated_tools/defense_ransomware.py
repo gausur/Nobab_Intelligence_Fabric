@@ -1,32 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-06 05:25:23.693857
+# Generated 2026-09-06 09:59:32.949465
 
 import os
 import subprocess
 
 def detect_ransomware(path):
-    # Use a command-line utility to check for ransomware in the given path
-    cmd = "ransomware_checker"
-    args = [cmd, path]
-    output = subprocess.check_output(args)
-    return output.decode("utf-8")
+    # Use the file system to detect ransomware
+    # Check if the file is readable
+    if not os.access(path, os.R_OK):
+        return False
+
+    # Check if the file is a valid image file
+    if not os.path.splitext(path)[1] == ".jpg":
+        return False
+
+    # Check if the file has the ransomware marker
+    marker = "This is a ransomware marker"
+    with open(path, "r") as f:
+        if marker not in f.read():
+            return False
+
+    # If we reach this point, we have detected ransomware
+    return True
 
 def mitigate_ransomware(path):
-    # Use a command-line utility to mitigate ransomware in the given path
-    cmd = "ransomware_mitigator"
-    args = [cmd, path]
-    output = subprocess.check_output(args)
-    return output.decode("utf-8")
+    # Use the file system to mitigate ransomware
+    # Delete the file
+    os.unlink(path)
 
 def main():
-    # Get the path to the directory to scan
-    path = os.getcwd()
-
-    # Detect and mitigate ransomware in the directory
-    output = detect_ransomware(path)
-    if output:
-        mitigate_ransomware(path)
+    # Detect ransomware in the current directory
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            path = os.path.join(root, file)
+            if detect_ransomware(path):
+                mitigate_ransomware(path)
 
 if __name__ == "__main__":
     main()
