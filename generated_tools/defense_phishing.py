@@ -1,44 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-05 22:35:19.797004
+# Generated 2026-09-06 00:29:38.165526
 
 import re
-import smtplib
+import urllib.parse
 
-def detect_phishing_attacks(email):
-    # Check if the email contains any suspicious keywords
-    keywords = ["phishing", "scam", "fraud"]
+def detect_phishing(url):
+    # Check if the URL is valid
+    if not urllib.parse.urlparse(url).netloc:
+        return False
+
+    # Check if the URL contains any suspicious keywords
+    keywords = ["phish", "fishing", "scam", "malware", "spoof"]
     for keyword in keywords:
-        if keyword in email:
-            return False
-
-    # Check if the email contains a suspicious link
-    if "://" in email:
-        domain = re.search(r"^[^@]+@([^@]+\.)+[^@]+", email).group(1)
-        if domain.endswith(".edu"):
-            return False
-        else:
+        if keyword in url:
             return True
 
-    return False
+    # Check if the URL is from a known trusted source
+    trusted_sources = ["example.com", "google.com", "facebook.com"]
+    for trusted_source in trusted_sources:
+        if url.startswith(trusted_source):
+            return False
 
-def mitigate_phishing_attacks(email):
-    # Remove any suspicious links or keywords from the email
-    email = re.sub(r"https?://[^\s]+", "", email)
-    email = re.sub(r"[^\s]+", "", email)
+    # Check if the URL is from a known malicious source
+    malicious_sources = ["phish.com", "fishing.net", "scam.io"]
+    for malicious_source in malicious_sources:
+        if url.startswith(malicious_source):
+            return True
 
-    # Send the email to the user
-    server = smtplib.SMTP("localhost")
-    server.sendmail("from@example.com", "to@example.com", email)
-    server.quit()
+    # If the URL is from an unknown source, assume it's a phishing attack
+    return True
 
-def main():
-    # Read the email from stdin
-    email = input()
+def mitigate_phishing(url):
+    # Check if the URL is a phishing attack
+    if detect_phishing(url):
+        # Block the URL
+        return False
 
-    # Detect and mitigate any phishing attacks
-    if detect_phishing_attacks(email):
-        mitigate_phishing_attacks(email)
+    # Allow the URL
+    return True
 
-if __name__ == "__main__":
-    main()
+# Test the script
+url = "http://phish.com/login"
+print(detect_phishing(url)) # True
+print(mitigate_phishing(url)) # False
+
+url = "https://example.com/login"
+print(detect_phishing(url)) # False
+print(mitigate_phishing(url)) # True
+
+url = "https://facebook.com/login"
+print(detect_phishing(url)) # False
+print(mitigate_phishing(url)) # True
