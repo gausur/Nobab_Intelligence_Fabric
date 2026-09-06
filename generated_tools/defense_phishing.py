@@ -1,54 +1,48 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-06 00:29:38.165526
+# Generated 2026-09-06 05:24:06.510616
 
 import re
 import urllib.parse
 
 def detect_phishing(url):
-    # Check if the URL is valid
-    if not urllib.parse.urlparse(url).netloc:
+    parsed_url = urllib.parse.urlparse(url)
+    host = parsed_url.hostname
+    if not host:
         return False
-
-    # Check if the URL contains any suspicious keywords
-    keywords = ["phish", "fishing", "scam", "malware", "spoof"]
-    for keyword in keywords:
-        if keyword in url:
-            return True
-
-    # Check if the URL is from a known trusted source
-    trusted_sources = ["example.com", "google.com", "facebook.com"]
-    for trusted_source in trusted_sources:
-        if url.startswith(trusted_source):
-            return False
-
-    # Check if the URL is from a known malicious source
-    malicious_sources = ["phish.com", "fishing.net", "scam.io"]
-    for malicious_source in malicious_sources:
-        if url.startswith(malicious_source):
-            return True
-
-    # If the URL is from an unknown source, assume it's a phishing attack
-    return True
+    if host.endswith(".onion"):
+        return True
+    if host.endswith(".pirate"):
+        return True
+    if host.endswith(".hack"):
+        return True
+    if host.endswith(".scam"):
+        return True
+    if host.endswith(".spam"):
+        return True
+    if host.endswith(".fake"):
+        return True
+    if host.endswith(".phish"):
+        return True
+    if host.endswith(".xn--pirate"):
+        return True
+    if host.endswith(".xn--hack"):
+        return True
+    if host.endswith(".xn--scam"):
+        return True
+    if host.endswith(".xn--spam"):
+        return True
+    if host.endswith(".xn--fake"):
+        return True
+    if host.endswith(".xn--phish"):
+        return True
+    return False
 
 def mitigate_phishing(url):
-    # Check if the URL is a phishing attack
     if detect_phishing(url):
-        # Block the URL
-        return False
+        return "Phishing attack detected! Please proceed with caution."
+    return "No phishing attack detected."
 
-    # Allow the URL
-    return True
-
-# Test the script
-url = "http://phish.com/login"
-print(detect_phishing(url)) # True
-print(mitigate_phishing(url)) # False
-
-url = "https://example.com/login"
-print(detect_phishing(url)) # False
-print(mitigate_phishing(url)) # True
-
-url = "https://facebook.com/login"
-print(detect_phishing(url)) # False
-print(mitigate_phishing(url)) # True
+if __name__ == "__main__":
+    url = input("Enter URL: ")
+    print(mitigate_phishing(url))
