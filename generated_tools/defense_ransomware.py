@@ -1,37 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-08 19:43:41.737046
+# Generated 2026-09-08 22:16:30.110944
 
 import os
-import json
+import sys
+import subprocess
 
-def detect_ransomware(file_path):
-    # Check if the file is a valid zip file
-    if not file_path.endswith('.zip'):
-        return False
-
-    # Read the file's metadata
-    with open(file_path, 'rb') as f:
-        metadata = json.load(f)
-
-    # Check if the file contains a ransom note
-    if 'ransom_note' in metadata:
-        return True
+def detect_ransomware():
+    # Check if the system is vulnerable to ransomware attacks
+    if "ransomware" in os.getenv("PATH"):
+        print("System is vulnerable to ransomware attacks")
     else:
-        return False
+        print("System is not vulnerable to ransomware attacks")
 
-def mitigate_ransomware(file_path):
-    # Remove the file
-    os.remove(file_path)
+def mitigate_ransomware():
+    # Run a ransomware scan to identify any infections
+    subprocess.run(["ransomware", "scan"], shell=True)
+    # Check if any infections were found
+    if subprocess.run(["ransomware", "scan"], shell=True).returncode == 0:
+        print("Infections found")
+        # Remove the ransomware files
+        subprocess.run(["ransomware", "remove"], shell=True)
+        # Restart the system
+        subprocess.run(["reboot"], shell=True)
+    else:
+        print("No infections found")
 
-def main():
-    # Get the list of files to check
-    files = os.listdir()
-
-    # Iterate over the files and check if they are ransomware
-    for file in files:
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    detect_ransomware()
+    mitigate_ransomware()
