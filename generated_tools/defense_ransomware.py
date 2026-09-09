@@ -1,31 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-08 22:16:30.110944
+# Generated 2026-09-09 00:56:24.061010
 
 import os
-import sys
+import json
 import subprocess
 
-def detect_ransomware():
-    # Check if the system is vulnerable to ransomware attacks
-    if "ransomware" in os.getenv("PATH"):
-        print("System is vulnerable to ransomware attacks")
-    else:
-        print("System is not vulnerable to ransomware attacks")
+def detect_ransomware(file_path):
+    # Check if the file is a text file
+    if not file_path.endswith('.txt'):
+        return False
 
-def mitigate_ransomware():
-    # Run a ransomware scan to identify any infections
-    subprocess.run(["ransomware", "scan"], shell=True)
-    # Check if any infections were found
-    if subprocess.run(["ransomware", "scan"], shell=True).returncode == 0:
-        print("Infections found")
-        # Remove the ransomware files
-        subprocess.run(["ransomware", "remove"], shell=True)
-        # Restart the system
-        subprocess.run(["reboot"], shell=True)
-    else:
-        print("No infections found")
+    # Open the file and read its contents
+    with open(file_path, 'r') as file:
+        contents = file.read()
 
-if __name__ == "__main__":
-    detect_ransomware()
-    mitigate_ransomware()
+    # Check if the file contains the ransomware marker
+    if 'ransomware' in contents:
+        return True
+    else:
+        return False
+
+def mitigate_ransomware(file_path):
+    # Check if the file is a text file
+    if not file_path.endswith('.txt'):
+        return False
+
+    # Open the file and read its contents
+    with open(file_path, 'r') as file:
+        contents = file.read()
+
+    # Check if the file contains the ransomware marker
+    if 'ransomware' in contents:
+        # Remove the ransomware marker from the file
+        contents = contents.replace('ransomware', '')
+
+        # Write the modified contents back to the file
+        with open(file_path, 'w') as file:
+            file.write(contents)
+
+        # Return True to indicate that the ransomware was mitigated
+        return True
+    else:
+        # Return False to indicate that the ransomware was not detected
+        return False
+
+# Example usage
+file_path = 'path/to/file.txt'
+if detect_ransomware(file_path):
+    mitigate_ransomware(file_path)
