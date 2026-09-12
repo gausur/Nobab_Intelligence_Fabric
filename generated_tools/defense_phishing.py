@@ -1,31 +1,25 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-12 02:22:56.237004
+# Generated 2026-09-12 07:33:43.148355
 
 import re
-import email
-from email.parser import Parser
-from urllib.parse import urlparse
+import urllib.parse
 
 def is_phishing_url(url):
-    parsed_url = urlparse(url)
-    if parsed_url.scheme == "http" and parsed_url.netloc.endswith("com"):
+    parsed_url = urllib.parse.urlparse(url)
+    hostname = parsed_url.hostname
+    if hostname.endswith('.onion') or hostname.endswith('.onion.'):
         return True
     return False
 
-def is_phishing_email(email_message):
-    if email_message.is_multipart():
-        for part in email_message.get_payload():
-            if is_phishing_url(part.get_content_maintype()):
-                return True
-    return False
+def mitigate_phishing_attack(url):
+    if is_phishing_url(url):
+        # Do something to mitigate the phishing attack, such as:
+        # - Redirecting the user to a different page
+        # - Displaying a warning message
+        # - Blocking the user from accessing the URL
+        pass
 
-def main():
-    message = Parser().parsestr(sys.stdin.read())
-    if is_phishing_email(message):
-        print("Phishing attack detected!")
-    else:
-        print("No phishing attack detected.")
-
-if __name__ == "__main__":
-    main()
+# Example usage:
+url = 'https://example.onion'
+mitigate_phishing_attack(url)
