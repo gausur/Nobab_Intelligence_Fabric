@@ -1,34 +1,62 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-11 23:48:17.258864
+# Generated 2026-09-12 02:20:13.108362
 
-import socket
-import re
 import os
+import re
+import socket
 import subprocess
+import time
 
-def detect_ransomware():
-    # Check if the file system is encrypted
-    if os.path.exists("/dev/dm-0"):
+def detect_ransomware(file_path):
+    # Check if the file is a valid executable
+    if not os.path.isfile(file_path):
+        return False
+    # Check if the file is a valid ELF executable
+    try:
+        with open(file_path, "rb") as f:
+            magic = f.read(4)
+        if magic != b"\x7FELF":
+            return False
+    except IOError:
+        return False
+    # Check if the file has the "ransom" string in the name
+    if re.search(r"ransom", os.path.basename(file_path)):
         return True
-    # Check if the process list contains ransomware-like processes
-    process_list = subprocess.check_output(["ps", "ax"]).decode("utf-8")
-    if re.search(r"ransomware|encrypt|crypt", process_list):
+    # Check if the file has the "ransomware" string in the name
+    if re.search(r"ransomware", os.path.basename(file_path)):
         return True
-    # Check if the system is using a suspicious network interface
-    network_interface = socket.gethostbyname(socket.gethostname())
-    if network_interface == "192.168.1.100" or network_interface == "192.16[7D[K
-"192.168.1.101":
+    # Check if the file is a valid ELF executable
+    try:
+        with open(file_path, "rb") as f:
+            magic = f.read(4)
+        if magic != b"\x7FELF":
+            return False
+    except IOError:
+        return False
+    # Check if the file has the "ransom" string in the name
+    if re.search(r"ransom", os.path.basename(file_path)):
         return True
-    # Check if the system is using a suspicious DNS server
-    dns_server = socket.gethostbyname("google.com")
-    if dns_server == "8.8.8.8" or dns_server == "8.8.4.4":
+    # Check if the file has the "ransomware" string in the name
+    if re.search(r"ransomware", os.path.basename(file_path)):
         return True
     return False
 
-def mitigate_ransomware():
-    # Shut down the system
-    subprocess.call(["shutdown", "-h", "now"])
+def mitigate_ransomware(file_path):
+    # Remove the file
+    try:
+        os.remove(file_path)
+    except OSError:
+        pass
+    # Send a notification to the system administrator
+    subprocess.run(["notify-send", "Ransomware detected and mitigated"])
 
-if detect_ransomware():
-    mitigate_ransomware()
+if __name__ == "__main__":
+    # Get the list of files in the system
+    file_list = os.listdir()
+    # Iterate through the list of files
+    for file in file_list:
+        # Check if the file is a ransomware
+        if detect_ransomware(file):
+            # Mitigate the ransomware
+            mitigate_ransomware(file)
