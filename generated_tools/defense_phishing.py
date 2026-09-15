@@ -1,33 +1,76 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-15 02:38:27.300607
+# Generated 2026-09-15 08:17:03.539033
 
+import requests
 import re
-import urllib.parse
+import socket
 
-def is_phishing_url(url):
-    # Check if the URL is a HTTP or HTTPS URL
-    if not re.match(r"^https?://", url):
+def detect_phishing_attack(url):
+    # Check if the URL is valid
+    if not re.match(r'^https?://', url):
         return False
-    
-    # Parse the URL and extract the domain
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    
-    # Check if the domain is a phishing domain
-    if domain.endswith(".phishing.com"):
+
+    # Extract the domain name from the URL
+    domain = urlparse(url).netloc
+
+    # Check if the domain name is in the public suffix list
+    if not in_public_suffix_list(domain):
+        return False
+
+    # Check if the domain name is in the phishing database
+    if domain in phishing_database:
         return True
-    
-    # Check if the domain is a subdomain of a phishing domain
-    if domain.endswith(".subdomain.phishing.com"):
-        return True
-    
+
     return False
 
-def mitigate_phishing_attack(url):
-    # If the URL is a phishing URL, block it
-    if is_phishing_url(url):
-        raise ValueError("Phishing attack detected!")
+def in_public_suffix_list(domain):
+    # Check if the domain name is in the public suffix list
+    if domain in public_suffix_list:
+        return True
+
+    # Check if the domain name has a valid top-level domain
+    if not re.match(r'^[a-z0-9-]+(\.[a-z0-9-]+)+$', domain):
+        return False
+
+    # Check if the domain name has a valid second-level domain
+    if not re.match(r'^[a-z0-9-]+\.[a-z0-9-]+$', domain):
+        return False
+
+    return False
+
+def phishing_database_lookup(domain):
+    # Lookup the domain name in the phishing database
+    if domain in phishing_database:
+        return True
+
+    return False
+
+def main():
+    # Parse the command-line arguments
+    parser = argparse.ArgumentParser(description='Detect and mitigate phish[5D[K
+phishing attacks')
+    parser.add_argument('-u', '--url', required=True, help='URL to check')
+    args = parser.parse_args()
+
+    # Check if the URL is valid
+    if not re.match(r'^https?://', args.url):
+        print('Invalid URL')
+        return
+
+    # Extract the domain name from the URL
+    domain = urlparse(args.url).netloc
+
+    # Check if the domain name is in the public suffix list
+    if not in_public_suffix_list(domain):
+        print('Invalid domain name')
+        return
+
+    # Check if the domain name is in the phishing database
+    if phishing_database_lookup(domain):
+        print('Phishing attack detected')
     else:
-        # If the URL is not a phishing URL, allow it
-        pass
+        print('No phishing attack detected')
+
+if __name__ == '__main__':
+    main()
