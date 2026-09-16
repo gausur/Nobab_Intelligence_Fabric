@@ -1,28 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-16 13:57:52.509156
+# Generated 2026-09-16 23:31:51.891435
 
 import re
-import requests
+import smtplib
 
-def detect_phishing(url):
-    """
-    Detect phishing attacks by analyzing the URL and the HTML content.
-    """
-    # Check if the URL is a valid HTTPS URL
-    if not re.match(r'^https://', url):
-        print('Error: URL is not a valid HTTPS URL.')
-        return
+def is_phishing_url(url):
+    return re.match(r"^http(s)?://[a-zA-Z0-9-.]+(:[0-9]+)?$", url)
 
-    # Fetch the HTML content of the URL
-    response = requests.get(url)
-    html_content = response.content.decode('utf-8')
+def is_phishing_email(email):
+    return re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", em[2D[K
+email)
 
-    # Check if the HTML content contains any suspicious keywords
-    if re.search(r'phishing|scam|fraud', html_content, re.IGNORECASE):
-        print('Possible phishing attack detected!')
+def mitigate_phishing(url, email):
+    if is_phishing_url(url):
+        return "Phishing URL detected: {}".format(url)
+    elif is_phishing_email(email):
+        return "Phishing email detected: {}".format(email)
     else:
-        print('No phishing attack detected.')
+        return "No phishing detected"
 
-# Example usage:
-detect_phishing('https://example.com')
+if __name__ == "__main__":
+    url = "http://www.example.com"
+    email = "johndoe@example.com"
+    print(mitigate_phishing(url, email))

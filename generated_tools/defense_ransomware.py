@@ -1,46 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-16 20:44:41.067439
+# Generated 2026-09-16 23:28:50.197887
 
 import os
-import json
+import subprocess
 
 def detect_ransomware(path):
-    # Check if the file is a json file
-    if not path.endswith('.json'):
+    # Check if the file is encrypted
+    if not os.path.isfile(path):
         return False
 
-    # Open the file and read the contents
-    with open(path, 'r') as f:
-        data = json.load(f)
+    # Check if the file has the ransomware signature
+    with open(path, 'rb') as f:
+        contents = f.read()
+        if b'ransomware' in contents:
+            return True
 
-    # Check if the file contains the required keys
-    if not all(k in data for k in ['key', 'message', 'duration']):
-        return False
+    # Check if the file has a suspicious extension
+    if os.path.splitext(path)[1] in ['.exe', '.dll', '.sys']:
+        return True
 
-    # Check if the key is valid
-    if not data['key'] == 'ransomware':
-        return False
+    # Check if the file has a suspicious file size
+    if os.path.getsize(path) > 1024 * 1024 * 1024:
+        return True
 
-    # Check if the message is valid
-    if not data['message'] == 'Your files have been encrypted. Please pay t[1D[K
-the ransom to decrypt them.':
-        return False
+    # Check if the file has a suspicious last modified date
+    if time.time() - os.path.getmtime(path) > 3600 * 24 * 30:
+        return True
 
-    # Check if the duration is valid
-    if not data['duration'] == '30 minutes':
-        return False
-
-    # If all checks pass, return True
-    return True
+    return False
 
 def mitigate_ransomware(path):
-    # If the file is a json file and it contains the required keys and valu[4D[K
-values,
-    # delete the file and its contents.
-    if detect_ransomware(path):
-        os.remove(path)
-        os.remove(path + '.backup')
+    # Decrypt the file
+    subprocess.run(['decrypt', path])
+
+    # Remove the ransomware signature
+    with open(path, 'rb') as f:
+        contents = f.read()
+        f.seek(0)
+        f.write(b''.join([b for b in contents if b != b'ransomware']))
+
+    # Remove the suspicious extension
+    os.rename(path, os.path.splitext(path)[0])
+
+    # Remove the suspicious last modified date
+    os.utime(path, (time.time() - 3600 * 24 * 30, time.time() - 3600 * 24 *[1D[K
+* 30))
+
+def main():
+    # Check if the file is a ransomware
+    if detect_ransomware(sys.argv[1]):
+        mitigate_ransomware(sys.argv[1])
 
 if __name__ == '__main__':
-    mitigate_ransomware(os.getcwd())
+    main()
