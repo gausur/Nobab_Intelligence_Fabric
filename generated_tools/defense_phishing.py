@@ -1,65 +1,51 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-18 12:36:28.866029
+# Generated 2026-09-18 16:52:30.634887
 
 import re
-import socket
+import email
+import smtplib
 
-def is_phishing_attempt(url):
-    # Check if the URL is a valid HTTP/HTTPS URL
-    if not re.match(r"^https?://", url):
+def detect_phishing_attacks(message):
+    # Check if the message is an email
+    if not isinstance(message, email.message.EmailMessage):
         return False
 
-    # Check if the URL is for a known phishing site
-    if url in known_phishing_sites:
+    # Check if the message has a subject
+    if not message.get("Subject"):
+        return False
+
+    # Check if the subject contains a phishing attack
+    if re.search(r"(phishing|scam|fraud|hack)", message.get("Subject")):
         return True
 
-    # Check if the domain of the URL is for a known phishing site
-    domain = url.split("://")[1].split("/")[0]
-    if domain in known_phishing_domains:
+    # Check if the message has a malicious link
+    if re.search(r"(http|https)://[a-z0-9-.]+", message.get("Body")):
         return True
 
-    # Check if the IP address of the URL is for a known phishing site
-    ip_address = socket.gethostbyname(domain)
-    if ip_address in known_phishing_ips:
+    # Check if the message has a malicious attachment
+    if re.search(r"(exe|dll|jar|zip|tar)", message.get("Attachments")):
         return True
 
     return False
 
-def mitigate_phishing_attempt(url):
-    # Redirect the user to the phishing site
-    print(f"Mitigating phishing attempt for {url}")
-    return "https://phishing.site"
+def mitigate_phishing_attacks(message):
+    # Block the message
+    if detect_phishing_attacks(message):
+        return True
 
-# List of known phishing sites, domains, and IP addresses
-known_phishing_sites = [
-    "https://phishing.site",
-    "https://anotherphishingsite.com",
-    "https://yetanotherphishingsite.org"
-]
-known_phishing_domains = [
-    "phishing.site",
-    "anotherphishingsite.com",
-    "yetanotherphishingsite.org"
-]
-known_phishing_ips = [
-    "192.168.1.1",
-    "192.168.1.2",
-    "192.168.1.3"
-]
+    # Allow the message
+    return False
 
-# Main function
 def main():
-    # Get the URL from the user
-    url = input("Enter the URL: ")
+    # Get the message from the command line
+    message = email.message_from_string(sys.stdin.read())
 
-    # Check if the URL is a phishing attempt
-    if is_phishing_attempt(url):
-        # Mitigate the phishing attempt
-        mitigate_phishing_attempt(url)
+    # Detect and mitigate phishing attacks
+    if mitigate_phishing_attacks(message):
+        print("Phishing attack detected and mitigated!")
     else:
-        # Print a message indicating the URL is not a phishing attempt
-        print(f"The URL {url} is not a phishing attempt.")
+        print("No phishing attack detected.")
 
 if __name__ == "__main__":
     main()
