@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-19 22:00:12.272981
+# Generated 2026-09-19 23:56:25.980428
 
 import os
-import sys
-import re
 import subprocess
-import psutil
-import time
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    if "ransomware" in subprocess.check_output(["ps", "-e"]):
+def detect_ransomware(path):
+    try:
+        subprocess.check_output(f"strings {path} | grep -q '{{Your Ransomwa[8D[K
+Ransomware Signature}}'", shell=True)
         return True
-    else:
+    except subprocess.CalledProcessError:
         return False
 
-def mitigate_ransomware():
-    # Stop the ransomware process
-    subprocess.check_call(["kill", "-9", "ransomware"])
-    # Delete the ransomware files
-    subprocess.check_call(["rm", "-rf", "/path/to/ransomware/files"])
-    # Restart the system
-    subprocess.check_call(["reboot"])
+def mitigate_ransomware(path):
+    try:
+        subprocess.check_output(f"rm -rf {path}", shell=True)
+    except subprocess.CalledProcessError:
+        pass
 
-if detect_ransomware():
-    mitigate_ransomware()
+def main():
+    for path in os.listdir():
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
+
+if __name__ == "__main__":
+    main()
