@@ -1,34 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-20 13:23:22.763508
+# Generated 2026-09-20 22:50:04.873442
 
 import re
-import requests
+import sys
 
 def detect_phishing_attacks(url):
-    # Check if the URL is a valid HTTP(S) URL
-    if not re.match(r'^https?://', url):
-        raise ValueError('Invalid URL')
+    pattern = r"^(?:http|https):\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    if re.match(pattern, url):
+        return True
+    else:
+        return False
 
-    # Send a HEAD request to the URL to get the headers
-    response = requests.head(url)
+def mitigate_phishing_attacks(url):
+    if detect_phishing_attacks(url):
+        print("Phishing attack detected!")
+        sys.exit(1)
+    else:
+        print("No phishing attack detected.")
 
-    # Check if the URL is a phishing attack by analyzing the headers
-    if response.headers.get('X-Frame-Options') == 'SAMEORIGIN':
-        raise PhishingAttackException('Phishing attack detected')
-    if response.headers.get('Content-Security-Policy') == 'default-src \'no[4D[K
-\'none\'':
-        raise PhishingAttackException('Phishing attack detected')
-    if response.headers.get('Content-Security-Policy-Report-Only') == 'defa[5D[K
-'default-src \'none\'':
-        raise PhishingAttackException('Phishing attack detected')
-    if response.headers.get('X-Content-Type-Options') == 'nosniff':
-        raise PhishingAttackException('Phishing attack detected')
-    if response.headers.get('X-XSS-Protection') == '1; mode=block':
-        raise PhishingAttackException('Phishing attack detected')
-
-    # If the URL is not a phishing attack, return the URL
-    return url
-
-class PhishingAttackException(Exception):
-    pass
+if __name__ == "__main__":
+    mitigate_phishing_attacks(sys.argv[1])
