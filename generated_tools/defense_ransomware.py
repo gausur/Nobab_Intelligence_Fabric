@@ -1,39 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-22 15:27:09.928229
+# Generated 2026-09-22 19:27:12.086191
 
 import os
-import stat
+import hashlib
+import re
 import time
 
-def detect_ransomware(path):
-    # Check if the file has the same permissions as the parent directory
-    if os.stat(path).st_mode == os.stat(os.path.dirname(path)).st_mode:
-        # Check if the file is a regular file
-        if os.path.isfile(path):
-            # Check if the file has been modified in the past day
-            if time.time() - os.stat(path).st_mtime < 86400:
-                # Check if the file has been accessed in the past day
-                if time.time() - os.stat(path).st_atime < 86400:
-                    return True
-    return False
+def detect_ransomware(file_path):
+    with open(file_path, 'rb') as f:
+        data = f.read()
+        hash = hashlib.sha256(data).hexdigest()
+        if hash in RANSOMWARE_HASHES:
+            return True
+        else:
+            return False
 
-def mitigate_ransomware(path):
-    # Set the file's permissions to the default permissions of the parent d[1D[K
-directory
-    os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
-    # Set the file's access time to the current time
-    os.utime(path, (time.time(), time.time()))
+def mitigate_ransomware(file_path):
+    with open(file_path, 'wb') as f:
+        f.write(b'')
 
 def main():
-    # Iterate over all files in the current directory
-    for file in os.listdir("."):
-        # Check if the file is a regular file and if it has been modified o[1D[K
-or accessed in the past day
-        if detect_ransomware(file):
-            # Mitigate the ransomware attack by setting the file's permissi[8D[K
-permissions and access time
-            mitigate_ransomware(file)
+    for root, dirs, files in os.walk(os.getcwd()):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if detect_ransomware(file_path):
+                mitigate_ransomware(file_path)
+                print(f'Mitigated ransomware in {file_path}')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
