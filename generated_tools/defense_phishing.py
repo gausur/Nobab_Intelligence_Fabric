@@ -1,63 +1,55 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-22 05:42:21.146859
+# Generated 2026-09-22 10:43:09.688045
 
 import re
-import ssl
+import smtplib
 
-class PhishingDetector:
-    def __init__(self, email_text):
-        self.email_text = email_text
+def is_phishing_email(email):
+    """
+    Check if the given email is a phishing email.
 
-    def is_phishing(self):
-        # Check for obvious phishing URLs
-        phishing_urls = ['https://www.phishingwebsite.com', 'https://phishi[15D[K
-'https://phishingwebsite.com']
-        for url in phishing_urls:
-            if url in self.email_text:
-                return True
+    Args:
+        email (str): The email address to check.
 
-        # Check for suspicious URLs
-        suspicious_urls = ['https://www.suspiciouswebsite.com', 'https://su[11D[K
-'https://suspiciouswebsite.com']
-        for url in suspicious_urls:
-            if url in self.email_text:
-                return True
+    Returns:
+        bool: True if the email is a phishing email, False otherwise.
+    """
+    # Check if the email is valid
+    if not re.match(r"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$", email):
+        return False
 
-        # Check for suspicious domain names
-        suspicious_domain_names = ['suspiciouswebsite.com', 'phishingwebsit[15D[K
-'phishingwebsite.com']
-        for domain_name in suspicious_domain_names:
-            if domain_name in self.email_text:
-                return True
+    # Check if the email is from a known phishing domain
+    if email.split("@")[1] in ["phishing.com", "phishing.net", "phishing.or[12D[K
+"phishing.org"]:
+        return True
 
-        # Check for suspicious email addresses
-        suspicious_email_addresses = ['phishing@suspiciouswebsite.com', 'ph[3D[K
-'phishing@phishingwebsite.com']
-        for email_address in suspicious_email_addresses:
-            if email_address in self.email_text:
-                return True
+    return False
 
-        # Check for suspicious IP addresses
-        suspicious_ip_addresses = ['1.2.3.4', '5.6.7.8']
-        for ip_address in suspicious_ip_addresses:
-            if ip_address in self.email_text:
-                return True
+def mitigate_phishing_email(email):
+    """
+    Mitigate a phishing email.
 
-        # Check for suspicious SSL certificates
-        try:
-            ssl.get_server_certificate(self.email_text)
-            return False
-        except ssl.SSLError:
-            return True
+    Args:
+        email (str): The email address to mitigate.
+    """
+    # Mark the email as spam
+    smtplib.SMTP("smtp.gmail.com", 587)
+    smtplib.starttls()
+    smtplib.login("spam@gmail.com", "spampassword")
+    smtplib.sendmail("spam@gmail.com", email, "This is a spam email.")
 
-    def mitigate(self):
-        if self.is_phishing():
-            print("This email is a phishing attack!")
-        else:
-            print("This email is legitimate.")
+def main():
+    """
+    Main function to run the script.
+    """
+    email = input("Enter email address: ")
 
-if __name__ == '__main__':
-    email_text = input("Enter the email text: ")
-    detector = PhishingDetector(email_text)
-    detector.mitigate()
+    if is_phishing_email(email):
+        mitigate_phishing_email(email)
+        print("Phishing email mitigated.")
+    else:
+        print("Not a phishing email.")
+
+if __name__ == "__main__":
+    main()
