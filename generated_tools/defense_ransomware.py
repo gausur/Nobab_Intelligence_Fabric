@@ -1,46 +1,79 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-24 05:42:29.256179
+# Generated 2026-09-24 10:52:33.226564
 
-import subprocess
-import json
-import re
 import os
+import re
+import subprocess
 
-def detect_ransomware(file_path):
-    # Check if the file is a valid executable
-    try:
-        subprocess.check_output(["file", file_path], universal_newlines=Tru[22D[K
-universal_newlines=True)
-    except subprocess.CalledProcessError:
+def detect_ransomware(path):
+    # Check if the file is a symlink
+    if os.path.islink(path):
         return False
 
-    # Check if the file contains the ransomware signature
-    with open(file_path, "r") as f:
-        contents = f.read()
-        if re.search(r"Ransomware signature", contents):
+    # Check if the file has the ransomware signature
+    with open(path, "rb") as f:
+        data = f.read()
+        if b"ransomware" in data:
             return True
 
-    # Check if the file contains the ransomware command line argument
-    if "--ransom" in contents:
+    # Check if the file is part of a ransomware family
+    for family in ["ransomware_family_1", "ransomware_family_2", "ransomwar[10D[K
+"ransomware_family_3"]:
+        with open(os.path.join(path, family), "rb") as f:
+            data = f.read()
+            if b"ransomware" in data:
+                return True
+
+    # Check if the file is a ransomware executable
+    if os.path.isfile(path) and os.access(path, os.X_OK):
         return True
 
-    # Check if the file contains the ransomware environment variable
-    if "RANSOMWARE" in os.environ:
-        return True
+    # Check if the file is a ransomware script
+    if os.path.isfile(path) and os.access(path, os.R_OK):
+        with open(path, "r") as f:
+            data = f.read()
+            if re.search(r"ransomware", data):
+                return True
 
     return False
 
-def mitigate_ransomware(file_path):
-    # Delete the file
-    os.remove(file_path)
+def mitigate_ransomware(path):
+    # Check if the file is a symlink
+    if os.path.islink(path):
+        return
 
-def main():
-    # Iterate over all files in the system
-    for file_path in os.listdir():
-        if detect_ransomware(file_path):
-            mitigate_ransomware(file_path)
-            print(f"Ransomware detected and mitigated: {file_path}")
+    # Check if the file has the ransomware signature
+    with open(path, "rb") as f:
+        data = f.read()
+        if b"ransomware" in data:
+            return
 
-if __name__ == "__main__":
-    main()
+    # Check if the file is part of a ransomware family
+    for family in ["ransomware_family_1", "ransomware_family_2", "ransomwar[10D[K
+"ransomware_family_3"]:
+        with open(os.path.join(path, family), "rb") as f:
+            data = f.read()
+            if b"ransomware" in data:
+                return
+
+    # Check if the file is a ransomware executable
+    if os.path.isfile(path) and os.access(path, os.X_OK):
+        return
+
+    # Check if the file is a ransomware script
+    if os.path.isfile(path) and os.access(path, os.R_OK):
+        with open(path, "r") as f:
+            data = f.read()
+            if re.search(r"ransomware", data):
+                return
+
+    # Remove the file
+    os.remove(path)
+
+# Scan the system for ransomware
+for root, dirs, files in os.walk("/"):
+    for file in files:
+        path = os.path.join(root, file)
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
