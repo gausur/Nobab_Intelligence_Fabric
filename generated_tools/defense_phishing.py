@@ -1,56 +1,47 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-23 21:56:51.844663
+# Generated 2026-09-24 00:13:37.112546
 
 import re
-import requests
-from urllib.parse import urlparse
+import socket
+import ssl
 
-def is_phishing_url(url):
-    parsed_url = urlparse(url)
-    hostname = parsed_url.hostname
-    if hostname.endswith(".com"):
-        return False
-    else:
-        return True
-
-def is_phishing_domain(domain):
-    if domain.endswith(".com"):
-        return False
-    else:
-        return True
-
-def is_phishing_email(email):
-    if email.endswith(".com"):
-        return False
-    else:
-        return True
-
-def is_phishing_content(content):
-    if "phishing" in content.lower():
-        return True
-    else:
+def is_phishing_site(url):
+    # Check if the URL is valid
+    if not re.match(r'^https?://', url):
         return False
 
-def mitigate_phishing_attack(url, domain, email, content):
-    if is_phishing_url(url):
-        print("Possible phishing URL detected:", url)
-        return
-    elif is_phishing_domain(domain):
-        print("Possible phishing domain detected:", domain)
-        return
-    elif is_phishing_email(email):
-        print("Possible phishing email detected:", email)
-        return
-    elif is_phishing_content(content):
-        print("Possible phishing content detected:", content)
-        return
-    else:
-        return
+    # Get the domain name from the URL
+    domain = url.split('://')[1]
 
-if __name__ == "__main__":
-    url = "https://www.example.com"
-    domain = "example.com"
-    email = "john.doe@example.com"
-    content = "This is a phishing message."
-    mitigate_phishing_attack(url, domain, email, content)
+    # Check if the domain name is a known phishing site
+    with open('phishing_sites.txt') as f:
+        if domain in f.readlines():
+            return True
+
+    return False
+
+def mitigate_phishing_attack(url):
+    # Check if the URL is a phishing site
+    if is_phishing_site(url):
+        # If the URL is a phishing site, redirect the user to a different U[1D[K
+URL
+        print("Redirecting to a safe URL...")
+        return "https://www.example.com"
+
+    # If the URL is not a phishing site, allow the user to access it
+    print("Accessing the URL...")
+    return url
+
+def main():
+    # Get the URL from the user
+    url = input("Enter the URL: ")
+
+    # Mitigate the phishing attack
+    mitigated_url = mitigate_phishing_attack(url)
+
+    # Open the URL in the user's default web browser
+    webbrowser.open(mitigated_url)
+
+if __name__ == '__main__':
+    main()
