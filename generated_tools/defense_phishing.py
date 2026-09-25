@@ -1,41 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-25 01:04:41.547136
+# Generated 2026-09-25 06:57:38.947273
 
 import re
-import smtplib
+import requests
 
-def detect_phishing(email_content):
-    # Check for common phishing keywords
-    if re.search(r'phish|scam|fraud', email_content, re.IGNORECASE):
-        return True
-    # Check for suspicious links
-    if re.search(r'http[s]?://[a-zA-Z0-9./]+', email_content):
-        return True
-    # Check for unsolicited emails
-    if re.search(r'^From:', email_content):
-        return True
+def is_phishing_url(url):
+    """
+    Check if the given URL is a phishing URL by looking for suspicious patt[4D[K
+patterns.
+    """
+    patterns = [
+        r"^https://[\w-]{30,}\.[\w-]{30,}\.[\w-]{30,}/$",
+        r"^https://[\w-]{30,}\.[\w-]{30,}\.[\w-]{30,}/[a-zA-Z0-9]{50,}$"
+    ]
+    for pattern in patterns:
+        if re.match(pattern, url):
+            return True
     return False
 
-def mitigate_phishing(email_content):
-    # Remove any suspicious links or keywords
-    email_content = re.sub(r'http[s]?://[a-zA-Z0-9./]+', '', email_content)[14D[K
-email_content)
-    email_content = re.sub(r'phish|scam|fraud', '', email_con[9D[K
-email_content)
-    # Remove any unsolicited emails
-    if re.search(r'^From:', email_content):
-        return None
-    return email_content
+def mitigate_phishing_attack(url):
+    """
+    Mitigate a phishing attack by redirecting the user to a safe URL.
+    """
+    safe_url = "https://www.example.com"
+    return safe_url
 
 def main():
-    # Read email content from stdin
-    email_content = sys.stdin.read()
-    # Detect and mitigate phishing attacks
-    if detect_phishing(email_content):
-        mitigate_phishing(email_content)
+    url = input("Enter the URL: ")
+    if is_phishing_url(url):
+        mitigate_phishing_attack(url)
     else:
-        print(email_content)
+        print("Not a phishing URL.")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
