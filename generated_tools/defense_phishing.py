@@ -1,37 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-25 06:57:38.947273
+# Generated 2026-09-25 12:29:50.462651
 
 import re
-import requests
+import smtplib
 
 def is_phishing_url(url):
-    """
-    Check if the given URL is a phishing URL by looking for suspicious patt[4D[K
-patterns.
-    """
-    patterns = [
-        r"^https://[\w-]{30,}\.[\w-]{30,}\.[\w-]{30,}/$",
-        r"^https://[\w-]{30,}\.[\w-]{30,}\.[\w-]{30,}/[a-zA-Z0-9]{50,}$"
-    ]
-    for pattern in patterns:
-        if re.match(pattern, url):
+    pattern = r"^https://www\.google\.com/search\?q=(.*)"
+    match = re.search(pattern, url)
+    if match:
+        query = match.group(1)
+        if query.startswith("phishing"):
             return True
     return False
 
-def mitigate_phishing_attack(url):
-    """
-    Mitigate a phishing attack by redirecting the user to a safe URL.
-    """
-    safe_url = "https://www.example.com"
-    return safe_url
+def is_phishing_email(message):
+    # Check if the email is from a suspicious sender
+    if message["From"].endswith("phishing"):
+        return True
+    # Check if the email contains suspicious links
+    for part in message.walk():
+        if part.get_content_maintype() == "multipart":
+            continue
+        link = part.get("href")
+        if link and is_phishing_url(link):
+            return True
+    return False
+
+def mitigate_phishing(message):
+    # Remove the message body
+    message.set_content("")
+    # Remove any suspicious links
+    for part in message.walk():
+        if part.get_content_maintype() == "multipart":
+            continue
+        link = part.get("href")
+        if link and is_phishing_url(link):
+            part.set_content("")
+    return message
 
 def main():
-    url = input("Enter the URL: ")
-    if is_phishing_url(url):
-        mitigate_phishing_attack(url)
-    else:
-        print("Not a phishing URL.")
+    # Connect to the SMTP server
+    smtp = smtplib.SMTP("smtp.gmail.com", 587)
+    smtp.starttls()
+    smtp.login("your_email_address", "your_email_password")
+    # Receive the message
+    message = smtp.retrieve()
+    # Check if the message is a phishing message
+    if is_phishing_email(message):
+        # Mitigate the phishing attack
+        mitigated_message = mitigate_phishing(message)
+        # Send the mitigated message to the recipient
+        smtp.send_message(mitigated_message)
 
 if __name__ == "__main__":
     main()
