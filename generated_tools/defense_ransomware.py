@@ -1,27 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-26 20:31:34.248540
+# Generated 2026-09-26 23:19:26.467517
 
 import os
-import sys
 import subprocess
 
 def detect_ransomware(path):
-    if os.path.isdir(path):
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                if file.endswith(".enc"):
-                    return True
-    else:
+    """
+    Detects ransomware attacks by analyzing the file system.
+
+    Args:
+        path (str): The path to the directory to analyze.
+
+    Returns:
+        bool: True if the directory contains ransomware, False otherwise.
+    """
+    try:
+        subprocess.check_output(["ransomware-detection-tool", "-d", path])
+        return True
+    except subprocess.CalledProcessError:
         return False
 
 def mitigate_ransomware(path):
+    """
+    Mitigates ransomware attacks by restoring the file system to its previo[6D[K
+previous state.
+
+    Args:
+        path (str): The path to the directory to restore.
+    """
+    try:
+        subprocess.check_output(["ransomware-mitigation-tool", "-d", path])[6D[K
+path])
+    except subprocess.CalledProcessError:
+        pass
+
+def main(path):
+    """
+    The main function that detects and mitigates ransomware attacks.
+
+    Args:
+        path (str): The path to the directory to analyze.
+    """
     if detect_ransomware(path):
-        subprocess.run(["powershell", "-Command", "Get-Item -Path \"{}\" -F[2D[K
--Force | Remove-Item".format(path)])
+        mitigate_ransomware(path)
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        mitigate_ransomware(sys.argv[1])
-    else:
-        print("Usage: python ransomware_detector.py <path>")
+    main(os.getcwd())
