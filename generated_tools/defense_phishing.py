@@ -1,35 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-28 00:14:49.385887
+# Generated 2026-09-28 06:10:04.190752
 
 import re
-import urllib.parse
-import requests
+import smtplib
 
-def is_phishing_attempt(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    if not domain.endswith(".com"):
-        return False
-    resp = requests.get(f"https://www.google.com/safebrowsing/diagnostic?si[64D[K
-requests.get(f"https://www.google.com/safebrowsing/diagnostic?site={domain}requests.get(f"https://www.google.com/safebrowsing/diagnostic?sie={domain}")
-    if resp.status_code != 200:
-        return False
-    data = resp.json()
-    if data["threat"] == "MALWARE":
+def detect_phishing_attempt(message):
+    pattern = r"https://[a-zA-Z0-9.-]+\.com"
+    if re.search(pattern, message):
+        print("Phishing attempt detected!")
         return True
-    return False
-
-def mitigate_phishing_attempt(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    if is_phishing_attempt(url):
-        print(f"Phishing attempt detected for {domain}")
-        # Mitigation logic goes here
-        # ...
     else:
-        print(f"No phishing attempt detected for {domain}")
+        print("No phishing attempt detected.")
+        return False
+
+def mitigate_phishing_attempt(message):
+    message = message.replace("http://", "https://")
+    return message
+
+def main():
+    message = input("Enter a message: ")
+    if detect_phishing_attempt(message):
+        mitigate_phishing_attempt(message)
+    else:
+        print("No phishing attempt detected.")
 
 if __name__ == "__main__":
-    url = input("Enter URL: ")
-    mitigate_phishing_attempt(url)
+    main()

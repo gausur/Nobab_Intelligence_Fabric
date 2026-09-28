@@ -1,35 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-28 00:13:32.055882
+# Generated 2026-09-28 06:11:59.886799
 
 import os
-import sys
+import shutil
+import subprocess
 
-def detect_ransomware(file_path):
-    with open(file_path, "rb") as f:
-        data = f.read()
-        if b"ransomware" in data:
-            print("Ransomware detected!")
-            return True
-        else:
-            print("No ransomware detected.")
-            return False
+def detect_ransomware(file):
+    try:
+        with open(file, 'rb') as f:
+            data = f.read()
+            if b'AES' in data:
+                return True
+            else:
+                return False
+    except FileNotFoundError:
+        return False
 
-def mitigate_ransomware(file_path):
-    with open(file_path, "wb") as f:
-        data = f.read()
-        if b"ransomware" in data:
-            print("Removing ransomware from file...")
-            data = data.replace(b"ransomware", b"")
-            f.write(data)
-            print("Ransomware removed.")
-        else:
-            print("No ransomware detected.")
+def mitigate_ransomware(file):
+    try:
+        with open(file, 'rb') as f:
+            data = f.read()
+            if b'AES' in data:
+                with open(file + '.backup', 'wb') as f:
+                    f.write(data.replace(b'AES', b''))
+        return True
+    except FileNotFoundError:
+        return False
 
 def main():
-    file_path = sys.argv[1]
-    detect_ransomware(file_path)
-    mitigate_ransomware(file_path)
+    for file in os.listdir():
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+            shutil.move(file + '.backup', file)
+            subprocess.run(['rm', file + '.backup'])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
