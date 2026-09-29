@@ -1,56 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-29 19:05:19.366490
+# Generated 2026-09-29 22:54:30.819104
 
 import re
-import requests
-import urllib.parse
+import socket
+import ssl
 
-def is_phishing_url(url):
-    parsed_url = urllib.parse.urlparse(url)
-    if parsed_url.scheme != "https":
+def detect_phishing_attacks(url):
+    # Check if the URL is a valid HTTPS URL
+    if not url.startswith("https://"):
+        return False
+
+    # Create a SSL context and verify the certificate
+    context = ssl.create_default_context()
+    try:
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_REQUIRED
+        conn = context.wrap_socket(socket.socket(), server_hostname=url)
+        conn.connect((url, 443))
+        cert = conn.getpeercert()
+        subject = dict(x[0] for x in cert["subject"])
+        issuer = dict(x[0] for x in cert["issuer"])
+        if not subject["commonName"].startswith("www."):
+            return False
+        if not issuer["organizationName"].startswith("Let's Encrypt"):
+            return False
+    except Exception:
+        return False
+
+    # Check if the URL is a phishing site
+    pattern = re.compile(r"(?i)phishing.+site", re.MULTILINE)
+    if pattern.search(url):
         return True
-    if parsed_url.netloc.endswith(".onion"):
-        return True
-    if parsed_url.netloc.endswith(".pw"):
-        return True
-    if parsed_url.netloc.endswith(".cf"):
-        return True
-    if parsed_url.netloc.endswith(".in"):
-        return True
-    if parsed_url.netloc.endswith(".com.cn"):
-        return True
-    if parsed_url.netloc.endswith(".com.au"):
-        return True
-    if parsed_url.netloc.endswith(".com.tw"):
-        return True
-    if parsed_url.netloc.endswith(".com.hk"):
-        return True
-    if parsed_url.netloc.endswith(".com.tw"):
-        return True
-    if parsed_url.netloc.endswith(".com.vn"):
-        return True
+
     return False
 
-def is_phishing_email(email):
-    if "@" in email:
-        local, domain = email.split("@")
-        if local.isdigit() or domain.isdigit():
-            return True
-    return False
-
-def mitigate_phishing_attack(url):
-    if is_phishing_url(url):
-        return url.replace("https://", "").replace("http://", "")
-    return url
-
-def main():
-    url = input("Enter the URL: ")
-    if is_phishing_url(url):
-        print("The URL is a phishing attack!")
-        mitigate_phishing_attack(url)
-    else:
-        print("The URL is not a phishing attack!")
-
-if __name__ == "__main__":
-    main()
+# Test the function
+url = "https://www.example.com"
+print(detect_phishing_attacks(url))
