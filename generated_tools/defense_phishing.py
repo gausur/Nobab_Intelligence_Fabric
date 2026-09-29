@@ -1,37 +1,56 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-29 13:37:22.203705
+# Generated 2026-09-29 19:05:19.366490
 
 import re
-import socket
-import smtplib
+import requests
+import urllib.parse
 
-def check_phishing_url(url):
-    if re.match(r"^https?://", url):
-        try:
-            socket.gethostbyname(urlparse(url).hostname)
-            return False
-        except socket.gaierror:
-            return True
-    else:
+def is_phishing_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    if parsed_url.scheme != "https":
         return True
-
-def check_phishing_email(email):
-    if re.match(r"^[^@]+@[^@]+\.[^@]+", email):
-        try:
-            smtplib.SMTP("smtp.gmail.com", 587)
-            return False
-        except smtplib.SMTPServerDisconnected:
-            return True
-    else:
+    if parsed_url.netloc.endswith(".onion"):
         return True
+    if parsed_url.netloc.endswith(".pw"):
+        return True
+    if parsed_url.netloc.endswith(".cf"):
+        return True
+    if parsed_url.netloc.endswith(".in"):
+        return True
+    if parsed_url.netloc.endswith(".com.cn"):
+        return True
+    if parsed_url.netloc.endswith(".com.au"):
+        return True
+    if parsed_url.netloc.endswith(".com.tw"):
+        return True
+    if parsed_url.netloc.endswith(".com.hk"):
+        return True
+    if parsed_url.netloc.endswith(".com.tw"):
+        return True
+    if parsed_url.netloc.endswith(".com.vn"):
+        return True
+    return False
 
-def mitigate_phishing_attack(url, email):
-    if check_phishing_url(url):
-        print("Phishing URL detected:", url)
-    if check_phishing_email(email):
-        print("Phishing email detected:", email)
+def is_phishing_email(email):
+    if "@" in email:
+        local, domain = email.split("@")
+        if local.isdigit() or domain.isdigit():
+            return True
+    return False
+
+def mitigate_phishing_attack(url):
+    if is_phishing_url(url):
+        return url.replace("https://", "").replace("http://", "")
+    return url
+
+def main():
+    url = input("Enter the URL: ")
+    if is_phishing_url(url):
+        print("The URL is a phishing attack!")
+        mitigate_phishing_attack(url)
+    else:
+        print("The URL is not a phishing attack!")
 
 if __name__ == "__main__":
-    mitigate_phishing_attack("http://example.com", "john.doe@phishing.com")[24D[K
-"john.doe@phishing.com")
+    main()
