@@ -1,32 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-29 22:56:28.556510
+# Generated 2026-09-30 01:48:08.228906
 
-import sys
 import os
-import json
-import time
 import subprocess
+import time
 
-def detect_ransomware(file_path):
-    # Check if the file is encrypted
-    if not os.path.exists(file_path):
-        return False
-    # Check if the file is encrypted using a known ransomware algorithm
-    for algorithm in ['AES', 'Blowfish', 'CAST', 'DES', 'IDEA']:
-        if file_path.endswith(f'.{algorithm}'):
-            return True
-    return False
+def detect_ransomware():
+    # Check if the system is infected with ransomware
+    output = subprocess.check_output("ransomware --detect", shell=True)
+    if output.decode().strip() == "Yes":
+        # If the system is infected, start the mitigation process
+        mitigate_ransomware()
 
-def mitigate_ransomware(file_path):
-    # Decrypt the file using the known decryption key
-    subprocess.run(['openssl', 'aes-256-cbc', '-d', '-in', file_path, '-out[5D[K
-'-out', file_path.replace('.enc', '')], check=True)
+def mitigate_ransomware():
+    # Check if the system is running in a virtual machine
+    if subprocess.check_output("ransomware --is-vm", shell=True).decode().s[22D[K
+shell=True).decode().strip() == "Yes":
+        # If the system is running in a virtual machine, stop the virtual m[1D[K
+machine
+        subprocess.check_output("ransomware --stop-vm", shell=True)
+    else:
+        # If the system is not running in a virtual machine, shut down the [K
+system
+        subprocess.check_output("shutdown -P now", shell=True)
 
-def main(file_path):
-    # Check if the file is a ransomware attack
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-
-if __name__ == '__main__':
-    main(sys.argv[1])
+# Start the detection and mitigation process
+detect_ransomware()

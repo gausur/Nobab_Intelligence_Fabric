@@ -1,40 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-09-29 22:54:30.819104
+# Generated 2026-09-30 01:49:35.132567
 
 import re
 import socket
-import ssl
+import urllib.request
 
-def detect_phishing_attacks(url):
-    # Check if the URL is a valid HTTPS URL
-    if not url.startswith("https://"):
+def detect_phishing_attack(url):
+    # Check if the URL is a valid HTTP or HTTPS URL
+    if not re.match(r"^https?://", url):
         return False
 
-    # Create a SSL context and verify the certificate
-    context = ssl.create_default_context()
-    try:
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_REQUIRED
-        conn = context.wrap_socket(socket.socket(), server_hostname=url)
-        conn.connect((url, 443))
-        cert = conn.getpeercert()
-        subject = dict(x[0] for x in cert["subject"])
-        issuer = dict(x[0] for x in cert["issuer"])
-        if not subject["commonName"].startswith("www."):
-            return False
-        if not issuer["organizationName"].startswith("Let's Encrypt"):
-            return False
-    except Exception:
-        return False
+    # Check if the URL is a known phishing site
+    if url in KNOWN_PHISHING_SITES:
+        return True
 
-    # Check if the URL is a phishing site
-    pattern = re.compile(r"(?i)phishing.+site", re.MULTILINE)
-    if pattern.search(url):
+    # Check if the URL is on a known phishing domain
+    domain = urllib.request.urlparse(url).netloc
+    if domain in KNOWN_PHISHING_DOMAINS:
         return True
 
     return False
 
-# Test the function
-url = "https://www.example.com"
-print(detect_phishing_attacks(url))
+def mitigate_phishing_attack(url):
+    # Redirect the user to the login page
+    login_url = "https://www.example.com/login"
+    return urllib.request.urlopen(login_url).read()
+
+def main():
+    # Get the URL from the user
+    url = input("Enter a URL: ")
+
+    # Detect and mitigate phishing attacks
+    if detect_phishing_attack(url):
+        mitigate_phishing_attack(url)
+
+if __name__ == "__main__":
+    main()
