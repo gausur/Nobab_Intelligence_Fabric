@@ -1,29 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-30 01:48:08.228906
+# Generated 2026-09-30 07:45:57.474135
 
 import os
+import re
 import subprocess
-import time
 
-def detect_ransomware():
-    # Check if the system is infected with ransomware
-    output = subprocess.check_output("ransomware --detect", shell=True)
-    if output.decode().strip() == "Yes":
-        # If the system is infected, start the mitigation process
-        mitigate_ransomware()
+def detect_ransomware(file_path):
+    # Check if the file is encrypted
+    if not os.path.isfile(file_path):
+        return False
+    with open(file_path, "rb") as f:
+        data = f.read()
+        if b"Ransomware" in data:
+            return True
+    return False
 
-def mitigate_ransomware():
-    # Check if the system is running in a virtual machine
-    if subprocess.check_output("ransomware --is-vm", shell=True).decode().s[22D[K
-shell=True).decode().strip() == "Yes":
-        # If the system is running in a virtual machine, stop the virtual m[1D[K
-machine
-        subprocess.check_output("ransomware --stop-vm", shell=True)
-    else:
-        # If the system is not running in a virtual machine, shut down the [K
-system
-        subprocess.check_output("shutdown -P now", shell=True)
+def mitigate_ransomware(file_path):
+    # Check if the file is encrypted
+    if not os.path.isfile(file_path):
+        return
+    # Decrypt the file
+    subprocess.run(["crypt", "--decrypt", file_path])
 
-# Start the detection and mitigation process
-detect_ransomware()
+def main():
+    # Get all the files in the current directory
+    files = os.listdir()
+    # Iterate over the files and check if they are encrypted
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
+
+if __name__ == "__main__":
+    main()
