@@ -1,32 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-09-30 14:29:00.349950
+# Generated 2026-09-30 19:50:05.558185
 
 import os
+import time
 import shutil
-import hashlib
+import random
 
-def detect_ransomware(file):
-    with open(file, "rb") as f:
-        data = f.read()
-        hash = hashlib.sha256(data).hexdigest()
-        if hash in ["<RANSOMWARE_HASH_1>", "<RANSOMWARE_HASH_2>", "<RANSOMW[9D[K
-"<RANSOMWARE_HASH_3>"]:
+def detect_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        if file.endswith(".zip"):
             return True
     return False
 
-def mitigate_ransomware(file):
-    if detect_ransomware(file):
-        os.rename(file, file + ".bak")
-        shutil.copyfile("<RECOVERY_FILE>", file)
-        return True
-    return False
-
-def main(file):
-    if mitigate_ransomware(file):
-        print("Ransomware mitigated successfully!")
-    else:
-        print("No ransomware detected.")
+def mitigate_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        if file.endswith(".zip"):
+            os.remove(file)
+    return True
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    path = "."
+    while True:
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
+            print("Ransomware detected and mitigated!")
+            break
+        else:
+            print("No ransomware detected.")
+            time.sleep(random.randint(1, 60))
