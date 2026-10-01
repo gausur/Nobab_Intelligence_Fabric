@@ -1,35 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-01 17:17:15.825775
+# Generated 2026-10-01 22:13:01.729996
 
 import re
+import urllib.parse
 
 def is_phishing_url(url):
-    """
-    Check if the given URL is a phishing URL.
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    pattern = re.compile("[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+")
+    if not pattern.match(domain):
+        return True
+    return False
 
-    :param url: The URL to check.
-    :return: True if the URL is a phishing URL, False otherwise.
-    """
-    pattern = r"^(?:http|https)://[a-zA-Z0-9.-]+(:[0-9]+)?/(?:phishing|frau[61D[K
-r"^(?:http|https)://[a-zA-Z0-9.-]+(:[0-9]+)?/(?:phishing|fraud|scam|malwarer"^(?:http|https)://[a-zA-Z0-9.-]+(:[0-9]+)?/(?:phishing|frau|scam|malware)($|/.*)$"
-    return re.search(pattern, url) is not None
-
-def mitigate_phishing_attacks(url):
-    """
-    Mitigate phishing attacks by redirecting the user to a safe page.
-
-    :param url: The URL to check.
-    :return: The safe page URL.
-    """
-    return "https://www.example.com/safe"
-
-def main():
-    url = "http://phishing.example.com"
+def mitigate_phishing(url):
     if is_phishing_url(url):
-        mitigate_phishing_attacks(url)
+        return "Phishing attempt detected. Blocked."
     else:
-        print("Not a phishing URL")
+        return "Not a phishing attempt. Allowed."
 
-if __name__ == "__main__":
-    main()
+url = "http://www.phishing-site.com/login.php"
+print(mitigate_phishing(url))
