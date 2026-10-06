@@ -1,42 +1,55 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-04 20:45:43.163558
+# Generated 2026-10-06 01:07:49.004707
 
 import re
-import urllib.parse
-from urllib.request import urlopen
+import smtplib
 
-def is_phishing_attempt(url):
-    """
-    Check if the given URL is a phishing attempt.
-    """
-    try:
-        response = urlopen(url)
-        html = response.read().decode("utf-8")
-    except:
-        return False
-
-    if re.search(r"https?://\w+.phishing\.com", url):
+def detect_phishing(email):
+    # Check if the email is from a known spammer
+    if re.search(r"spammer\.com", email.get("from")):
         return True
 
-    if re.search(r"https?://\w+.phishing\.com", html):
+    # Check if the email contains a known phishing URL
+    if re.search(r"phishing\.com", email.get("body")):
+        return True
+
+    # Check if the email contains a known phishing domain
+    if re.search(r"[a-z0-9]+\.phishing\.com", email.get("body")):
         return True
 
     return False
 
-def mitigate_phishing_attempt(url):
-    """
-    Mitigate the phishing attempt by redirecting the user to a safe page.
-    """
-    safe_url = "https://www.example.com"
-    return safe_url
+def mitigate_phishing(email):
+    # Send a message to the sender's email address
+    # indicating that their email was detected as phishing
+    smtplib.sendmail(
+        email.get("from"),
+        email.get("to"),
+        "Your email was detected as phishing. Please be cautious when click[5D[K
+clicking on links or providing personal information."
+    )
+
+    # Delete the email from the inbox
+    email.delete()
 
 def main():
-    url = "https://www.phishing.com"
-    if is_phishing_attempt(url):
-        mitigate_phishing_attempt(url)
-    else:
-        print("Not a phishing attempt")
+    # Connect to the email server
+    server = smtplib.SMTP("email.com", 587)
 
-if __name__ == "__main__":
-    main()
+    # Log in to the email server
+    server.login("username", "password")
+
+    # Fetch the inbox messages
+    messages = server.inbox()
+
+    # Iterate over the messages and detect phishing
+    for message in messages:
+        if detect_phishing(message):
+            mitigate_phishing(message)
+
+    # Log out of the email server
+    server.logout()
+
+# Start the script
+main()
