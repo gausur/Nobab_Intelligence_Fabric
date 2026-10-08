@@ -1,45 +1,34 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-08 00:39:36.762841
+# Generated 2026-10-08 06:57:25.591356
 
 import os
-import shutil
-import subprocess
+import socket
+import json
 
-def detect_ransomware(directory):
-    # Check if the directory contains a ransomware payload
-    if os.path.exists(os.path.join(directory, 'payloads')):
-        return True
-    # Check if the directory contains a ransomware decryption key
-    if os.path.exists(os.path.join(directory, 'decryption_key')):
-        return True
-    # Check if the directory contains a ransomware lockout file
-    if os.path.exists(os.path.join(directory, 'lockout')):
-        return True
-    # Check if the directory contains a ransomware configuration file
-    if os.path.exists(os.path.join(directory, 'config.ini')):
-        return True
+def detect_ransomware(file_path):
+    with open(file_path, "r") as f:
+        contents = f.read()
+        if "RANSOMWARE" in contents:
+            return True
     return False
 
-def mitigate_ransomware(directory):
-    # Delete the ransomware payload
-    if os.path.exists(os.path.join(directory, 'payloads')):
-        shutil.rmtree(os.path.join(directory, 'payloads'))
-    # Delete the ransomware decryption key
-    if os.path.exists(os.path.join(directory, 'decryption_key')):
-        os.remove(os.path.join(directory, 'decryption_key'))
-    # Delete the ransomware lockout file
-    if os.path.exists(os.path.join(directory, 'lockout')):
-        os.remove(os.path.join(directory, 'lockout'))
-    # Delete the ransomware configuration file
-    if os.path.exists(os.path.join(directory, 'config.ini')):
-        os.remove(os.path.join(directory, 'config.ini'))
+def mitigate_ransomware(file_path):
+    with open(file_path, "w") as f:
+        f.write("")
 
-def main(directory):
-    if detect_ransomware(directory):
-        mitigate_ransomware(directory)
+def main():
+    if len(sys.argv) != 2:
+        print("Usage: python ransomware_detector.py <file_path>")
+        return
+
+    file_path = sys.argv[1]
+
+    if detect_ransomware(file_path):
+        print("Ransomware detected!")
+        mitigate_ransomware(file_path)
     else:
-        print('No ransomware detected.')
+        print("No ransomware detected.")
 
-if __name__ == '__main__':
-    main(os.getcwd())
+if __name__ == "__main__":
+    main()
