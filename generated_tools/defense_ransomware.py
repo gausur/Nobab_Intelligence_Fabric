@@ -1,35 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-09 19:57:33.790993
+# Generated 2026-10-09 23:47:05.801898
 
 import os
-import sys
+import json
+import subprocess
 
 def detect_ransomware(file_path):
-    with open(file_path, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            print("Ransomware detected!")
+    # Use a file hash to detect ransomware
+    file_hash = subprocess.check_output(['sha256sum', file_path])
+    with open('ransomware_hashes.json') as f:
+        ransomware_hashes = json.load(f)
+        if file_hash in ransomware_hashes:
             return True
-        else:
-            print("No ransomware detected.")
-            return False
+    return False
 
 def mitigate_ransomware(file_path):
-    with open(file_path, "rb") as f:
-        data = f.read()
-        if b"RANSOMWARE" in data:
-            print("Removing ransomware from file...")
-            data = data.replace(b"RANSOMWARE", b"")
-            with open(file_path, "wb") as f:
-                f.write(data)
-            print("Ransomware removed!")
-        else:
-            print("No ransomware detected.")
+    # Remove the infected file
+    os.remove(file_path)
 
-if __name__ == "__main__":
-    file_path = sys.argv[1]
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
-    else:
-        print("No ransomware detected.")
+def main():
+    # Check for ransomware in the current directory and its subdirectories
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if detect_ransomware(file_path):
+                mitigate_ransomware(file_path)
+
+if __name__ == '__main__':
+    main()
