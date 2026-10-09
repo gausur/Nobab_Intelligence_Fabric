@@ -1,35 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-09 07:04:06.974442
+# Generated 2026-10-09 14:18:53.467800
 
 import os
-import shutil
+import subprocess
 
-def detect_ransomware(directory):
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".txt"):
-                with open(os.path.join(root, file), "r") as f:
-                    if "RANSOMWARE" in f.read():
-                        print("Ransomware detected in file:", file)
-                        return True
+def detect_ransomware(path):
+    # Use a combination of file size and file name to detect ransomware
+    files = os.listdir(path)
+    for file in files:
+        if os.path.getsize(path + file) > 1000000:
+            if file.endswith(".exe"):
+                return True
     return False
 
-def mitigate_ransomware(directory):
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(".txt"):
-                with open(os.path.join(root, file), "r") as f:
-                    if "RANSOMWARE" in f.read():
-                        print("Removing ransomware file:", file)
-                        os.remove(os.path.join(root, file))
-                        return True
-    return False
-
-def main():
-    directory = os.getcwd()
-    if detect_ransomware(directory):
-        mitigate_ransomware(directory)
+def mitigate_ransomware(path):
+    # Use a combination of file size and file name to detect ransomware
+    files = os.listdir(path)
+    for file in files:
+        if os.path.getsize(path + file) > 1000000:
+            if file.endswith(".exe"):
+                subprocess.run(["rm", "-rf", path + file])
+    return
 
 if __name__ == "__main__":
-    main()
+    path = "/path/to/directory"
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
