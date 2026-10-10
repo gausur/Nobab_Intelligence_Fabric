@@ -1,37 +1,57 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-10 16:06:24.165807
+# Generated 2026-10-10 20:28:30.102288
 
 import re
-import requests
-import urllib.parse
-from bs4 import BeautifulSoup
+import smtplib
 
-def is_phishing_url(url):
-    # Check if the URL is valid
-    if not urllib.parse.urlparse(url).scheme:
-        return False
+def detect_phishing(email):
+    """
+    Detect phishing attacks in emails.
 
-    # Check if the URL is a phishing URL
-    try:
-        response = requests.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        if soup.find("title").text.lower().startswith("phishing"):
-            return True
-    except requests.exceptions.RequestException:
-        return False
+    :param email: The email message to check.
+    :return: True if the email is phishing, False otherwise.
+    """
+    # Check the subject for keywords related to phishing
+    if re.search(r'phishing|scam|hack', email.subject, re.IGNORECASE):
+        return True
 
+    # Check the sender's email address for suspicious characters
+    if re.search(r'@(gmail|yahoo|hotmail)\.', email.from_address):
+        return True
+
+    # Check the content of the email for suspicious links or attachments
+    if re.search(r'://(drive|dropbox|onedrive)\.', email.body):
+        return True
+
+    # Check the sender's email address for spelling errors
+    if re.search(r'[a-zA-Z]+@[a-zA-Z]+', email.from_address):
+        return True
+
+    # Check the recipient's email address for spelling errors
+    if re.search(r'[a-zA-Z]+@[a-zA-Z]+', email.to_address):
+        return True
+
+    # Check the content of the email for suspicious words or phrases
+    if re.search(r'phishing|scam|hack|virus', email.body, re.IGNORECASE):
+        return True
+
+    # If the email doesn't contain any of the above keywords or phrases, it[2D[K
+it is likely legitimate
     return False
 
-def mitigate_phishing_url(url):
-    # Check if the URL is a phishing URL
-    if is_phishing_url(url):
-        # Redirect to a safe URL
-        return "https://www.example.com"
-    else:
-        # Return the original URL
-        return url
+def mitigate_phishing(email):
+    """
+    Mitigate phishing attacks by blocking the sender's email address.
+
+    :param email: The email message to block.
+    """
+    # Block the sender's email address
+    smtplib.sendmail('noreply@example.com', email.from_address, 'Phishing a[1D[K
+attempt blocked')
 
 # Example usage
-url = "http://www.phishingwebsite.com"
-print(mitigate_phishing_url(url))
+email = EmailMessage('Subject: Phishing Attack', 'This is a phishing attemp[6D[K
+attempt', 'sender@example.com', ['recipient@example.com'])
+if detect_phishing(email):
+    mitigate_phishing(email)
