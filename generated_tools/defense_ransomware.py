@@ -1,31 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-09 23:47:05.801898
+# Generated 2026-10-10 03:34:49.870635
 
 import os
-import json
+import re
+import sys
 import subprocess
 
-def detect_ransomware(file_path):
-    # Use a file hash to detect ransomware
-    file_hash = subprocess.check_output(['sha256sum', file_path])
-    with open('ransomware_hashes.json') as f:
-        ransomware_hashes = json.load(f)
-        if file_hash in ransomware_hashes:
-            return True
+def detect_ransomware(filename):
+    # Check if the file is a valid executable
+    if not os.path.isfile(filename):
+        return False
+    if not os.access(filename, os.X_OK):
+        return False
+
+    # Check if the file has a known ransomware signature
+    with open(filename, "rb") as f:
+        contents = f.read()
+        for signature in RANSOMWARE_SIGNATURES:
+            if contents.find(signature) != -1:
+                return True
+
+    # Check if the file has a known ransomware extension
+    _, extension = os.path.splitext(filename)
+    if extension in RANSOMWARE_EXTENSIONS:
+        return True
+
+    # Check if the file has a known ransomware filename
+    _, filename = os.path.split(filename)
+    if filename in RANSOMWARE_FILENAMES:
+        return True
+
     return False
 
-def mitigate_ransomware(file_path):
-    # Remove the infected file
-    os.remove(file_path)
+def mitigate_ransomware(filename):
+    # Remove the file
+    os.remove(filename)
+
+    # Print a message indicating the file has been removed
+    print("File removed:", filename)
 
 def main():
-    # Check for ransomware in the current directory and its subdirectories
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                mitigate_ransomware(file_path)
+    # Get the list of files to check
+    files = sys.argv[1:]
 
-if __name__ == '__main__':
+    # Check each file for ransomware
+    for filename in files:
+        if detect_ransomware(filename):
+            mitigate_ransomware(filename)
+
+if __name__ == "__main__":
     main()
