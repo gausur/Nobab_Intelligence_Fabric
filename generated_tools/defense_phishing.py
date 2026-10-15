@@ -1,45 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-15 17:34:11.780504
+# Generated 2026-10-15 20:47:39.622438
 
 import re
-import smtplib
+import urllib
 
-def is_phishing_url(url):
-    # Check if the URL is a phishing URL by checking if it contains any of [K
-the known phishing keywords
-    keywords = ['phishing', 'scam', 'fraud', 'hack', 'hijack']
-    for keyword in keywords:
-        if keyword in url:
-            return True
+def detect_phishing(url):
+    # Check if the URL is valid
+    if not urllib.parse.urlparse(url).scheme:
+        return False
+
+    # Check if the URL contains a suspicious domain
+    domain = urllib.parse.urlparse(url).netloc
+    if domain.lower().endswith('google.com'):
+        return True
+
+    # Check if the URL contains a suspicious path
+    path = urllib.parse.urlparse(url).path
+    if re.search(r'/phishing-page\.html$', path):
+        return True
+
+    # Check if the URL contains a suspicious parameter
+    params = urllib.parse.urlparse(url).query
+    if re.search(r'param=value', params):
+        return True
+
     return False
 
-def is_phishing_email(email):
-    # Check if the email is a phishing email by checking if it contains any[3D[K
-any of the known phishing keywords
-    keywords = ['phishing', 'scam', 'fraud', 'hack', 'hijack']
-    for keyword in keywords:
-        if keyword in email:
-            return True
-    return False
-
-def send_email(recipient, subject, message):
-    # Send an email to the recipient with the given subject and message
-    smtplib.SMTP().sendmail('sender@example.com', recipient, f'Subject: {su[3D[K
-{subject}\n\n{message}')
+def mitigate_phishing(url):
+    # Replace the URL with a safe one
+    safe_url = url.replace('google.com', 'example.com')
+    safe_url = safe_url.replace('phishing-page.html', 'index.html')
+    safe_url = safe_url.replace('param=value', 'param=safe')
+    return safe_url
 
 def main():
-    # Get the email and URL from the command line arguments
-    email = sys.argv[1]
-    url = sys.argv[2]
+    # Get the URL from the user
+    url = input("Enter the URL: ")
 
-    # Check if the email and URL are phishing
-    if is_phishing_email(email) or is_phishing_url(url):
-        # If either the email or URL are phishing, send a warning email to [K
-the sender
-        send_email(sys.argv[1], 'Phishing Warning', f'This is a phishing em[2D[K
-email. Please do not click on any links or provide any personal information[11D[K
-information.')
+    # Detect and mitigate phishing attacks
+    if detect_phishing(url):
+        print("The URL is a phishing site.")
+        url = mitigate_phishing(url)
+    else:
+        print("The URL is not a phishing site.")
+
+    # Print the safe URL
+    print(url)
 
 if __name__ == '__main__':
     main()
