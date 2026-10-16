@@ -1,69 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-16 02:27:06.428653
+# Generated 2026-10-16 07:48:58.438310
 
 import os
+import time
 import shutil
-import subprocess
+import hashlib
 
-def detect_ransomware(path):
-    # Check if the path exists
-    if not os.path.exists(path):
-        return False
-
-    # Check if the path is a directory
-    if not os.path.isdir(path):
-        return False
-
-    # Check if the directory contains any ransomware files
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if "ransomware" in file:
-                return True
-
-    # If the directory does not contain any ransomware files, return False
-    return False
-
-def mitigate_ransomware(path):
-    # Check if the path exists
-    if not os.path.exists(path):
-        return False
-
-    # Check if the path is a directory
-    if not os.path.isdir(path):
-        return False
-
-    # Check if the directory contains any ransomware files
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if "ransomware" in file:
-                # Remove the ransomware file
-                os.remove(os.path.join(root, file))
-
-    # If the directory does not contain any ransomware files, return False
-    return False
-
-def main():
-    # Get the path to the directory to scan
-    path = input("Enter the path to the directory to scan: ")
-
-    # Check if the directory exists
-    if not os.path.exists(path):
-        print("The directory does not exist.")
-        return
-
-    # Check if the directory is a directory
-    if not os.path.isdir(path):
-        print("The path is not a directory.")
-        return
-
-    # Detect and mitigate ransomware in the directory
-    if detect_ransomware(path):
-        print("Ransomware detected in the directory.")
-        mitigate_ransomware(path)
-        print("Ransomware mitigated.")
+def detect_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        data = f.read()
+    digest = hashlib.sha256(data).hexdigest()
+    if digest == "49a5c4540834d442d8b7338e909910b3898e8f8f":
+        return True
     else:
-        print("No ransomware detected in the directory.")
+        return False
+
+def mitigate_ransomware(filepath):
+    with open(filepath, "rb") as f:
+        data = f.read()
+    data = data.replace(b"Encrypt", b"Decrypt")
+    with open(filepath, "wb") as f:
+        f.write(data)
 
 if __name__ == "__main__":
-    main()
+    filepath = os.path.join(os.getcwd(), "example.txt")
+    if detect_ransomware(filepath):
+        mitigate_ransomware(filepath)
+        print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")

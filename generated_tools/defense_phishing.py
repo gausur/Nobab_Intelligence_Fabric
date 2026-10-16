@@ -1,52 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-15 20:47:39.622438
+# Generated 2026-10-16 07:47:45.795874
 
 import re
-import urllib
+import requests
 
 def detect_phishing(url):
     # Check if the URL is valid
-    if not urllib.parse.urlparse(url).scheme:
+    if not re.match(r"^https?://", url):
         return False
 
-    # Check if the URL contains a suspicious domain
-    domain = urllib.parse.urlparse(url).netloc
-    if domain.lower().endswith('google.com'):
+    # Send a HEAD request to the URL
+    try:
+        response = requests.head(url, allow_redirects=True)
+    except requests.exceptions.RequestException:
+        return False
+
+    # Check if the response is a redirect
+    if response.status_code >= 300 and response.status_code < 400:
         return True
 
-    # Check if the URL contains a suspicious path
-    path = urllib.parse.urlparse(url).path
-    if re.search(r'/phishing-page\.html$', path):
-        return True
+    # Check if the response is HTML
+    if not response.headers["Content-Type"].startswith("text/html"):
+        return False
 
-    # Check if the URL contains a suspicious parameter
-    params = urllib.parse.urlparse(url).query
-    if re.search(r'param=value', params):
-        return True
+    # Check if the response contains suspicious patterns
+    for pattern in ["<script>", "</script>", "<iframe>"]:
+        if pattern in response.text:
+            return True
 
+    # No phishing detected
     return False
 
 def mitigate_phishing(url):
-    # Replace the URL with a safe one
-    safe_url = url.replace('google.com', 'example.com')
-    safe_url = safe_url.replace('phishing-page.html', 'index.html')
-    safe_url = safe_url.replace('param=value', 'param=safe')
-    return safe_url
+    # Check if the URL is valid
+    if not re.match(r"^https?://", url):
+        return
 
-def main():
-    # Get the URL from the user
-    url = input("Enter the URL: ")
+    # Check if the URL is a redirect
+    if response.status_code >= 300 and response.status_code < 400:
+        return
 
-    # Detect and mitigate phishing attacks
-    if detect_phishing(url):
-        print("The URL is a phishing site.")
-        url = mitigate_phishing(url)
-    else:
-        print("The URL is not a phishing site.")
+    # Check if the URL is an HTML page
+    if not response.headers["Content-Type"].startswith("text/html"):
+        return
 
-    # Print the safe URL
-    print(url)
+    # Check if the URL contains suspicious patterns
+    for pattern in ["<script>", "</script>", "<iframe>"]:
+        if pattern in response.text:
+            return
 
-if __name__ == '__main__':
-    main()
+    # No phishing detected
+    return
