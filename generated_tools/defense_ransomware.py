@@ -1,45 +1,49 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-17 11:58:00.203701
+# Generated 2026-10-17 14:45:33.899538
 
 import os
-import socket
+import sys
+import json
+import subprocess
 import time
-import hashlib
 
 def detect_ransomware(path):
     # Check if the file is a valid executable
-    if not os.path.isfile(path) or not os.access(path, os.X_OK):
+    if not os.path.isfile(path):
         return False
 
-    # Check if the file is a known ransomware executable
-    with open(path, "rb") as f:
-        data = f.read()
-        hash = hashlib.sha256(data).hexdigest()
-        if hash in RANSOMWARE_HASHES:
+    # Get the file hash
+    file_hash = subprocess.check_output(['md5sum', path]).decode('utf-8')
+    file_hash = file_hash.split(' ')[0]
+
+    # Check if the file hash is in the ransomware database
+    with open('ransomware_database.json', 'r') as f:
+        database = json.load(f)
+        if file_hash in database:
             return True
 
     return False
 
 def mitigate_ransomware(path):
-    # Check if the file is a known ransomware executable
-    if detect_ransomware(path):
-        # Delete the file
-        os.remove(path)
-        print("Ransomware detected and mitigated")
-    else:
-        print("No ransomware detected")
+    # Delete the infected file
+    os.remove(path)
 
-# Main function
+    # Notify the user that the file has been deleted
+    print("The infected file has been deleted.")
+
 def main():
-    # Get the list of files to scan
-    files = os.listdir(".")
+    # Check if the script is running as root
+    if os.geteuid() != 0:
+        print("This script must be run as root.")
+        sys.exit(1)
 
-    # Iterate over the files and detect ransomware
-    for file in files:
-        path = os.path.join(".", file)
-        if detect_ransomware(path):
-            mitigate_ransomware(path)
+    # Get the path to the infected file
+    path = sys.argv[1]
 
-if __name__ == "__main__":
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+
+if __name__ == '__main__':
     main()
