@@ -1,49 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-17 14:45:33.899538
+# Generated 2026-10-17 17:41:43.086254
 
 import os
-import sys
-import json
 import subprocess
-import time
 
 def detect_ransomware(path):
-    # Check if the file is a valid executable
-    if not os.path.isfile(path):
+    # Check if the file is encrypted
+    encryption_flag = subprocess.check_output(f'gpg --list-packets {path}',[8D[K
+{path}', shell=True)
+    if b'encrypted' in encryption_flag:
+        return True
+    else:
         return False
 
-    # Get the file hash
-    file_hash = subprocess.check_output(['md5sum', path]).decode('utf-8')
-    file_hash = file_hash.split(' ')[0]
-
-    # Check if the file hash is in the ransomware database
-    with open('ransomware_database.json', 'r') as f:
-        database = json.load(f)
-        if file_hash in database:
-            return True
-
-    return False
-
 def mitigate_ransomware(path):
-    # Delete the infected file
-    os.remove(path)
-
-    # Notify the user that the file has been deleted
-    print("The infected file has been deleted.")
+    # Decrypt the file using gpg
+    subprocess.check_call(f'gpg --decrypt {path}', shell=True)
+    # Remove the encryption flag
+    subprocess.check_call(f'gpg --clear-signatures {path}', shell=True)
 
 def main():
-    # Check if the script is running as root
-    if os.geteuid() != 0:
-        print("This script must be run as root.")
-        sys.exit(1)
-
-    # Get the path to the infected file
-    path = sys.argv[1]
-
-    # Detect and mitigate ransomware attacks
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+    # Get the list of files to check
+    files = os.listdir()
+    # Iterate over the files and detect ransomware
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
 if __name__ == '__main__':
     main()

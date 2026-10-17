@@ -1,40 +1,37 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-17 14:46:45.070987
+# Generated 2026-10-17 17:44:37.923074
 
 import re
-import sys
+import smtplib
 
-# Define a list of phishing URLs
-phishing_urls = [
-    "https://www.example1.com",
-    "https://www.example2.com",
-    "https://www.example3.com",
-    "https://www.example4.com",
-    "https://www.example5.com",
-]
+def check_phishing_attack(email_body):
+    # Check if the email body contains a suspicious link
+    if re.search(r'href="\w+:\/\/[^\s]+"', email_body):
+        # Check if the link is to a known phishing domain
+        if re.search(r'href="https?:\/\/phishingdomain\.com\/', email_body)[11D[K
+email_body):
+            # Mitigate the phishing attack by marking the email as spam
+            return True
+    return False
 
-# Define a regular expression pattern to match phishing URLs
-pattern = r"https://(www\.)?(example1|example2|example3|example4|example5)\[65D[K
-r"https://(www\.)?(example1|example2|example3|example4|example5)\.com"
+def main():
+    # Connect to the email server
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.starttls()
+    server.login('your_email@gmail.com', 'your_password')
 
-# Define a function to check if a URL is phishing
-def is_phishing(url):
-    if re.match(pattern, url):
-        return True
-    else:
-        return False
+    # Fetch new emails from the email server
+    emails = server.retrieve('your_email@gmail.com', 'INBOX')
 
-# Define a function to mitigate phishing attacks
-def mitigate_phishing(url):
-    if is_phishing(url):
-        print("Phishing attack detected!")
-        sys.exit(1)
-    else:
-        print("No phishing attack detected.")
-        sys.exit(0)
+    # Check each email for phishing attacks
+    for email in emails:
+        if check_phishing_attack(email['body']):
+            # Mark the email as spam
+            server.flag(email)
 
-# Call the mitigate_phishing function with the URL provided as an argument
-if __name__ == "__main__":
-    url = sys.argv[1]
-    mitigate_phishing(url)
+    # Disconnect from the email server
+    server.quit()
+
+if __name__ == '__main__':
+    main()
