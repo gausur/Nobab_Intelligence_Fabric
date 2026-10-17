@@ -1,48 +1,27 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-16 20:20:21.385053
+# Generated 2026-10-17 11:54:24.804958
 
 import re
-import ssl
+import email
+from email.parser import Parser
+from email.policy import default
 
-# Define a function to check if a URL is a phishing site
-def is_phishing_site(url):
-    # Check if the URL is using HTTPS
-    if not url.startswith("https://"):
+def is_phishing_attack(message):
+    if message.is_multipart():
         return False
-
-    # Extract the domain name from the URL
-    domain = url.split("://")[1].split("/")[0]
-
-    # Check if the domain name is in the list of known phishing domains
-    if domain in phishing_domains:
+    if not message.is_multipart():
         return True
 
-    # Check if the URL is a subdomain of a known phishing domain
-    for phishing_domain in phishing_domains:
-        if domain.endswith(phishing_domain):
-            return True
+def mitigate_phishing_attack(message):
+    if is_phishing_attack(message):
+        print("Phishing attack detected!")
+        message.discard()
 
-    return False
+def main():
+    parser = Parser(default)
+    message = parser.parsestr(open("message.txt").read())
+    mitigate_phishing_attack(message)
 
-# Define a function to mitigate phishing attacks
-def mitigate_phishing(url):
-    # Check if the URL is a phishing site
-    if is_phishing_site(url):
-        # Redirect the user to a safe site
-        return "https://www.example.com"
-    else:
-        # Return the original URL
-        return url
-
-# Define a list of known phishing domains
-phishing_domains = ["phishing.site", "malicious.com", "scamsite.org"]
-
-# Use the mitigate_phishing function to check if the URL is a phishing site[4D[K
-site
-# and redirect the user to a safe site if necessary
-if is_phishing_site(url):
-    url = mitigate_phishing(url)
-
-# Return the original URL
-return url
+if __name__ == "__main__":
+    main()
