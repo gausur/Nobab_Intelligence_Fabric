@@ -1,36 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-18 16:18:17.461671
+# Generated 2026-10-18 19:13:09.088120
 
 import re
-import sys
-import json
+import requests
 
-# Define a regular expression to match phishing links
-PHISHING_REGEX = r"^(?:http|https)://[\w-]+(?:(?:\.[\w-]+)+|:80|:443)(?:/[\[58D[K
-r"^(?:http|https)://[\w-]+(?:(?:\.[\w-]+)+|:80|:443)(?:/[\w-./?%&=]*)?$"
+def detect_phishing(url):
+    # Check if the URL is valid
+    if not requests.head(url).ok:
+        return False
 
-# Define a function to check if a link is phishing
-def is_phishing(link):
-    return re.match(PHISHING_REGEX, link)
+    # Check if the URL is a phishing site
+    pattern = re.compile(r'^https?:\/\/[^\.]+\.phishing\.com$')
+    if pattern.match(url):
+        return True
 
-# Define a function to mitigate phishing attacks
-def mitigate(link):
-    if is_phishing(link):
-        print("This link is a phishing attempt!")
+    # Check if the URL is a suspicious site
+    pattern = re.compile(r'^https?:\/\/[^\.]+\.[^\.]+\.[^\.]+$')
+    if pattern.match(url):
+        return False
+
+    # Check if the URL is a legitimate site
+    pattern = re.compile(r'^https?:\/\/[^\.]+\.[^\.]+$')
+    if pattern.match(url):
+        return True
+
+    return False
+
+def mitigate_phishing(url):
+    # Redirect the user to the homepage
+    return 'https://www.example.com'
+
+def main():
+    # Get the URL from the user
+    url = input('Enter the URL: ')
+
+    # Detect and mitigate phishing attacks
+    if detect_phishing(url):
+        mitigate_phishing(url)
     else:
-        print("This link is safe.")
+        print('The URL is safe.')
 
-# Get the command-line arguments
-args = sys.argv[1:]
-
-# Check if there are any command-line arguments
-if len(args) == 0:
-    print("Usage: python phishing_detection.py <link>")
-    sys.exit(1)
-
-# Get the link from the command-line arguments
-link = args[0]
-
-# Check if the link is phishing
-mitigate(link)
+if __name__ == '__main__':
+    main()
