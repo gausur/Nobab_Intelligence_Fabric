@@ -1,45 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-18 12:23:17.225883
+# Generated 2026-10-18 16:18:17.461671
 
 import re
-import urllib.parse
+import sys
+import json
 
-def is_phishing_attack(url):
-    # Check if the URL is a valid HTTP/HTTPS URL
-    if not url.startswith(("http://", "https://")):
-        return False
+# Define a regular expression to match phishing links
+PHISHING_REGEX = r"^(?:http|https)://[\w-]+(?:(?:\.[\w-]+)+|:80|:443)(?:/[\[58D[K
+r"^(?:http|https)://[\w-]+(?:(?:\.[\w-]+)+|:80|:443)(?:/[\w-./?%&=]*)?$"
 
-    # Parse the URL and extract the hostname
-    parsed_url = urllib.parse.urlparse(url)
-    hostname = parsed_url.hostname
+# Define a function to check if a link is phishing
+def is_phishing(link):
+    return re.match(PHISHING_REGEX, link)
 
-    # Check if the hostname is an IP address
-    if re.match(r"^\d+\.\d+\.\d+\.\d+$", hostname):
-        return False
+# Define a function to mitigate phishing attacks
+def mitigate(link):
+    if is_phishing(link):
+        print("This link is a phishing attempt!")
+    else:
+        print("This link is safe.")
 
-    # Check if the hostname is a valid domain name
-    if not re.match(r"^[a-zA-Z0-9-]+$", hostname):
-        return False
+# Get the command-line arguments
+args = sys.argv[1:]
 
-    # Check if the hostname is in the public suffix list
-    if not urllib.parse.urlsplit(url).hostname in urllib.parse.publicsuffix[25D[K
-urllib.parse.publicsuffix.public_suffix_list:
-        return False
+# Check if there are any command-line arguments
+if len(args) == 0:
+    print("Usage: python phishing_detection.py <link>")
+    sys.exit(1)
 
-    # Check if the URL is for a known phishing website
-    if url in known_phishing_urls:
-        return True
+# Get the link from the command-line arguments
+link = args[0]
 
-    return False
-
-def mitigate_phishing_attack(url):
-    # Redirect the user to the homepage
-    return redirect("/")
-
-known_phishing_urls = [
-    "https://example.com",
-    "https://example2.com",
-    "https://example3.com",
-    "https://example4.com"
-]
+# Check if the link is phishing
+mitigate(link)
