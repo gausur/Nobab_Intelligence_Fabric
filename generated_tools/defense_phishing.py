@@ -1,35 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-19 05:33:58.151267
+# Generated 2026-10-19 11:40:46.353268
 
 import re
-import smtplib
 
-def detect_phishing(email):
-    # Check for suspicious keywords in the email subject and body
-    keywords = ["phishing", "scam", "fake", "urgent", "password", "login"]
-    if any(keyword in email.subject.lower() for keyword in keywords):
+def detect_phishing(url):
+    """
+    Detects phishing attacks by checking if the URL is a valid URL and if i[1D[K
+it contains any suspicious characters.
+    :param url: The URL to check
+    :return: True if the URL is a phishing attack, False otherwise
+    """
+    # Check if the URL is a valid URL
+    if not re.match(r"^https?://", url):
         return True
-    if any(keyword in email.body.lower() for keyword in keywords):
+
+    # Check if the URL contains any suspicious characters
+    if re.search(r"[^\w-./]", url):
         return True
+
     return False
 
-def mitigate_phishing(email):
-    # Send a warning message to the sender
-    smtplib.SMTP("smtp.gmail.com", 587).sendmail(
-        email.from_address,
-        email.to_address,
-        f"Warning: potential phishing attack detected from {email.from_addr[16D[K
-{email.from_address}. Please verify the authenticity of the message before [K
-taking any action.",
-    )
+def mitigate_phishing(url):
+    """
+    Mitigates phishing attacks by redirecting the user to a secure URL.
+    :param url: The URL to redirect to
+    :return: The redirect URL
+    """
+    return "https://www.example.com"
 
-# Set up the email server
-smtp = smtplib.SMTP("smtp.gmail.com", 587)
-smtp.login("your_email_address", "your_email_password")
-
-# Receive and process emails
-while True:
-    email = smtp.receive()
-    if detect_phishing(email):
-        mitigate_phishing(email)
+# Test the function
+url = "http://www.example.com"
+if detect_phishing(url):
+    mitigate_phishing(url)
