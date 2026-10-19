@@ -1,46 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-19 00:44:12.705362
+# Generated 2026-10-19 05:33:58.151267
 
 import re
-import requests
+import smtplib
 
-def detect_phishing_attack(url):
-    """
-    Detects phishing attacks by analyzing the URL.
-    """
-    # Check if the URL is valid
-    if not re.match(r"^https?://", url):
-        return False
-
-    # Check if the URL is from a trusted domain
-    if not re.match(r"^www\.(yahoo|google|facebook|twitter)\.com$", url):
-        return False
-
-    # Check if the URL contains a suspicious parameter
-    if "?" in url and re.search(r"[a-z0-9]{16}", url):
+def detect_phishing(email):
+    # Check for suspicious keywords in the email subject and body
+    keywords = ["phishing", "scam", "fake", "urgent", "password", "login"]
+    if any(keyword in email.subject.lower() for keyword in keywords):
         return True
-
+    if any(keyword in email.body.lower() for keyword in keywords):
+        return True
     return False
 
-def mitigate_phishing_attack(url):
-    """
-    Mitigates a phishing attack by redirecting the user to a secure page.
-    """
-    # Redirect the user to the secure page
-    return "https://example.com/secure-page"
+def mitigate_phishing(email):
+    # Send a warning message to the sender
+    smtplib.SMTP("smtp.gmail.com", 587).sendmail(
+        email.from_address,
+        email.to_address,
+        f"Warning: potential phishing attack detected from {email.from_addr[16D[K
+{email.from_address}. Please verify the authenticity of the message before [K
+taking any action.",
+    )
 
-def main():
-    # Get the URL from the user
-    url = input("Enter the URL: ")
+# Set up the email server
+smtp = smtplib.SMTP("smtp.gmail.com", 587)
+smtp.login("your_email_address", "your_email_password")
 
-    # Check if the URL is a phishing attack
-    if detect_phishing_attack(url):
-        # Mitigate the phishing attack
-        mitigate_phishing_attack(url)
-    else:
-        # The URL is not a phishing attack
-        pass
-
-if __name__ == "__main__":
-    main()
+# Receive and process emails
+while True:
+    email = smtp.receive()
+    if detect_phishing(email):
+        mitigate_phishing(email)
