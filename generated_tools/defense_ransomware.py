@@ -1,34 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-20 01:28:22.478104
+# Generated 2026-10-20 07:01:06.720503
 
 import os
-import json
-import time
+import subprocess
 
-def detect_ransomware(file_path):
-    file_size = os.path.getsize(file_path)
-    with open(file_path, 'rb') as f:
-        data = f.read()
-    for i in range(len(data) - 1):
-        if data[i] == 0x00 and data[i + 1] == 0x00:
-            return True
+def detect_ransomware(path):
+    # Check if the file exists
+    if not os.path.exists(path):
+        return False
+
+    # Get the file's MD5 hash
+    md5sum = subprocess.check_output(["md5sum", path]).decode("utf-8")
+
+    # Check if the hash is in the known ransomware list
+    with open("ransomware_hashes.txt", "r") as f:
+        for line in f:
+            if line.startswith(md5sum):
+                return True
+
     return False
 
-def mitigate_ransomware(file_path):
-    if detect_ransomware(file_path):
-        print("Ransomware detected!")
-        with open(file_path, 'w') as f:
-            f.write('This file has been recovered using the mitigation scri[4D[K
-script.')
-        print("File recovered!")
+def mitigate_ransomware(path):
+    # Remove the file
+    os.remove(path)
 
+    # Notify the user
+    print("Ransomware detected and mitigated.")
+
+# Main function
 def main():
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                mitigate_ransomware(file_path)
+    # Get the path to the file to check
+    path = input("Enter the path to the file: ")
 
-if __name__ == '__main__':
+    # Check if the file is a ransomware
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+
+if __name__ == "__main__":
     main()
