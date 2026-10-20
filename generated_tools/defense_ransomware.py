@@ -1,47 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-20 17:42:27.958268
+# Generated 2026-10-20 21:05:36.885993
 
 import os
-import sys
-import time
-import subprocess
+import hashlib
 
-def detect_ransomware(process_name):
-    """
-    Detect if the given process is a ransomware.
-    :param process_name: the name of the process to check
-    :return: True if the process is a ransomware, False otherwise
-    """
-    # Check if the process name is "ransomware"
-    if process_name == "ransomware":
-        return True
-    else:
-        return False
+def detect_ransomware(file):
+    # Calculate the MD5 hash of the file
+    md5 = hashlib.md5(file.read()).hexdigest()
+    # Check if the MD5 hash is in the list of known ransomware hashes
+    if md5 in KNOWN_RANSOMWARE_HASHES:
+        # If the file is a ransomware, raise an exception
+        raise ValueError("File is a ransomware")
 
-def mitigate_ransomware(process_name):
-    """
-    Mitigate the given ransomware process.
-    :param process_name: the name of the ransomware process to mitigate
-    :return: None
-    """
-    # Kill the process
-    subprocess.run(["kill", "-9", process_name])
+def mitigate_ransomware(file):
+    # If the file is a ransomware, delete it
+    os.remove(file)
 
 def main():
-    # Get the list of running processes
-    process_list = subprocess.run(["ps", "axwwo", "user,pid,comm"], stdout=[7D[K
-stdout=subprocess.PIPE)
-
-    # Iterate over the list of processes
-    for process in process_list.stdout.decode("utf-8").split("\n"):
-        # Get the process name
-        process_name = process.split(" ", 1)[1]
-
-        # Check if the process is a ransomware
-        if detect_ransomware(process_name):
-            # Mitigate the ransomware
-            mitigate_ransomware(process_name)
+    # Loop through all files in the current directory
+    for file in os.listdir():
+        # Detect ransomware
+        detect_ransomware(file)
+        # Mitigate ransomware
+        mitigate_ransomware(file)
 
 if __name__ == "__main__":
     main()
