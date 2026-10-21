@@ -1,26 +1,45 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-21 15:48:07.279854
+# Generated 2026-10-21 22:58:48.279345
 
 import re
+import requests
 
-def is_phishing_url(url):
-    # Check if the URL is a phishing URL
-    if re.search(r"[a-zA-Z0-9-_]+@[a-zA-Z0-9-_]+.[a-zA-Z0-9-_]+", url):
-        return True
-    else:
+def is_phishing_attack(url):
+    """
+    Check if the given URL is a phishing attack.
+    """
+    # Check if the URL is a valid HTTPS URL
+    if not re.match(r"^https://", url):
         return False
 
+    # Send a HEAD request to the URL to get the headers
+    try:
+        response = requests.head(url)
+    except requests.RequestException:
+        return False
+
+    # Check if the server is a legitimate HTTPS server
+    if not response.headers.get("Strict-Transport-Security"):
+        return False
+
+    # Check if the server has a valid SSL certificate
+    try:
+        requests.get(url, verify=True)
+    except requests.RequestException:
+        return False
+
+    # If all checks pass, the URL is likely a phishing attack
+    return True
+
 def mitigate_phishing_attack(url):
-    # Redirect the user to a safe URL
-    if is_phishing_url(url):
-        return "https://www.example.com"
-    else:
-        return url
+    """
+    Mitigate a phishing attack by blocking the URL.
+    """
+    # Block the URL in the firewall
+    os.system(f"iptables -I INPUT -p tcp --dport 443 -s {url} -j DROP")
 
-url = "http://example.com"
-
-if is_phishing_url(url):
+# Test the function
+url = "https://example.com"
+if is_phishing_attack(url):
     mitigate_phishing_attack(url)
-else:
-    print("The URL is not a phishing URL.")
