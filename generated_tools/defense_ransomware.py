@@ -1,31 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-22 17:50:55.946962
+# Generated 2026-10-22 21:02:49.545574
 
 import os
+import socket
 import subprocess
 
 def detect_ransomware():
-    # Check if the system is compromised by looking for known ransomware fi[2D[K
-files
-    for file in ["lock", "ransom", "encrypt"]:
-        if os.path.isfile(file):
-            return True
-    # Check if the system is communicating with known ransomware servers
-    try:
-        subprocess.check_output(["ping", "127.0.0.1"])
-        return True
-    except subprocess.CalledProcessError:
-        return False
+    # Check if ransomware is detected in the system
+    if os.path.exists("ransomware_detected"):
+        # If ransomware is detected, mitigate the attack
+        mitigate_ransomware()
+    else:
+        # If ransomware is not detected, do nothing
+        pass
 
 def mitigate_ransomware():
-    # Remove all ransomware files
-    for file in os.listdir():
-        if file.endswith((".lock", ".ransom", ".encrypt")):
-            os.remove(file)
-    # Block all incoming traffic to known ransomware servers
-    subprocess.check_output(["iptables", "-A", "INPUT", "-s", "127.0.0.1", [K
-"-j", "DROP"])
+    # Restore the system to its previous state
+    subprocess.run("system restore", shell=True)
+    # Remove the ransomware files
+    os.remove("ransomware_detected")
+    # Restart the system
+    subprocess.run("system restart", shell=True)
 
-if detect_ransomware():
+def main():
+    # Run the detection and mitigation script
+    detect_ransomware()
     mitigate_ransomware()
+
+if __name__ == "__main__":
+    main()
