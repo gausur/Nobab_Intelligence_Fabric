@@ -1,45 +1,46 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-21 22:58:48.279345
+# Generated 2026-10-22 01:08:29.261930
 
 import re
-import requests
 
-def is_phishing_attack(url):
+def detect_phishing_attacks(url):
     """
-    Check if the given URL is a phishing attack.
+    Detect and mitigate phishing attacks by analyzing the URL.
     """
-    # Check if the URL is a valid HTTPS URL
-    if not re.match(r"^https://", url):
+    # Check for valid URL
+    if not re.match(r'^https?://', url):
         return False
 
-    # Send a HEAD request to the URL to get the headers
-    try:
-        response = requests.head(url)
-    except requests.RequestException:
+    # Check for suspicious TLDs
+    if re.search(r'\.(asia|club|exchange|gifts|help|store)\.', url):
         return False
 
-    # Check if the server is a legitimate HTTPS server
-    if not response.headers.get("Strict-Transport-Security"):
+    # Check for suspicious hostnames
+    if re.search(r'\.(biz|buzz|gay|gov|hotmail|icu|info|jobs|la|mil|mobi|ne[68D[K
+re.search(r'\.(biz|buzz|gay|gov|hotmail|icu|info|jobs|la|mil|mobi|news|onlire.search(r'\.(biz|buzz|gay|gov|hotmail|icu|info|jobs|la|mil|mobi|nes|online|pics|post|sex|shop|site|travel|xxx)\.', url):
         return False
 
-    # Check if the server has a valid SSL certificate
-    try:
-        requests.get(url, verify=True)
-    except requests.RequestException:
+    # Check for suspicious parameters
+    if re.search(r'\?\w{8}\=', url):
         return False
 
-    # If all checks pass, the URL is likely a phishing attack
+    # Check for suspicious query strings
+    if re.search(r'\?\w{8}\=', url):
+        return False
+
+    # Check for suspicious fragments
+    if re.search(r'#\w{8}', url):
+        return False
+
     return True
 
-def mitigate_phishing_attack(url):
-    """
-    Mitigate a phishing attack by blocking the URL.
-    """
-    # Block the URL in the firewall
-    os.system(f"iptables -I INPUT -p tcp --dport 443 -s {url} -j DROP")
+def main():
+    url = "https://www.example.com"
+    if detect_phishing_attacks(url):
+        print("Phishing attack detected.")
+    else:
+        print("No phishing attacks detected.")
 
-# Test the function
-url = "https://example.com"
-if is_phishing_attack(url):
-    mitigate_phishing_attack(url)
+if __name__ == "__main__":
+    main()
