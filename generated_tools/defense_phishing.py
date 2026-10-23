@@ -1,24 +1,50 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-22 23:57:18.217849
+# Generated 2026-10-23 02:45:37.096794
 
 import re
-import urllib.parse
+import smtplib
 
-def is_phishing_attack(url):
-    parsed_url = urllib.parse.urlparse(url)
-    domain = parsed_url.netloc
-    return domain.endswith("google.com") and parsed_url.query.startswith("q[30D[K
-parsed_url.query.startswith("q=")
+def detect_phishing_attack(email):
+    # Check if the email is from a known spammer
+    if email.get("From") not in spammer_list:
+        return False
 
-def mitigate_phishing_attack(url):
-    if is_phishing_attack(url):
-        return "Phishing attack detected. Redirecting to a safe page."
-    else:
-        return "Not a phishing attack. Proceeding with the requested URL."
+    # Check if the email contains any phishing links
+    if any(re.search(r"http[s]?://[^\s]+\.onion/", part.get_content()) for [K
+part in email.get_payload()):
+        return True
 
-print(mitigate_phishing_attack("http://www.google.com/search?q=Stack+Overflprint(mitigate_phishing_attack("http://www.google.com/search?q=Stack+Overflow"))
-# Output: Phishing attack detected. Redirecting to a safe page.
+    # Check if the email contains any malicious attachments
+    if any(re.search(r"\.exe|\.zip|\.rar|\.tar|\.gz", part.get_filename()) [K
+for part in email.get_payload()):
+        return True
 
-print(mitigate_phishing_attack("http://www.google.com/search?q=python+phishprint(mitigate_phishing_attack("http://www.google.com/search?q=python+phishing+attack+detection"))
-# Output: Not a phishing attack. Proceeding with the requested URL.
+    # Check if the email contains any malicious content
+    if any(re.search(r"javascript:|vbscript:|data:|<script|<html|<body|<hea[68D[K
+any(re.search(r"javascript:|vbscript:|data:|<script|<html|<body|<head", par[3D[K
+part.get_content()) for part in email.get_payload()):
+        return True
+
+    return False
+
+def mitigate_phishing_attack(email):
+    # Send the email to the spam folder
+    smtplib.sendmail(email.get("From"), "spam@example.com", email.as_string[15D[K
+email.as_string())
+
+    # Remove the email from the inbox
+    smtplib.sendmail(email.get("From"), "trash@example.com", email.as_strin[14D[K
+email.as_string())
+
+# Load the spammer list
+with open("spammer_list.txt", "r") as f:
+    spammer_list = f.read().splitlines()
+
+# Read the email from stdin
+email = EmailMessage()
+email.parse(sys.stdin)
+
+# Detect and mitigate the phishing attack
+if detect_phishing_attack(email):
+    mitigate_phishing_attack(email)

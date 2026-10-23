@@ -1,37 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-22 23:58:57.783214
+# Generated 2026-10-23 02:44:22.137950
 
 import os
-import time
-import json
+import sys
 
-def detect_ransomware(file_path):
-    # Read the file contents
-    with open(file_path, 'r') as f:
-        contents = f.read()
-    
-    # Check for the ransomware signature
-    if "RANSOMWARE_SIGNATURE" in contents:
-        # Raise an alert
-        raise Exception("Ransomware detected!")
+def detect_ransomware(path):
+    """
+    Detect ransomware by checking for the presence of specific files and fo[2D[K
+folders.
+    """
+    files = ['lock', 'key', 'password', 'encrypted']
+    folders = ['ransomware', 'demands']
+    for file in files:
+        if file in os.listdir(path):
+            return True
+    for folder in folders:
+        if folder in os.listdir(path):
+            return True
+    return False
 
-def mitigate_ransomware(file_path):
-    # Restore the original file
-    with open(file_path, 'w') as f:
-        f.write("RESTORED_FILE_CONTENTS")
+def mitigate_ransomware(path):
+    """
+    Mitigate ransomware by removing the malicious files and folders.
+    """
+    files = ['lock', 'key', 'password', 'encrypted']
+    folders = ['ransomware', 'demands']
+    for file in files:
+        os.remove(os.path.join(path, file))
+    for folder in folders:
+        os.rmdir(os.path.join(path, folder))
 
 def main():
-    # Get the file path from the command line arguments
-    file_path = sys.argv[1]
-    
-    # Detect and mitigate ransomware
-    try:
-        detect_ransomware(file_path)
-        mitigate_ransomware(file_path)
-    except Exception as e:
-        # Log the exception
-        print(e)
+    if detect_ransomware(os.getcwd()):
+        mitigate_ransomware(os.getcwd())
+    else:
+        print("No ransomware detected")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
