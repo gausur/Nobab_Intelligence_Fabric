@@ -1,39 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-23 14:02:26.866136
+# Generated 2026-10-23 18:06:30.353050
 
+import subprocess
+import sys
 import os
-import hashlib
 import time
+import re
 
-def detect_ransomware(filepath):
-    # Calculate the SHA-256 hash of the file
-    with open(filepath, 'rb') as f:
-        file_hash = hashlib.sha256(f.read()).hexdigest()
-    
-    # Check if the file has been modified
-    modified_time = os.path.getmtime(filepath)
-    if time.time() - modified_time > 3600:
-        return False
-    
-    # Check if the file hash has changed
-    if file_hash != '...':
-        return True
-    
-    return False
+def detect_ransomware():
+    # Check if ransomware is detected in the system
+    try:
+        subprocess.check_output(["ransomware-detection", "--status"])
+    except subprocess.CalledProcessError:
+        # If the ransomware is not detected, return
+        return
 
-def mitigate_ransomware(filepath):
-    # Delete the file
-    os.remove(filepath)
-    
-    # Notify the user
-    print('Ransomware attack detected and mitigated!')
+    # If the ransomware is detected, mitigate it
+    subprocess.check_output(["ransomware-detection", "--mitigate"])
 
 def main():
-    # Check for ransomware attacks
-    for filepath in os.listdir():
-        if detect_ransomware(filepath):
-            mitigate_ransomware(filepath)
+    while True:
+        detect_ransomware()
+        time.sleep(60)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -1,48 +1,53 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-23 13:59:40.602837
+# Generated 2026-10-23 18:09:33.987110
 
 import re
-import smtplib
+import requests
 
-def detect_phishing_attacks(email):
-    # Check if the email is from a legitimate sender
-    if not re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', em[2D[K
-email['From']):
+def detect_phishing_attacks(url):
+    # Check if the URL is valid
+    if not re.match(r'^https?://', url):
         return False
 
-    # Check if the email contains a phishing URL
-    if re.search(r'http://|https://|www.', email['Subject']):
-        return True
+    # Send a HEAD request to the URL
+    try:
+        response = requests.head(url)
+    except requests.exceptions.RequestException:
+        return False
 
-    # Check if the email contains a phishing domain
-    if re.search(r'\.(com|net|org)$', email['From']):
-        return True
+    # Check if the response status code is 200
+    if response.status_code != 200:
+        return False
 
-    # Check if the email contains a phishing keyword
-    if re.search(r'phish|scam|fake|spoof', email['Subject']):
+    # Check if the response contains a suspicious header
+    if 'x-frame-options' in response.headers:
+        # Check if the header value is 'deny'
+        if response.headers['x-frame-options'] == 'deny':
+            return True
+
+    # Check if the response contains a suspicious cookie
+    if 'set-cookie' in response.headers:
+        # Check if the cookie name is '__Host-' or starts with '__Host-'
+        for cookie in response.headers['set-cookie']:
+            if cookie.startswith('__Host-'):
+                return True
+
+    # Check if the response contains a suspicious header
+    if 'content-security-policy' in response.headers:
+        # Check if the header value contains 'unsafe-inline'
+        if 'unsafe-inline' in response.headers['content-security-policy']:
+            return True
+
+    # Check if the response contains a suspicious body
+    if response.text.lower().find('<script>') != -1:
         return True
 
     return False
 
-def mitigate_phishing_attacks(email):
-    # Mark the email as spam
-    email['X-Spam-Status'] = 'Yes'
-
-    # Add a header to indicate that the email was flagged as spam
-    email['X-Spam-Flag'] = 'Yes'
-
-    # Send the email to a spam filter
-    smtplib.sendmail(email['From'], email['To'], email['Subject'], email.as[8D[K
-email.as_string())
-
-def main():
-    # Read the email from stdin
-    email = email.message_from_file(sys.stdin)
-
-    # Detect and mitigate phishing attacks
-    if detect_phishing_attacks(email):
-        mitigate_phishing_attacks(email)
-
-if __name__ == '__main__':
-    main()
+# Example usage
+url = 'https://example.com'
+if detect_phishing_attacks(url):
+    print('Phishing attack detected')
+else:
+    print('No phishing attack detected')
