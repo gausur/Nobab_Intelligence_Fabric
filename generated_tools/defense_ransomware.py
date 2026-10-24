@@ -1,28 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-24 17:47:24.472281
+# Generated 2026-10-24 20:07:10.747539
 
 import os
-import socket
-import sys
+import time
+import json
+import hashlib
 
-def detect_ransomware():
-    try:
-        # Check if the system has been compromised by checking for the exis[4D[K
-existence of ransomware-specific files
-        if os.path.exists("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\[5D[K
-Menu\\Programs\\Startup\\ransomware.exe"):
-            print("Ransomware detected!")
-            # Stop the ransomware from running
-            os.system("taskkill /im ransomware.exe")
-            # Delete the ransomware file
-            os.remove("C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Pro[9D[K
-Menu\\Programs\\Startup\\ransomware.exe")
-            # Restart the system to clear any lingering ransomware processe[8D[K
-processes
-            os.system("shutdown /r /t 0")
-    except:
-        print("No ransomware detected.")
+def detect_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        with open(os.path.join(path, file), 'rb') as f:
+            data = f.read()
+            hash = hashlib.sha256(data).hexdigest()
+            if hash == '0000000000000000000000000000000000000000':
+                print('Ransomware detected!')
+                return True
+    return False
 
-if __name__ == "__main__":
-    detect_ransomware()
+def mitigate_ransomware(path):
+    files = os.listdir(path)
+    for file in files:
+        with open(os.path.join(path, file), 'rb') as f:
+            data = f.read()
+            hash = hashlib.sha256(data).hexdigest()
+            if hash != '0000000000000000000000000000000000000000':
+                print('Mitigating ransomware...')
+                os.remove(os.path.join(path, file))
+                return
+
+def main():
+    path = '/path/to/your/files'
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+        print('Ransomware mitigated!')
+    else:
+        print('No ransomware detected.')
+
+if __name__ == '__main__':
+    main()
