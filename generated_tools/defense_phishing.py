@@ -1,42 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-24 14:14:45.695480
+# Generated 2026-10-24 17:46:44.511014
 
 import re
-import smtplib
-import ssl
+import requests
+import json
 
-def detect_phishing(email):
-    # Check for common phishing patterns
-    if re.search(r'[\w.-]+@[\w.-]+\.[a-z]{2,3}$', email):
-        return True
-    else:
-        return False
+def is_phishing_url(url):
+    """
+    Check if the given URL is a phishing site.
+    """
+    response = requests.get(url)
+    if response.status_code == 200:
+        content = response.content.decode()
+        if re.search(r'https://[a-z0-9]+.{0,3}', content):
+            return True
+    return False
 
-def mitigate_phishing(email):
-    # Check for common phishing domains
-    if re.search(r'@phishing.com', email):
-        # Send a warning email
-        subject = 'Phishing Attempt'
-        message = 'This email is a phishing attempt. Please do not respond.[8D[K
-respond.'
-        try:
-            server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-            server.login('your_email', 'your_password')
-            server.sendmail('your_email', email, message)
-            server.quit()
-        except smtplib.SMTPException:
-            print('Failed to send warning email')
-        return True
-    else:
-        return False
+def mitigate_phishing(url):
+    """
+    Mitigate a phishing site by redirecting the user to a safe URL.
+    """
+    safe_url = 'https://example.com'
+    return safe_url
 
 def main():
-    # Check if the email is a phishing attempt
-    if detect_phishing('johndoe@phishing.com'):
-        mitigate_phishing('johndoe@phishing.com')
+    url = input('Enter a URL: ')
+    if is_phishing_url(url):
+        mitigate_phishing(url)
     else:
-        print('This email is not a phishing attempt.')
+        print('The URL is not a phishing site.')
 
 if __name__ == '__main__':
     main()
