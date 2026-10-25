@@ -1,41 +1,28 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-25 00:44:16.764487
+# Generated 2026-10-25 05:36:23.247608
 
 import os
+import shutil
 import subprocess
-import json
+import time
 
-def detect_ransomware(path):
-    # Check if the file is a valid image
-    try:
-        image = Image.open(path)
-    except:
-        return False
-
-    # Check if the image contains any ransomware-specific patterns
-    patterns = ['ransomware_pattern1', 'ransomware_pattern2', 'ransomware_p[13D[K
-'ransomware_pattern3']
-    for pattern in patterns:
-        if pattern in image.tobytes():
-            return True
-    return False
-
-def mitigate_ransomware(path):
-    # Restore the original file from the backup
-    subprocess.run(['restore', path])
+def detect_ransomware():
+    # Check if the system has been infected with ransomware
+    if os.path.exists("./ransomware"):
+        # Remove the ransomware file
+        os.remove("./ransomware")
+        # Delete the ransomware directory
+        shutil.rmtree("./ransomware")
+        # Restart the system to clear the infection
+        subprocess.call("sudo reboot")
 
 def main():
-    # Get the path to the image file
-    path = input('Enter the path to the image file: ')
+    # Run the detection function in a loop
+    while True:
+        detect_ransomware()
+        # Wait for a minute before running the detection function again
+        time.sleep(60)
 
-    # Detect ransomware
-    if detect_ransomware(path):
-        print('Ransomware detected!')
-        # Mitigate the ransomware
-        mitigate_ransomware(path)
-    else:
-        print('No ransomware detected.')
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
