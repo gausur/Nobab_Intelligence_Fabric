@@ -1,27 +1,23 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-25 14:44:16.783439
+# Generated 2026-10-25 22:58:28.889612
 
 import re
 
-def detect_phishing_attack(url):
-    if re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", url):
+def detect_phishing(url):
+    pattern = r"^https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}[61D[K
+r"^https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9r"^https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}b([-a-zA-Z0-9@:%_\+.~#?&//=]*)$"
+    match = re.match(pattern, url)
+    if match:
         return True
     else:
         return False
 
-def mitigate_phishing_attack(url):
-    if detect_phishing_attack(url):
-        # Redirect to a safe page
-        return "http://example.com/safe-page"
+def mitigate_phishing(url):
+    if detect_phishing(url):
+        print("Phishing attack detected!")
     else:
-        # Proceed with normal navigation
-        return url
+        print("No phishing attack detected.")
 
-def main():
-    url = "http://example.com/phishing-attack"
-    mitigated_url = mitigate_phishing_attack(url)
-    print(mitigated_url)
-
-if __name__ == "__main__":
-    main()
+url = "https://www.example.com"
+mitigate_phishing(url)
