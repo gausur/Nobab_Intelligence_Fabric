@@ -1,35 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-27 07:07:07.659831
+# Generated 2026-10-27 23:27:08.651054
 
 import re
-import urllib.request
+import urllib.parse
 
-def detect_phishing(url):
-    # Check if the URL is a valid HTTPS URL
-    if not url.startswith("https://"):
+def is_phishing_url(url):
+    parsed_url = urllib.parse.urlparse(url)
+    domain = parsed_url.netloc
+    if not domain.endswith(('.com', '.org', '.net')):
         return False
-
-    # Check if the URL has a valid domain name
-    try:
-        domain = urllib.request.urlopen(url).geturl()
-        if not re.match(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", domain):
+    for part in parsed_url.path.split('/'):
+        if re.match(r'^[a-zA-Z0-9]+$', part):
+            continue
+        else:
             return False
-    except urllib.error.URLError:
-        return False
+    return True
 
-    # Check if the URL contains any suspicious content
-    content = urllib.request.urlopen(url).read().decode()
-    if re.search(r"[a-zA-Z0-9.-]+[.][a-zA-Z]{2,}", content):
-        return True
+def mitigate_phishing_attack(url):
+    if is_phishing_url(url):
+        print("Phishing attack detected!")
+        return False
     else:
-        return False
+        print("No phishing attack detected.")
+        return True
 
-def mitigate_phishing(url):
-    # Block the URL
-    if detect_phishing(url):
-        raise Exception("Phishing attack detected")
-
-# Test the script
-mitigate_phishing("https://www.example.com")  # should raise an exception
-mitigate_phishing("https://example.com")  # should not raise an exception
+if __name__ == "__main__":
+    mitigate_phishing_attack("http://www.example.com")
