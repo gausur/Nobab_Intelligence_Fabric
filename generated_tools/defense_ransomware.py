@@ -1,49 +1,66 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-29 01:28:15.180095
+# Generated 2026-10-29 07:57:14.830087
 
 import os
+import sys
+import shutil
 import hashlib
 import subprocess
+import re
 
-def detect_ransomware():
-    # Check if the file system is read-only
-    if os.access(os.environ["HOME"], os.W_OK):
+def detect_ransomware(path):
+    # Check if the file is a valid executable
+    if not os.path.isfile(path):
+        return False
+    if not os.access(path, os.X_OK):
         return False
 
-    # Check if the file system is encrypted
-    if os.path.exists(os.environ["HOME"] + "/.ransomware"):
+    # Check if the file has a known ransomware signature
+    with open(path, "rb") as f:
+        data = f.read()
+    sig = hashlib.md5(data).hexdigest()
+    if sig in RANSOMWARE_SIGNATURES:
         return True
 
-    # Check if the file system is compressed
-    if os.path.exists(os.environ["HOME"] + "/.compressed"):
-        return True
-
-    # Check if the file system is corrupted
-    if hashlib.md5(os.environ["HOME"]).hexdigest() != "00000000000000000000000000000000":
-        return True
-
-    # Check if the system is under attack
-    if subprocess.check_output(["ransomware_detector"]).decode().strip() == "yes":
+    # Check if the file contains a ransomware-like string
+    if re.search(r"[A-Z]+\s+[a-z]+\s+ransomware", data.decode("utf-8")):
         return True
 
     return False
 
-def mitigate_ransomware():
-    # Unmount the file system
-    subprocess.run(["umount", os.environ["HOME"]])
+def mitigate_ransomware(path):
+    # Remove the file
+    os.remove(path)
 
-    # Remove the ransomware payload
-    os.remove(os.environ["HOME"] + "/.ransomware")
+    # Check if the file is a directory and remove it recursively
+    if os.path.isdir(path):
+        shutil.rmtree(path)
 
-    # Remove the compressed file
-    os.remove(os.environ["HOME"] + "/.compressed")
+    # Check if the file is a symbolic link and remove it
+    if os.path.islink(path):
+        os.unlink(path)
 
-    # Fix the file system
-    subprocess.run(["fsck", os.environ["HOME"]])
+def main():
+    # Check if the script is running with root privileges
+    if os.geteuid() != 0:
+        print("You need to run this script with root privileges.")
+        return
 
-    # Restart the system
-    subprocess.run(["reboot"])
+    # Check if the script is running on a supported operating system
+    if sys.platform not in SUPPORTED_PLATFORMS:
+        print("This script is only supported on the following operating systems:")
+        print(SUPPORTED_PLATFORMS)
+        return
 
-if detect_ransomware():
-    mitigate_ransomware()
+    # Get the list of files to scan
+    files = get_files_to_scan()
+
+    # Iterate over the files and detect ransomware
+    for path in files:
+        if detect_ransomware(path):
+            mitigate_ransomware(path)
+            print(f"Removed ransomware from {path}")
+
+if __name__ == "__main__":
+    main()
