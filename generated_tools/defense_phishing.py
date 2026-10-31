@@ -1,27 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-30 21:20:12.557435
+# Generated 2026-10-31 01:19:40.399406
 
 import re
+import requests
+import urllib.parse
+from bs4 import BeautifulSoup
 
-def is_phishing_url(url):
-    pattern = r'^https?:\/\/[a-zA-Z0-9@:.!#$%^&*()_+=-{}|;,?\/]+$'
-    if re.match(pattern, url):
-        return True
-    else:
+def is_phishing_attempt(url):
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        links = soup.find_all('a')
+        for link in links:
+            link_url = urllib.parse.urlparse(link.get('href'))
+            if link_url.netloc != '':
+                return True
+        return False
+    except:
         return False
 
-def is_phishing_email(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    if re.match(pattern, email):
-        return True
-    else:
-        return False
+def mitigate_phishing_attempt(url):
+    return url.replace('phishing', 'safe')
 
-def mitigate_phishing_attack(url, email):
-    if is_phishing_url(url) and is_phishing_email(email):
-        print("Phishing attack detected!")
+def main():
+    url = 'https://phishing.com'
+    if is_phishing_attempt(url):
+        mitigated_url = mitigate_phishing_attempt(url)
+        print(f'Phishing attempt detected: {url}')
+        print(f'Mitigated URL: {mitigated_url}')
     else:
-        print("No phishing attack detected.")
+        print(f'No phishing attempt detected: {url}')
 
-mitigate_phishing_attack("https://example.com", "johndoe@example.com")
+if __name__ == '__main__':
+    main()
