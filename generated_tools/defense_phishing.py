@@ -1,36 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-10-31 01:19:40.399406
+# Generated 2026-10-31 07:51:02.864562
 
 import re
-import requests
-import urllib.parse
-from bs4 import BeautifulSoup
+import socket
+import urllib.request
 
-def is_phishing_attempt(url):
+def is_phishing_site(url):
+    # Check if the URL is a valid HTTP/HTTPS URL
+    if not re.match(r"^https?://", url):
+        return False
+
+    # Check if the URL is from a known phishing domain
     try:
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        links = soup.find_all('a')
-        for link in links:
-            link_url = urllib.parse.urlparse(link.get('href'))
-            if link_url.netloc != '':
-                return True
-        return False
-    except:
+        socket.gethostbyname(url)
+        return True
+    except socket.gaierror:
         return False
 
-def mitigate_phishing_attempt(url):
-    return url.replace('phishing', 'safe')
+def mitigate_phishing_attack(url):
+    # Redirect the user to the homepage
+    print("Redirecting to homepage...")
+    urllib.request.urlopen(url)
 
-def main():
-    url = 'https://phishing.com'
-    if is_phishing_attempt(url):
-        mitigated_url = mitigate_phishing_attempt(url)
-        print(f'Phishing attempt detected: {url}')
-        print(f'Mitigated URL: {mitigated_url}')
-    else:
-        print(f'No phishing attempt detected: {url}')
+# Parse the URL from the command line arguments
+url = sys.argv[1]
 
-if __name__ == '__main__':
-    main()
+# Check if the URL is a phishing site
+if is_phishing_site(url):
+    mitigate_phishing_attack(url)
+else:
+    print("This is not a phishing site.")

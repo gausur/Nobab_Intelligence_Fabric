@@ -1,26 +1,22 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-10-31 01:20:13.513086
+# Generated 2026-10-31 07:48:31.889173
 
 import os
-import sys
-import subprocess
+import time
 
-def detect_ransomware(process):
-    # Check if the process is a ransomware
-    if process.name == 'ransomware':
-        # Kill the process
-        subprocess.run(['kill', process.pid])
-        # Notify the system administrator
-        subprocess.run(['notify', 'Ransomware detected and mitigated'])
+# Set up the script to run every 5 minutes
+while True:
+    # Check if the current directory is a directory
+    if not os.path.isdir(os.getcwd()):
+        break
 
-def main():
-    # Get a list of all running processes
-    processes = subprocess.run(['ps', 'aux'])
-    # Iterate over the list of processes
-    for process in processes.split('\n'):
-        # Check if the process is a ransomware
-        detect_ransomware(process)
+    # Check if the current directory contains a file named "ransom.txt"
+    if os.path.isfile("ransom.txt"):
+        # Mitigate the ransomware attack by removing the file
+        os.remove("ransom.txt")
+        print("Ransomware attack detected and mitigated")
+        break
 
-if __name__ == '__main__':
-    main()
+    # Wait for 5 minutes before checking again
+    time.sleep(300)
