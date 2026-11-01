@@ -1,30 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-01 08:29:38.456317
+# Generated 2026-11-01 15:39:52.297728
 
 import os
-import sys
-import socket
-import hashlib
+import subprocess
 
-def detect_ransomware(path):
-    with open(path, "rb") as f:
-        data = f.read()
-    hash = hashlib.sha256(data).hexdigest()
-    if hash == "2e4133b482572c281a68d50628b41b2248c34f43":
-        print("Ransomware detected!")
+def detect_ransomware():
+    # Check if the system is running Linux
+    if os.name == 'posix':
+        # Run the ransomware detection script
+        subprocess.run(['ransomware_detection.sh'], shell=True, check=True)
     else:
-        print("No ransomware detected.")
+        # Run the ransomware detection script
+        subprocess.run(['ransomware_detection.bat'], shell=True, check=True)
 
-def mitigate_ransomware(path):
-    with open(path, "wb") as f:
-        f.write(b"Ransomware mitigated!")
-    print("Ransomware mitigated!")
+def mitigate_ransomware():
+    # Check if the system is running Linux
+    if os.name == 'posix':
+        # Run the ransomware mitigation script
+        subprocess.run(['ransomware_mitigation.sh'], shell=True, check=True)
+    else:
+        # Run the ransomware mitigation script
+        subprocess.run(['ransomware_mitigation.bat'], shell=True, check=True)
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python ransomware_detector.py <file_path>")
-        exit(1)
-    path = sys.argv[1]
-    detect_ransomware(path)
-    mitigate_ransomware(path)
+# Main function
+def main():
+    detect_ransomware()
+    mitigate_ransomware()
+
+if __name__ == '__main__':
+    main()
