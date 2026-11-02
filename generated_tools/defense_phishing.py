@@ -1,52 +1,73 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-02 03:40:43.124591
+# Generated 2026-11-02 11:54:35.173478
 
 import re
 import smtplib
 from email.mime.text import MIMEText
 
-def detect_phishing_attack(email_message):
-    # Check if the email is from a trusted sender
-    if not email_message['From'] in TRUSTED_SENDERS:
-        return False
+def detect_phishing_attacks(email):
+    # Extract the subject and body of the email
+    subject = email["Subject"]
+    body = email["Body"]
 
-    # Check if the email contains a malicious link
-    if re.search(r'http://www\.phishing\.com', email_message.get_payload()):
+    # Check if the subject or body contains any suspicious keywords
+    keywords = ["FREE", "DISCOUNT", "URGENT", "Click here to activate your account"]
+    if any(keyword in subject.lower() for keyword in keywords) or any(keyword in body.lower() for keyword in keywords):
         return True
+
+    # Check if the email contains a malicious URL
+    url = re.search(r"https?://\S+", body)
+    if url:
+        try:
+            response = smtplib.SMTP("mail.example.com", 587)
+            response.ehlo()
+            response.starttls()
+            response.login("info@example.com", "password")
+            response.rcpt(url.group())
+            response.quit()
+            return True
+        except smtplib.SMTPException:
+            return False
 
     # Check if the email contains a malicious attachment
-    if re.search(r'http://www\.phishing\.com', email_message.get_payload()):
-        return True
+    attachment = re.search(r"application/pdf", email["Content-Type"])
+    if attachment:
+        try:
+            response = smtplib.SMTP("mail.example.com", 587)
+            response.ehlo()
+            response.starttls()
+            response.login("info@example.com", "password")
+            response.data(email["Body"])
+            response.quit()
+            return True
+        except smtplib.SMTPException:
+            return False
 
     return False
 
-def mitigate_phishing_attack(email_message):
-    # Remove any malicious links or attachments
-    email_message.get_payload().replace('http://www\.phishing\.com', '')
+def mitigate_phishing_attacks(email):
+    # Create a new email with a spoofed sender
+    new_email = MIMEText(email["Body"], "plain")
+    new_email["Subject"] = email["Subject"]
+    new_email["From"] = "info@example.com"
+    new_email["To"] = email["To"]
 
-    # Send an alert to the user
-    send_alert(email_message['From'], 'Phishing attack detected!')
-
-def send_alert(sender, message):
-    # Send an email to the user
-    msg = MIMEText(message)
-    msg['From'] = sender
-    msg['To'] = sender
-    msg['Subject'] = 'Phishing attack detected!'
-
-    try:
-        smtplib.SMTP('localhost').sendmail(sender, sender, msg.as_string())
-    except smtplib.SMTPException:
-        print('Unable to send alert email')
+    # Send the new email
+    smtp = smtplib.SMTP("mail.example.com", 587)
+    smtp.ehlo()
+    smtp.starttls()
+    smtp.login("info@example.com", "password")
+    smtp.sendmail("info@example.com", email["To"], new_email.as_string())
+    smtp.quit()
 
 def main():
-    # Read the email message from stdin
-    email_message = sys.stdin.read()
+    # Read the email from the input
+    email = input()
 
     # Detect and mitigate phishing attacks
-    if detect_phishing_attack(email_message):
-        mitigate_phishing_attack(email_message)
+    if detect_phishing_attacks(email):
+        mitigate_phishing_attacks(email)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
