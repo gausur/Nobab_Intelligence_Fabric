@@ -1,30 +1,52 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-01 23:27:25.009303
+# Generated 2026-11-02 03:40:43.124591
 
 import re
 import smtplib
+from email.mime.text import MIMEText
 
-def is_phishing_attack(email):
-    # Check for common phishing attack patterns
-    if re.search(r'https?://[a-z0-9.-]+(:[0-9]+)?/[a-z0-9.-]+', email):
+def detect_phishing_attack(email_message):
+    # Check if the email is from a trusted sender
+    if not email_message['From'] in TRUSTED_SENDERS:
+        return False
+
+    # Check if the email contains a malicious link
+    if re.search(r'http://www\.phishing\.com', email_message.get_payload()):
         return True
-    if re.search(r'[a-z0-9.-]+@[a-z0-9.-]+\.onion', email):
+
+    # Check if the email contains a malicious attachment
+    if re.search(r'http://www\.phishing\.com', email_message.get_payload()):
         return True
-    if re.search(r'[a-z0-9.-]+@[a-z0-9.-]+\.[a-z]+', email):
-        return True
+
     return False
 
-def mitigate_phishing_attack(email):
-    # Check if the email is a phishing attack
-    if is_phishing_attack(email):
-        # Send an alert to the IT department
-        smtplib.SMTP('it.example.com').sendmail('phishing@example.com', 'it@example.com', 'Subject: Phishing Attack Detected')
-        # Block the email sender
-        smtplib.SMTP('mail.example.com').sendmail('phishing@example.com', 'spam@example.com', 'Subject: Phishing Attack Detected')
+def mitigate_phishing_attack(email_message):
+    # Remove any malicious links or attachments
+    email_message.get_payload().replace('http://www\.phishing\.com', '')
+
+    # Send an alert to the user
+    send_alert(email_message['From'], 'Phishing attack detected!')
+
+def send_alert(sender, message):
+    # Send an email to the user
+    msg = MIMEText(message)
+    msg['From'] = sender
+    msg['To'] = sender
+    msg['Subject'] = 'Phishing attack detected!'
+
+    try:
+        smtplib.SMTP('localhost').sendmail(sender, sender, msg.as_string())
+    except smtplib.SMTPException:
+        print('Unable to send alert email')
 
 def main():
-    mitigate_phishing_attack(input('Enter an email: '))
+    # Read the email message from stdin
+    email_message = sys.stdin.read()
+
+    # Detect and mitigate phishing attacks
+    if detect_phishing_attack(email_message):
+        mitigate_phishing_attack(email_message)
 
 if __name__ == '__main__':
     main()
