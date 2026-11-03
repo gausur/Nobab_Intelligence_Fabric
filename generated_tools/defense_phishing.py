@@ -1,40 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-03 11:33:21.837269
+# Generated 2026-11-03 18:58:42.441589
 
 import re
-import smtplib
+import urllib.parse
 
-def is_phishing_url(url):
-    pattern = r"^(http|https)://[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if re.match(pattern, url):
-        return True
-    else:
-        return False
+def is_phishing_attack(url):
+    """
+    Detect phishing attacks using regular expressions.
+    """
+    regex = r"^(?:http|https)://\w+\.\w+/(?:login|signin|account|profile|dashboard|home|signup|sign-up)\b"
+    return re.search(regex, url) is not None
 
-def send_email(email, subject, body):
-    smtp = smtplib.SMTP("smtp.gmail.com", 587)
-    smtp.starttls()
-    smtp.login("your-email@gmail.com", "your-email-password")
-    smtp.sendmail("from@gmail.com", email, f"Subject: {subject}\n\n{body}")
-    smtp.quit()
+def mitigate_phishing_attack(url):
+    """
+    Mitigate phishing attacks by redirecting the user to a safe page.
+    """
+    safe_url = "https://example.com/safe-page"
+    return urllib.parse.urljoin(safe_url, url)
 
-def detect_phishing_attacks(emails):
-    for email in emails:
-        url = email["url"]
-        if is_phishing_url(url):
-            send_email(email["email"], "Phishing Attack Detected", f"We have detected a phishing attack on your account. Please visit {url} to verify that it is a legitimate website.")
+def detect_and_mitigate_phishing_attacks(url):
+    """
+    Detect and mitigate phishing attacks using regular expressions and redirects.
+    """
+    if is_phishing_attack(url):
+        return mitigate_phishing_attack(url)
+    return url
 
 def main():
-    emails = [
-        {"email": "john.doe@example.com", "url": "http://www.phishing-site.com"},
-        {"email": "jane.doe@example.com", "url": "http://www.legitimate-site.com"},
-        {"email": "john.smith@example.com", "url": "http://www.phishing-site.com"},
-        {"email": "jane.smith@example.com", "url": "http://www.legitimate-site.com"},
-        {"email": "john.jones@example.com", "url": "http://www.phishing-site.com"},
-        {"email": "jane.jones@example.com", "url": "http://www.legitimate-site.com"}
-    ]
-    detect_phishing_attacks(emails)
+    url = input("Enter a URL: ")
+    mitigated_url = detect_and_mitigate_phishing_attacks(url)
+    print("Mitigated URL:", mitigated_url)
 
 if __name__ == "__main__":
     main()
