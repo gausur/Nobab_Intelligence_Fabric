@@ -1,40 +1,29 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-06 03:00:34.649602
+# Generated 2026-11-06 10:29:29.875990
 
 import os
 import subprocess
-import shutil
 
-def detect_ransomware(file):
-    # Check if the file is a valid image
-    try:
-        subprocess.check_output(['file', '-b', file])
-    except subprocess.CalledProcessError:
-        return False
-
-    # Check if the file is encrypted
-    try:
-        subprocess.check_output(['strings', file], universal_newlines=True)
-        if "Ransomware" in subprocess.check_output(['strings', file], universal_newlines=True):
+def detect_ransomware(path):
+    command = f'ls -l {path} | awk \'{{print $1}}\''
+    output = subprocess.check_output(command, shell=True)
+    files = output.decode('utf-8').splitlines()
+    for file in files:
+        if file.startswith('.'):
             return True
-    except subprocess.CalledProcessError:
-        return False
-
     return False
 
-def mitigate_ransomware(file):
-    # Delete the ransomware file
-    os.remove(file)
+def mitigate_ransomware(path):
+    command = f'rm -rf {path}'
+    subprocess.run(command, shell=True)
 
 def main():
-    # Get the list of files in the current directory
-    files = os.listdir()
+    path = '/path/to/your/files'
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
+    else:
+        print('No ransomware detected')
 
-    # Iterate over the files and detect ransomware
-    for file in files:
-        if detect_ransomware(file):
-            mitigate_ransomware(file)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
