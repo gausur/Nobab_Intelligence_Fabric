@@ -1,34 +1,40 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-05 22:34:55.908995
+# Generated 2026-11-06 03:00:34.649602
 
 import os
-import sys
-import json
-import base64
-import hashlib
+import subprocess
+import shutil
 
-def detect_ransomware(file_path):
-    with open(file_path, "rb") as f:
-        file_data = f.read()
-        file_hash = hashlib.sha256(file_data).hexdigest()
-        if file_hash in RANSOMWARE_HASHES:
-            print("Ransomware detected!")
+def detect_ransomware(file):
+    # Check if the file is a valid image
+    try:
+        subprocess.check_output(['file', '-b', file])
+    except subprocess.CalledProcessError:
+        return False
+
+    # Check if the file is encrypted
+    try:
+        subprocess.check_output(['strings', file], universal_newlines=True)
+        if "Ransomware" in subprocess.check_output(['strings', file], universal_newlines=True):
             return True
-        else:
-            return False
+    except subprocess.CalledProcessError:
+        return False
 
-def mitigate_ransomware(file_path):
-    with open(file_path, "rb") as f:
-        file_data = f.read()
-        file_data = base64.b64decode(file_data)
-        with open(file_path, "wb") as f:
-            f.write(file_data)
+    return False
+
+def mitigate_ransomware(file):
+    # Delete the ransomware file
+    os.remove(file)
 
 def main():
-    file_path = sys.argv[1]
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
+    # Get the list of files in the current directory
+    files = os.listdir()
+
+    # Iterate over the files and detect ransomware
+    for file in files:
+        if detect_ransomware(file):
+            mitigate_ransomware(file)
 
 if __name__ == "__main__":
     main()
