@@ -1,31 +1,26 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-08 16:55:09.699092
+# Generated 2026-11-08 20:58:55.584998
 
 import os
 import subprocess
 
-def detect_ransomware(path):
-    try:
-        subprocess.run(["file", path], capture_output=True)
-        output = subprocess.run(["strings", path], capture_output=True)
-        if "ransomware" in output.stdout.decode("utf-8"):
+def detect_ransomware(processes):
+    for process in processes:
+        if "ransomware" in process.name().lower():
             return True
-    except subprocess.CalledProcessError:
-        return False
+    return False
 
-def mitigate_ransomware(path):
-    try:
-        subprocess.run(["chattr", "+i", path])
-        subprocess.run(["chown", "root:root", path])
-        subprocess.run(["chmod", "a-w", path])
-        subprocess.run(["find", path, "-type", "f", "-exec", "chattr", "+i", "{}", ";"])
-    except subprocess.CalledProcessError:
-        return False
+def mitigate_ransomware(processes):
+    for process in processes:
+        if "ransomware" in process.name().lower():
+            process.terminate()
+    return True
 
 def main():
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+    processes = subprocess.check_output(["ps", "aux"]).decode("utf-8").split("\n")
+    if detect_ransomware(processes):
+        mitigate_ransomware(processes)
 
 if __name__ == "__main__":
     main()
