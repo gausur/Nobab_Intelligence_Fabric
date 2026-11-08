@@ -1,39 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-08 03:36:41.164924
+# Generated 2026-11-08 16:55:09.699092
 
 import os
-import stat
-import shutil
+import subprocess
 
-def detect_ransomware():
-    # Check for infected files
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            if os.path.isfile(os.path.join(root, file)):
-                file_size = os.path.getsize(os.path.join(root, file))
-                if file_size > 1000000:
-                    # Check for encrypted file
-                    if os.path.getctime(os.path.join(root, file)) > 1000000:
-                        # Check for ransomware signature
-                        if "RANSOMWARE_SIGNATURE" in file:
-                            # Report infected file
-                            print(f"Infected file: {file}")
+def detect_ransomware(path):
+    try:
+        subprocess.run(["file", path], capture_output=True)
+        output = subprocess.run(["strings", path], capture_output=True)
+        if "ransomware" in output.stdout.decode("utf-8"):
+            return True
+    except subprocess.CalledProcessError:
+        return False
 
-def mitigate_ransomware():
-    # Check for infected files
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            if os.path.isfile(os.path.join(root, file)):
-                file_size = os.path.getsize(os.path.join(root, file))
-                if file_size > 1000000:
-                    # Check for encrypted file
-                    if os.path.getctime(os.path.join(root, file)) > 1000000:
-                        # Check for ransomware signature
-                        if "RANSOMWARE_SIGNATURE" in file:
-                            # Remove infected file
-                            os.remove(os.path.join(root, file))
+def mitigate_ransomware(path):
+    try:
+        subprocess.run(["chattr", "+i", path])
+        subprocess.run(["chown", "root:root", path])
+        subprocess.run(["chmod", "a-w", path])
+        subprocess.run(["find", path, "-type", "f", "-exec", "chattr", "+i", "{}", ";"])
+    except subprocess.CalledProcessError:
+        return False
+
+def main():
+    if detect_ransomware(path):
+        mitigate_ransomware(path)
 
 if __name__ == "__main__":
-    detect_ransomware()
-    mitigate_ransomware()
+    main()
