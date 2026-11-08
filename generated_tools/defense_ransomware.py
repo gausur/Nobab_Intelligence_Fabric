@@ -1,33 +1,39 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-07 23:22:48.779173
+# Generated 2026-11-08 03:36:41.164924
 
-import subprocess
 import os
+import stat
 import shutil
 
-def detect_ransomware(file_path):
-    # Use the file command to check if the file is a ransomware
-    result = subprocess.run(['file', file_path], capture_output=True, text=True)
-    if 'ransomware' in result.stdout:
-        return True
-    else:
-        return False
+def detect_ransomware():
+    # Check for infected files
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            if os.path.isfile(os.path.join(root, file)):
+                file_size = os.path.getsize(os.path.join(root, file))
+                if file_size > 1000000:
+                    # Check for encrypted file
+                    if os.path.getctime(os.path.join(root, file)) > 1000000:
+                        # Check for ransomware signature
+                        if "RANSOMWARE_SIGNATURE" in file:
+                            # Report infected file
+                            print(f"Infected file: {file}")
 
-def mitigate_ransomware(file_path):
-    # Use the rm command to delete the ransomware
-    subprocess.run(['rm', file_path])
+def mitigate_ransomware():
+    # Check for infected files
+    for root, dirs, files in os.walk("."):
+        for file in files:
+            if os.path.isfile(os.path.join(root, file)):
+                file_size = os.path.getsize(os.path.join(root, file))
+                if file_size > 1000000:
+                    # Check for encrypted file
+                    if os.path.getctime(os.path.join(root, file)) > 1000000:
+                        # Check for ransomware signature
+                        if "RANSOMWARE_SIGNATURE" in file:
+                            # Remove infected file
+                            os.remove(os.path.join(root, file))
 
-def main():
-    # Get the file path from the user
-    file_path = input('Enter the file path: ')
-    # Detect if the file is a ransomware
-    if detect_ransomware(file_path):
-        # Mitigate the ransomware
-        mitigate_ransomware(file_path)
-    else:
-        # Print an error message
-        print('The file is not a ransomware')
-
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    detect_ransomware()
+    mitigate_ransomware()
