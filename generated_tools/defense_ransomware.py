@@ -1,30 +1,33 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-10 16:56:36.022303
+# Generated 2026-11-10 22:05:45.898586
 
 import os
-import json
-import socket
-import hashlib
+import stat
+import time
 
-def detect_ransomware(file_path):
-    with open(file_path, 'rb') as f:
-        file_data = f.read()
-        md5_hash = hashlib.md5(file_data).hexdigest()
-        if md5_hash == 'd41d8cd98f00b204e9800998ecf8427e':
-            return False
+def detect_ransomware(path):
+    # Check if the file is encrypted
+    if not os.path.isfile(path):
+        return False
+    # Get the file's metadata
+    stat_info = os.stat(path)
+    # Check if the file has been modified recently
+    if time.time() - stat_info.st_mtime > 300:
         return True
+    return False
 
-def mitigate_ransomware(file_path):
-    with open(file_path, 'wb') as f:
-        f.write(b'')
+def mitigate_ransomware(path):
+    # Remove the file
+    os.remove(path)
 
 def main():
-    if os.path.exists('ransomware.exe'):
-        if detect_ransomware('ransomware.exe'):
-            mitigate_ransomware('ransomware.exe')
-        else:
-            print('Ransomware attack detected.')
+    # Walk the file system and check for ransomware
+    for root, dirs, files in os.walk('.'):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if detect_ransomware(file_path):
+                mitigate_ransomware(file_path)
 
 if __name__ == '__main__':
     main()
