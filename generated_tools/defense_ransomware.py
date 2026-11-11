@@ -1,33 +1,43 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-10 22:05:45.898586
+# Generated 2026-11-11 02:27:54.118789
 
 import os
-import stat
-import time
+import shutil
+import hashlib
 
-def detect_ransomware(path):
-    # Check if the file is encrypted
-    if not os.path.isfile(path):
-        return False
-    # Get the file's metadata
-    stat_info = os.stat(path)
-    # Check if the file has been modified recently
-    if time.time() - stat_info.st_mtime > 300:
+def detect_ransomware(file_path):
+    # Calculate the SHA-256 hash of the file
+    with open(file_path, "rb") as f:
+        file_hash = hashlib.sha256(f.read()).hexdigest()
+
+    # Check if the file hash matches the known ransomware hashes
+    if file_hash in [...]:
         return True
-    return False
+    else:
+        return False
 
-def mitigate_ransomware(path):
-    # Remove the file
-    os.remove(path)
+def mitigate_ransomware(file_path):
+    # Create a backup of the original file
+    backup_path = file_path + ".bak"
+    shutil.copyfile(file_path, backup_path)
+
+    # Overwrite the original file with a blank one
+    with open(file_path, "wb") as f:
+        f.write(b"\x00" * os.path.getsize(file_path))
+
+    # Print a message indicating the file has been mitigated
+    print(f"Mitigated ransomware attack on {file_path}")
 
 def main():
-    # Walk the file system and check for ransomware
-    for root, dirs, files in os.walk('.'):
-        for file in files:
-            file_path = os.path.join(root, file)
-            if detect_ransomware(file_path):
-                mitigate_ransomware(file_path)
+    # Get the path to the file to be scanned
+    file_path = input("Enter the path to the file: ")
 
-if __name__ == '__main__':
+    # Detect and mitigate ransomware attacks
+    if detect_ransomware(file_path):
+        mitigate_ransomware(file_path)
+    else:
+        print("No ransomware detected")
+
+if __name__ == "__main__":
     main()
