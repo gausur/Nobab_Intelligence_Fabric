@@ -1,32 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-11 10:07:32.021924
+# Generated 2026-11-11 18:17:30.273831
 
 import os
-import shutil
+import time
 import subprocess
+import shutil
 
-def detect_ransomware(directory):
-    # Check if the directory contains a ransomware infection
-    for file in os.listdir(directory):
-        if file.endswith(".ransomware"):
-            return True
-    return False
+def detect_ransomware(process_name, timeout=10):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        if process_name not in subprocess.check_output(['ps', 'aux']):
+            return False
+        time.sleep(1)
+    return True
 
-def mitigate_ransomware(directory):
-    # Remove the ransomware files
-    for file in os.listdir(directory):
-        if file.endswith(".ransomware"):
-            os.remove(os.path.join(directory, file))
+def mitigate_ransomware(process_name):
+    subprocess.run(['killall', process_name], check=True)
 
-if __name__ == "__main__":
-    # Get the current working directory
-    directory = os.getcwd()
+def main():
+    # Set up logging
+    logging.basicConfig(filename='ransomware_detector.log', level=logging.INFO)
 
-    # Check if the directory is infected
-    if detect_ransomware(directory):
-        # Mitigate the ransomware infection
-        mitigate_ransomware(directory)
+    # Detect and mitigate ransomware attacks
+    while True:
+        if detect_ransomware('ransomware_process'):
+            logging.info('Ransomware detected!')
+            mitigate_ransomware('ransomware_process')
+            logging.info('Ransomware mitigated!')
+            break
+        time.sleep(1)
 
-        # Restart the affected processes
-        subprocess.run(["sudo", "killall", "-r", "ransomware"])
+if __name__ == '__main__':
+    main()
