@@ -1,49 +1,31 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-15 18:19:50.013186
+# Generated 2026-11-15 23:18:50.763396
 
-import requests
-import json
 import re
+import urllib
 
-def detect_phishing(url):
-    """
-    Detect phishing attacks using the URL provided.
-    """
-    # Make a GET request to the URL to get the HTML content
-    response = requests.get(url)
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, 'html.parser')
-    # Check if the URL contains any suspicious patterns
-    if re.search(r'phishing\.', url):
-        # Return a positive detection result
-        return True
-    else:
-        # Check if the HTML content contains any suspicious patterns
-        if re.search(r'phishing\.', soup.text):
-            # Return a positive detection result
-            return True
-        else:
-            # Return a negative detection result
-            return False
+def detect_phishing_attack(url):
+    if re.search(r'https?://[^\.]+\.[^\.]+', url):
+        try:
+            hostname = urllib.parse.urlparse(url).hostname
+            if hostname.endswith('.ru') or hostname.endswith('.com') or hostname.endswith('.org'):
+                return True
+        except:
+            pass
+    return False
 
-def mitigate_phishing(url):
-    """
-    Mitigate phishing attacks using the URL provided.
-    """
-    # Make a GET request to the URL to get the HTML content
-    response = requests.get(url)
-    # Parse the HTML content using BeautifulSoup
-    soup = BeautifulSoup(response.content, 'html.parser')
-    # Check if the URL contains any suspicious patterns
-    if re.search(r'phishing\.', url):
-        # Redirect the user to a safe page
-        return 'https://www.example.com/safe'
+def mitigate_phishing_attack(url):
+    if detect_phishing_attack(url):
+        print('Phishing attack detected!')
+        # Add your own mitigation logic here
     else:
-        # Check if the HTML content contains any suspicious patterns
-        if re.search(r'phishing\.', soup.text):
-            # Redirect the user to a safe page
-            return 'https://www.example.com/safe'
-        else:
-            # Return the original URL
-            return url
+        print('No phishing attack detected.')
+        # Add your own logic here
+
+def main():
+    url = input('Enter the URL to check: ')
+    mitigate_phishing_attack(url)
+
+if __name__ == '__main__':
+    main()
