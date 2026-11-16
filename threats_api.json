@@ -1,13 +1,13 @@
 {
-  "last_updated": "2026-11-16T07:04:02.862679",
+  "last_updated": "2026-11-16T09:13:16.932885",
   "threats": [
     {
-      "timestamp": "2026-11-16T07:04:02.862027",
+      "timestamp": "2026-11-16T09:13:16.932576",
       "snippet": "{'keyword': 'ransomware', 'time': 1794807780.9186985}",
       "enrichment": []
     },
     {
-      "timestamp": "2026-11-16T07:04:02.862038",
+      "timestamp": "2026-11-16T09:13:16.932588",
       "snippet": "{'keyword': 'zero day exploit', 'time': 1794807801.85368}",
       "enrichment": []
     }
