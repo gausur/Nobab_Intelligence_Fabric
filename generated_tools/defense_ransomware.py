@@ -1,44 +1,30 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-17 22:07:39.405027
+# Generated 2026-11-18 04:03:37.410831
 
 import os
-import socket
-import hashlib
+import subprocess
+import json
 import time
 
-def detect_ransomware(filepath):
-    # Calculate the SHA256 hash of the file
-    with open(filepath, 'rb') as f:
-        data = f.read()
-        sha256 = hashlib.sha256(data).hexdigest()
+def detect_ransomware():
+    try:
+        subprocess.run(["lsblk", "-f"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8", check=True)
+    except subprocess.CalledProcessError:
+        return "Ransomware detected!"
+    return "No ransomware detected."
 
-    # Check if the file is a known ransomware
-    known_ransomware = ['31337', '424242', '545454']
-    if sha256 in known_ransomware:
-        return True
-    else:
-        return False
-
-def mitigate_ransomware(filepath):
-    # Overwrite the file with a random data
-    random_data = os.urandom(1024)
-    with open(filepath, 'wb') as f:
-        f.write(random_data)
+def mitigate_ransomware(output):
+    if output == "Ransomware detected!":
+        subprocess.run(["lsblk", "-f"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8", check=True)
+        return "Ransomware mitigated!"
+    return "No ransomware detected."
 
 def main():
-    # Get the current file path
-    filepath = os.path.abspath(__file__)
+    output = detect_ransomware()
+    if output == "Ransomware detected!":
+        mitigate_ransomware(output)
+    return output
 
-    # Detect if the file is a ransomware
-    if detect_ransomware(filepath):
-        # Mitigate the ransomware
-        mitigate_ransomware(filepath)
-
-    # Check if the file has been modified
-    if os.path.getmtime(filepath) > time.time() - 30:
-        # The file has been modified, exit the script
-        return
-
-    # The file has not been modified, execute the rest of the script
-    # ...
+if __name__ == "__main__":
+    print(main())
