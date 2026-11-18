@@ -1,30 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-18 04:03:37.410831
+# Generated 2026-11-18 12:46:20.955980
 
 import os
-import subprocess
-import json
+import re
+import sys
 import time
 
-def detect_ransomware():
-    try:
-        subprocess.run(["lsblk", "-f"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8", check=True)
-    except subprocess.CalledProcessError:
-        return "Ransomware detected!"
-    return "No ransomware detected."
+def detect_ransomware(filename):
+    with open(filename, "r") as file:
+        contents = file.read()
+        if re.search(r"^[0-9A-Z]{10}$", contents):
+            return True
+    return False
 
-def mitigate_ransomware(output):
-    if output == "Ransomware detected!":
-        subprocess.run(["lsblk", "-f"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf-8", check=True)
-        return "Ransomware mitigated!"
-    return "No ransomware detected."
-
-def main():
-    output = detect_ransomware()
-    if output == "Ransomware detected!":
-        mitigate_ransomware(output)
-    return output
+def mitigate_ransomware(filename):
+    with open(filename, "r") as file:
+        contents = file.read()
+        if detect_ransomware(filename):
+            print("Detected ransomware attack. Removing file...")
+            os.remove(filename)
+            print("Removal complete.")
+        else:
+            print("No ransomware attack detected.")
 
 if __name__ == "__main__":
-    print(main())
+    if len(sys.argv) < 2:
+        print("Usage: python ransomware_detector.py <filename>")
+        sys.exit(1)
+    filename = sys.argv[1]
+    mitigate_ransomware(filename)

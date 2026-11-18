@@ -1,36 +1,32 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-18 04:01:35.571061
+# Generated 2026-11-18 12:43:25.571892
 
 import re
-import smtplib
-from email.utils import getaddresses
+import email
 
-def is_phishing_attack(email):
-    sender, recipient = getaddresses(email)
-    subject = email.get("Subject", "")
-    body = email.get("Body", "")
-    if sender == recipient:
-        return False
-    if re.search(r"phishing", subject, re.IGNORECASE):
-        return True
-    if re.search(r"phishing", body, re.IGNORECASE):
-        return True
+def detect_phishing_attacks(email_message):
+    if email_message.is_multipart():
+        for part in email_message.get_payload():
+            if part.get_content_type() == 'text/html':
+                body = part.get_payload(decode=True)
+                if re.search(r'[a-zA-Z]{3,}\s{3,}[a-zA-Z]{3,}', body):
+                    return True
+    else:
+        if email_message.get_content_type() == 'text/html':
+            body = email_message.get_payload(decode=True)
+            if re.search(r'[a-zA-Z]{3,}\s{3,}[a-zA-Z]{3,}', body):
+                return True
     return False
 
-def mitigate_phishing_attack(email):
-    sender, recipient = getaddresses(email)
-    if sender != recipient:
-        smtplib.SMTP("localhost").sendmail(sender, recipient, email.as_string())
+def mitigate_phishing_attacks(email_message):
+    if detect_phishing_attacks(email_message):
+        print('Phishing attack detected!')
+        # Perform mitigation actions here, e.g. blocking the sender, reporting the attack, etc.
     else:
-        smtplib.SMTP("localhost").sendmail(sender, recipient, email.as_string(), bcc=[sender])
+        print('No phishing attack detected.')
 
-def main(email):
-    if is_phishing_attack(email):
-        mitigate_phishing_attack(email)
-    else:
-        print("No phishing attack detected.")
-
-if __name__ == "__main__":
-    email = input("Enter the email: ")
-    main(email)
+if __name__ == '__main__':
+    with open('phishing_attack.eml', 'rb') as f:
+        email_message = email.message_from_bytes(f.read())
+        mitigate_phishing_attacks(email_message)
