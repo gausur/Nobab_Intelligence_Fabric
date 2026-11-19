@@ -1,27 +1,41 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-19 02:56:19.863961
+# Generated 2026-11-19 11:00:27.076237
 
 import re
-import smtplib
+import requests
 
-def is_phishing_url(url):
-    return re.match(r"(https?://)?(www\.)?example\.com/?", url)
+def detect_phishing(url):
+    try:
+        resp = requests.get(url)
+        if resp.status_code != 200:
+            return False
+        content = resp.text
+        if re.search(r"(phishing|scam|fraud)", content, re.IGNORECASE):
+            return True
+        else:
+            return False
+    except requests.exceptions.RequestException:
+        return False
 
-def is_phishing_email(email):
-    return re.match(r"(^[a-zA-Z0-9_.+-]+@example\.com$)", email)
+def mitigate_phishing(url):
+    try:
+        resp = requests.get(url)
+        if resp.status_code != 200:
+            return False
+        content = resp.text
+        if re.search(r"(phishing|scam|fraud)", content, re.IGNORECASE):
+            return True
+        else:
+            return False
+    except requests.exceptions.RequestException:
+        return False
 
-def mitigate_phishing_attack(request):
-    if is_phishing_url(request.url) or is_phishing_email(request.email):
-        print("Phishing attack detected!")
-        return "403 Forbidden"
-    else:
-        return "200 OK"
+def main():
+    urls = ["https://example.com", "https://example.org"]
+    for url in urls:
+        if detect_phishing(url):
+            mitigate_phishing(url)
 
 if __name__ == "__main__":
-    while True:
-        request = input("Enter a URL or email address: ")
-        if request:
-            print(mitigate_phishing_attack(request))
-        else:
-            break
+    main()
