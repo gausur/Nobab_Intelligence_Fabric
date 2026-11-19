@@ -1,32 +1,35 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-18 21:07:54.729253
+# Generated 2026-11-19 02:57:03.695450
 
 import os
+import sys
 import subprocess
-import json
+import time
 
-def detect_ransomware(filename):
-    # Use the `file` command to identify the file type
-    file_type = subprocess.run(["file", filename], capture_output=True).stdout.decode()
-    if "encrypted" in file_type:
-        return True
+def detect_ransomware(file_path):
+    # Check if the file is a text file
+    if os.path.isfile(file_path):
+        with open(file_path, 'r') as f:
+            if f.read().startswith('$'):
+                return True
     return False
 
-def mitigate_ransomware(filename):
-    # Use the `file` command to identify the file type
-    file_type = subprocess.run(["file", filename], capture_output=True).stdout.decode()
-    if "encrypted" in file_type:
-        # Use the `dd` command to overwrite the file with random data
-        subprocess.run(["dd", "if=/dev/urandom", "of=" + filename])
-        return True
-    return False
+def mitigate_ransomware(file_path):
+    # Remove the file
+    os.remove(file_path)
 
 def main():
-    # Iterate through all files in the current directory
-    for filename in os.listdir("."):
-        if detect_ransomware(filename):
-            mitigate_ransomware(filename)
+    # Get the file path from the command line arguments
+    file_path = sys.argv[1]
 
-if __name__ == "__main__":
+    # Detect ransomware
+    if detect_ransomware(file_path):
+        # Mitigate ransomware
+        mitigate_ransomware(file_path)
+        print("Ransomware detected and mitigated.")
+    else:
+        print("No ransomware detected.")
+
+if __name__ == '__main__':
     main()
