@@ -1,32 +1,36 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-21 07:59:14.197048
+# Generated 2026-11-21 15:55:10.026178
 
 import os
-import json
-import subprocess
+import shutil
+import hashlib
 
-def detect_ransomware(file_path):
-    """
-    Detects ransomware in a given file by checking its hash.
-    """
-    file_hash = subprocess.check_output(["sha256sum", file_path]).decode().split()[0]
-    known_hashes = json.loads(open("known_hashes.json", "r").read())
-    if file_hash in known_hashes:
-        return True
-    else:
-        return False
+def detect_ransomware(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            filepath = os.path.join(root, file)
+            with open(filepath, "rb") as f:
+                file_hash = hashlib.sha256(f.read()).hexdigest()
+                if file_hash in RANSOMWARE_HASHES:
+                    print(f"Ransomware detected in {filepath}")
+                    shutil.copy(filepath, "/path/to/ransomware/backup")
+                    os.remove(filepath)
 
-def mitigate_ransomware(file_path):
-    """
-    Mitigates ransomware infection by deleting the infected file.
-    """
-    subprocess.check_call(["rm", file_path])
+def mitigate_ransomware(directory):
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            filepath = os.path.join(root, file)
+            with open(filepath, "rb") as f:
+                file_hash = hashlib.sha256(f.read()).hexdigest()
+                if file_hash in RANSOMWARE_HASHES:
+                    print(f"Ransomware detected in {filepath}")
+                    shutil.copy(filepath, "/path/to/ransomware/backup")
+                    os.remove(filepath)
 
 def main():
-    file_path = "path/to/file"
-    if detect_ransomware(file_path):
-        mitigate_ransomware(file_path)
+    detect_ransomware("/path/to/files")
+    mitigate_ransomware("/path/to/files")
 
 if __name__ == "__main__":
     main()
