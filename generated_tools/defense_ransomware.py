@@ -1,52 +1,38 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-24 11:54:31.479516
+# Generated 2026-11-24 21:47:41.795091
 
 import os
-import shutil
+import sys
 import subprocess
+import shutil
+import glob
 
-def detect_ransomware(path):
-    # Check if the path is a directory
-    if os.path.isdir(path):
-        # Check if the directory contains a file with the name "RansomwareDetected"
-        if os.path.isfile(os.path.join(path, "RansomwareDetected")):
-            # If the file exists, return True
-            return True
-        else:
-            # If the file does not exist, check if any subdirectories contain the file
-            for root, dirs, files in os.walk(path):
-                for file in files:
-                    if file == "RansomwareDetected":
-                        return True
-    # If the path is not a directory or does not contain the file "RansomwareDetected", return False
+def detect_ransomware(directory):
+    files = glob.glob(os.path.join(directory, '*.*'))
+    for file in files:
+        if '.' in file and file.split('.')[-1] in ['exe', 'bat', 'com']:
+            with open(file, 'r') as f:
+                contents = f.read()
+                if 'ransomware' in contents.lower():
+                    print(f'Ransomware detected in {file}')
+                    return True
     return False
 
-def mitigate_ransomware(path):
-    # Check if the path is a directory
-    if os.path.isdir(path):
-        # Check if the directory contains a file with the name "RansomwareDetected"
-        if os.path.isfile(os.path.join(path, "RansomwareDetected")):
-            # If the file exists, remove it and all of its contents
-            shutil.rmtree(path)
-            # If the directory contains any subdirectories, remove them and their contents
-            for root, dirs, files in os.walk(path):
-                for file in files:
-                    os.remove(os.path.join(root, file))
-        # If the file does not exist, check if any subdirectories contain the file
-        else:
-            for root, dirs, files in os.walk(path):
-                for file in files:
-                    if file == "RansomwareDetected":
-                        # Remove the file and all of its contents
-                        os.remove(os.path.join(root, file))
-                        # Remove the directory and its contents
-                        shutil.rmtree(root)
-    # If the path is not a directory or does not contain the file "RansomwareDetected", do nothing
+def mitigate_ransomware(directory):
+    files = glob.glob(os.path.join(directory, '*.*'))
+    for file in files:
+        if '.' in file and file.split('.')[-1] in ['exe', 'bat', 'com']:
+            with open(file, 'r') as f:
+                contents = f.read()
+                if 'ransomware' in contents.lower():
+                    print(f'Removing ransomware from {file}')
+                    os.remove(file)
 
-if __name__ == "__main__":
-    path = input("Enter the path to the directory to scan: ")
-    if detect_ransomware(path):
-        mitigate_ransomware(path)
+if __name__ == '__main__':
+    directory = sys.argv[1] if len(sys.argv) > 1 else '.'
+    if detect_ransomware(directory):
+        mitigate_ransomware(directory)
+        print('Ransomware removed')
     else:
-        print("No ransomware detected.")
+        print('No ransomware detected')
