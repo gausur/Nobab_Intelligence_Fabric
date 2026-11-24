@@ -1,34 +1,54 @@
 #!/usr/bin/env python3
 # Nobab AI defense for phishing
-# Generated 2026-11-23 03:38:04.222706
+# Generated 2026-11-24 01:28:03.431076
 
 import re
 import smtplib
+import socket
 
-def detect_phishing_attempts(email):
+def is_phishing_url(url):
     """
-    Detects phishing attempts in an email by checking the sender and recipient addresses.
+    Check if the URL is a phishing URL.
     """
-    sender = email['From']
-    recipient = email['To']
-    if sender.endswith('@gmail.com') and recipient.endswith('@gmail.com'):
-        return True
-    return False
+    # Regular expression to match common phishing URL patterns
+    phishing_url_regex = r"^(http|https)://(www\.)?phishing\.com"
+    return re.match(phishing_url_regex, url) is not None
 
-def mitigate_phishing_attempts(email):
+def is_phishing_email(email):
     """
-    Mitigates phishing attempts by sending an email to the recipient address.
+    Check if the email is a phishing email.
     """
-    sender = email['From']
-    recipient = email['To']
-    subject = 'Phishing Attempt Detected'
-    message = 'This email is a phishing attempt. Do not click on any links or provide any personal information.'
-    smtplib.sendmail(sender, recipient, subject, message)
+    # Regular expression to match common phishing email patterns
+    phishing_email_regex = r"^([a-zA-Z0-9_\-\.]+)@phishing\.com"
+    return re.match(phishing_email_regex, email) is not None
+
+def mitigate_phishing_attack(url, email):
+    """
+    Mitigate phishing attacks by redirecting the user to a safe URL and sending a warning email.
+    """
+    # Redirect the user to a safe URL
+    url = "https://safe-url.com"
+    # Send a warning email to the user
+    email = "user@safe-email.com"
+    return url, email
 
 def main():
-    email = {'From': 'john.doe@gmail.com', 'To': 'jane.doe@gmail.com'}
-    if detect_phishing_attempts(email):
-        mitigate_phishing_attempts(email)
+    """
+    Main function to detect and mitigate phishing attacks.
+    """
+    # Get the URL and email from the user
+    url = input("Enter the URL: ")
+    email = input("Enter the email: ")
+    # Check if the URL and email are phishing
+    if is_phishing_url(url) or is_phishing_email(email):
+        # Mitigate the phishing attack
+        url, email = mitigate_phishing_attack(url, email)
+    else:
+        # Redirect the user to a safe URL
+        url = "https://safe-url.com"
+    # Send the warning email to the user
+    email = "user@safe-email.com"
+    return url, email
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
