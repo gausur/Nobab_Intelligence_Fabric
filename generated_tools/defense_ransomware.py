@@ -1,38 +1,47 @@
 #!/usr/bin/env python3
 # Nobab AI defense for ransomware
-# Generated 2026-11-24 21:47:41.795091
+# Generated 2026-11-25 04:45:54.320691
 
 import os
-import sys
-import subprocess
+import hashlib
 import shutil
-import glob
+import subprocess
+import requests
 
-def detect_ransomware(directory):
-    files = glob.glob(os.path.join(directory, '*.*'))
-    for file in files:
-        if '.' in file and file.split('.')[-1] in ['exe', 'bat', 'com']:
-            with open(file, 'r') as f:
-                contents = f.read()
-                if 'ransomware' in contents.lower():
-                    print(f'Ransomware detected in {file}')
-                    return True
-    return False
+def detect_ransomware(path):
+    """
+    Detect ransomware by checking the file hashes.
+    """
+    file_hashes = {}
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            file_hashes[file_path] = hashlib.sha256(open(file_path, 'rb').read()).hexdigest()
+    return file_hashes
 
-def mitigate_ransomware(directory):
-    files = glob.glob(os.path.join(directory, '*.*'))
-    for file in files:
-        if '.' in file and file.split('.')[-1] in ['exe', 'bat', 'com']:
-            with open(file, 'r') as f:
-                contents = f.read()
-                if 'ransomware' in contents.lower():
-                    print(f'Removing ransomware from {file}')
-                    os.remove(file)
+def mitigate_ransomware(path):
+    """
+    Mitigate ransomware by restoring the original files.
+    """
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if file_path in detect_ransomware(path):
+                shutil.copyfile(file_path, file_path + '.bak')
+                shutil.move(file_path + '.bak', file_path)
+    return True
+
+def main():
+    """
+    Main function to detect and mitigate ransomware.
+    """
+    path = '/path/to/your/files'
+    file_hashes = detect_ransomware(path)
+    if file_hashes:
+        mitigate_ransomware(path)
+        print("Ransomware detected and mitigated!")
+    else:
+        print("No ransomware detected.")
 
 if __name__ == '__main__':
-    directory = sys.argv[1] if len(sys.argv) > 1 else '.'
-    if detect_ransomware(directory):
-        mitigate_ransomware(directory)
-        print('Ransomware removed')
-    else:
-        print('No ransomware detected')
+    main()
